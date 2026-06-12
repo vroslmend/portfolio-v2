@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/reveal";
+import { FeaturedList } from "@/components/work/featured-list";
 import { WorkList } from "@/components/work/work-list";
 import { projects } from "@/data/site";
 
@@ -21,67 +22,7 @@ export default function WorkPage() {
         </h1>
       </Reveal>
 
-      <section className="flex flex-col">
-        {featured.map((p, i) => (
-          <Reveal key={p.slug} delay={i * 0.05}>
-            <article
-              className={`group grid gap-x-10 gap-y-3 border-t border-line py-10 transition-colors duration-500 hover:border-faint sm:grid-cols-[1fr_2fr] ${
-                i === featured.length - 1 ? "border-b" : ""
-              }`}
-            >
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-baseline gap-3">
-                  <span className="font-mono text-[11px] text-faint">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <h2 className="text-[17px] font-medium tracking-tight">
-                    {p.name}
-                  </h2>
-                </div>
-                <p className="pl-[26px] font-mono text-[11px] tracking-[0.08em] text-faint sm:pl-0 sm:pt-1">
-                  {p.tagline} · {p.year}
-                </p>
-              </div>
-              <div className="flex flex-col gap-5">
-                <p className="max-w-[60ch] text-[14.5px] leading-[1.8] text-muted text-pretty">
-                  {p.description}
-                </p>
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-                  {p.stack.join(" · ")}
-                </p>
-                <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
-                  {p.links.live && (
-                    <a
-                      href={p.links.live}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="u-link group font-mono text-[11px] tracking-[0.12em] text-fg"
-                    >
-                      live{" "}
-                      <span className="inline-block transition-transform duration-500 ease-out-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
-                        ↗
-                      </span>
-                    </a>
-                  )}
-                  {p.links.github && (
-                    <a
-                      href={p.links.github}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="u-link group font-mono text-[11px] tracking-[0.12em] text-fg"
-                    >
-                      github{" "}
-                      <span className="inline-block transition-transform duration-500 ease-out-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
-                        ↗
-                      </span>
-                    </a>
-                  )}
-                </div>
-              </div>
-            </article>
-          </Reveal>
-        ))}
-      </section>
+      <FeaturedList projects={featured} />
 
       <section className="flex flex-col gap-6">
         <Reveal>

@@ -35,6 +35,7 @@ export const projects: Project[] = [
       "A platform for my university that brings cafeteria pre-ordering, room booking, faculty availability and a job portal into one place, with separate flows for students, teachers and admins. It also has a Gemini-powered chatbot that answers questions about the campus from a custom knowledge base.",
     stack: ["Next.js 15", "Socket.IO", "Gemini", "MongoDB"],
     links: { live: "https://cui-central.vercel.app" },
+    image: "/images/projects/cui-central.webp",
     featured: true,
   },
   {
@@ -49,6 +50,7 @@ export const projects: Project[] = [
       live: "https://check-the-game.vercel.app",
       github: "https://github.com/vroslmend/check-the-card-game-v2",
     },
+    image: "/images/projects/check.webp",
     featured: true,
   },
   {
@@ -63,6 +65,7 @@ export const projects: Project[] = [
       live: "https://imaginify-six-sigma.vercel.app",
       github: "https://github.com/vroslmend/next-ai-saas-app",
     },
+    image: "/images/projects/imaginify.webp",
     featured: true,
   },
   {
@@ -76,6 +79,7 @@ export const projects: Project[] = [
     links: {
       github: "https://github.com/vroslmend/sportzilla-laptime-analysis",
     },
+    image: "/images/projects/sportzilla.webp",
     featured: true,
   },
   {

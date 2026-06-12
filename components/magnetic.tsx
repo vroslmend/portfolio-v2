@@ -3,6 +3,11 @@
 import { useRef } from "react";
 import { motion, useMotionValue, useSpring, useReducedMotion } from "motion/react";
 
+/**
+ * Magnetic pull. The outer element stays static and owns the hit area —
+ * only the inner element translates. If the hit area itself moved, the
+ * pointer could fall off the edge mid-pull, flickering :hover on and off.
+ */
 export function Magnetic({
   children,
   strength = 0.25,
@@ -30,14 +35,15 @@ export function Magnetic({
   }
 
   return (
-    <motion.div
+    <div
       ref={ref}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
-      style={{ x: sx, y: sy }}
-      className="inline-block"
+      className="magnetic-area inline-block"
     >
-      {children}
-    </motion.div>
+      <motion.div style={{ x: sx, y: sy }} className="inline-block">
+        {children}
+      </motion.div>
+    </div>
   );
 }

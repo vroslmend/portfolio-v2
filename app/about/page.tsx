@@ -33,7 +33,7 @@ export default function AboutPage() {
         </Reveal>
       </section>
 
-      <section className="flex flex-col">
+      <section className="rows-hover flex flex-col">
         <Reveal>
           <div className="group grid gap-x-10 gap-y-2 border-t border-line py-6 transition-colors duration-500 hover:border-faint sm:grid-cols-[1fr_2fr]">
             <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint transition-colors duration-500 group-hover:text-muted">
@@ -101,7 +101,7 @@ export default function AboutPage() {
         <Reveal>
           <SectionLabel>education</SectionLabel>
         </Reveal>
-        <div className="flex flex-col">
+        <div className="rows-hover flex flex-col">
           {education.map((e, i) => (
             <Reveal key={e.school} delay={i * 0.06}>
               <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line py-4 transition-colors duration-500 hover:border-faint">

@@ -54,12 +54,14 @@ export function HoverPreview({ project }: { project: Project | null }) {
               <Image
                 src={project.image}
                 alt=""
-                width={600}
-                height={375}
-                className="aspect-[16/10] w-full object-cover saturate-[0.85]"
+                width={640}
+                height={340}
+                loading="eager"
+                unoptimized
+                className="block h-auto w-full saturate-[0.85]"
               />
             ) : (
-              <div className="grid aspect-[16/10] w-full place-items-center">
+              <div className="grid aspect-video w-full place-items-center">
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-faint">
                   {project.tagline}
                 </span>

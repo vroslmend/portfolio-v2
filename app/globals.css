@@ -91,9 +91,15 @@ body::after {
   transition: transform 0.45s var(--ease-out-expo);
 }
 .u-link:hover::after,
-.u-link[data-active="true"]::after {
+.u-link[data-active="true"]::after,
+/* inside a magnetic wrapper, hover binds to the static outer element so the
+   underline can't flicker while the link itself is being pulled around */
+.magnetic-area:hover .u-link::after {
   transform: scaleX(1);
   transform-origin: left;
+}
+.u-link::after {
+  will-change: transform;
 }
 
 /* inline prose links: underline always on, ink-fill sweep on hover */
@@ -153,6 +159,13 @@ body::after {
 }
 ::view-transition-new(root) {
   z-index: 2;
+}
+
+/* ---- shared hairlines ----
+   A row's bottom line is structurally the next row's top border, so
+   hovering a row also brightens the following sibling's top edge. */
+.rows-hover > *:hover + * > div {
+  border-top-color: var(--faint);
 }
 
 /* ---- work list dimming ---- */
