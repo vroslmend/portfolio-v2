@@ -6,23 +6,31 @@ import { useTheme } from "next-themes";
 import { Command } from "cmdk";
 import { AnimatePresence, motion } from "motion/react";
 import { EASE } from "@/lib/motion";
+import { PixelPrius } from "@/components/pixel-prius";
 import { site } from "@/data/site";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [search, setSearch] = useState("");
+  const [driving, setDriving] = useState<"off" | "cruise" | "rally">("off");
+  const [denied, setDenied] = useState(false);
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
+
+  const q = search.trim().toLowerCase();
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        setSearch("");
         setOpen((o) => !o);
       }
       if (e.key === "Escape") setOpen(false);
     }
     function onOpenEvent() {
+      setSearch("");
       setOpen(true);
     }
     window.addEventListener("keydown", onKey);
@@ -48,7 +56,8 @@ export function CommandMenu() {
   }
 
   return (
-    <AnimatePresence>
+    <>
+      <AnimatePresence>
       {open && (
         <motion.div
           className="fixed inset-0 z-110 grid place-items-start justify-items-center bg-bg/60 pt-[18vh] backdrop-blur-sm"
@@ -72,6 +81,8 @@ export function CommandMenu() {
             >
               <Command.Input
                 autoFocus
+                value={search}
+                onValueChange={setSearch}
                 placeholder="type a command…"
                 className="w-full border-b border-line bg-transparent px-5 py-4 font-mono text-[13px] text-fg outline-none placeholder:text-faint"
               />
@@ -115,6 +126,41 @@ export function CommandMenu() {
                   </Item>
                 </Group>
 
+                {(q === "prius" || q === "rally" || q === "sudo") && (
+                  <Group heading="???">
+                    {q === "prius" && (
+                      <Item
+                        onSelect={() =>
+                          run(() => setDriving("cruise"))
+                        }
+                      >
+                        start the prius
+                      </Item>
+                    )}
+                    {q === "rally" && (
+                      <Item
+                        value="rally full send"
+                        onSelect={() => run(() => setDriving("rally"))}
+                      >
+                        full send
+                      </Item>
+                    )}
+                    {q === "sudo" && (
+                      <Item
+                        onSelect={() => {
+                          setDenied(true);
+                          setTimeout(() => {
+                            setDenied(false);
+                            setOpen(false);
+                          }, 1100);
+                        }}
+                      >
+                        {denied ? "permission denied — nice try" : "sudo"}
+                      </Item>
+                    )}
+                  </Group>
+                )}
+
                 <Group heading="elsewhere">
                   <Item
                     onSelect={() =>
@@ -136,7 +182,14 @@ export function CommandMenu() {
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+      {driving !== "off" && (
+        <PixelPrius
+          fast={driving === "rally"}
+          onDone={() => setDriving("off")}
+        />
+      )}
+    </>
   );
 }
 
@@ -160,12 +213,15 @@ function Group({
 function Item({
   children,
   onSelect,
+  value,
 }: {
   children: React.ReactNode;
   onSelect: () => void;
+  value?: string;
 }) {
   return (
     <Command.Item
+      value={value}
       onSelect={onSelect}
       className="cursor-pointer rounded-md px-3 py-2.5 font-mono text-[13px] text-muted transition-colors duration-150 data-[selected=true]:bg-surface data-[selected=true]:text-fg"
     >

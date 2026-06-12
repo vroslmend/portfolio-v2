@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ReadingProgress } from "@/components/reading-progress";
 import { Reveal } from "@/components/reveal";
 
 export const metadata: Metadata = {
@@ -82,10 +83,11 @@ function Section({
 export default function AgenticBookkeepingEssay() {
   return (
     <article className="flex flex-col gap-10 pb-8">
+      <ReadingProgress />
       <header className="flex flex-col gap-5">
         <Reveal mask>
           <p className="select-none font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
-            writing — may 2026
+            writing — may 2026 · 6 min
           </p>
         </Reveal>
         <Reveal delay={0.1}>

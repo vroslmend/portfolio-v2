@@ -29,6 +29,14 @@ export function Footer() {
         </div>
         <LocalTime />
         <div className="flex items-baseline gap-5 font-mono text-[11px] tracking-[0.12em] text-faint">
+          <a
+            href="https://github.com/vroslmend/portfolio-v2"
+            target="_blank"
+            rel="noreferrer"
+            className="u-link hover:text-muted"
+          >
+            view source
+          </a>
           <KbdHint />
           <span>© 2026</span>
         </div>

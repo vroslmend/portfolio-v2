@@ -73,7 +73,8 @@ export default function Home() {
       <section>
         <Reveal>
           <p className="font-mono text-[12px] leading-relaxed tracking-[0.04em] text-faint">
-            <span className="text-muted">now</span> — {site.now}.
+            <span className="text-muted">now</span> — {site.now}.{" "}
+            <span className="whitespace-nowrap opacity-60">· jun 2026</span>
           </p>
         </Reveal>
       </section>

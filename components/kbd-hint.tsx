@@ -6,21 +6,27 @@ const emptySubscribe = () => () => {};
 
 /** Shows the command-menu shortcut with the right modifier for the visitor's OS. */
 export function KbdHint() {
-  const label = useSyncExternalStore(
+  const modifier = useSyncExternalStore(
     emptySubscribe,
-    () => (/mac|iphone|ipad/i.test(navigator.userAgent) ? "⌘ k" : "ctrl k"),
+    () => (/mac|iphone|ipad/i.test(navigator.userAgent) ? "⌘" : "ctrl"),
     () => null
   );
 
-  if (!label) return null;
+  if (!modifier) return null;
 
   return (
     <button
       type="button"
       onClick={() => window.dispatchEvent(new Event("open-cmdk"))}
-      className="hidden cursor-pointer transition-colors duration-300 hover:text-muted sm:inline"
+      title="open command menu"
+      className="hidden cursor-pointer items-center gap-1 transition-colors duration-300 hover:text-muted sm:inline-flex"
     >
-      {label}
+      <kbd className="rounded border border-line px-[5px] py-px font-mono text-[10px]">
+        {modifier}
+      </kbd>
+      <kbd className="rounded border border-line px-[5px] py-px font-mono text-[10px]">
+        k
+      </kbd>
     </button>
   );
 }

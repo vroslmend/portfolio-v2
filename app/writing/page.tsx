@@ -12,7 +12,7 @@ const pieces = [
     slug: "agentic-bookkeeping",
     title: "Agents that do bookkeeping, with humans where it matters",
     tagline: "an architecture concept",
-    date: "may 2026",
+    date: "may 2026 · 6 min",
   },
 ];
 
