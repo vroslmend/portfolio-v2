@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { useRef } from "react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import { EASE } from "@/lib/motion";
 
 type RevealProps = {
@@ -20,6 +21,10 @@ export function Reveal({
   once = true,
 }: RevealProps) {
   const reduced = useReducedMotion();
+  // Observe the (never-clipped) wrapper: the masked child itself is fully
+  // clipped while hidden, so IntersectionObserver would never see it.
+  const maskRef = useRef<HTMLDivElement>(null);
+  const maskInView = useInView(maskRef, { once, margin: "-10% 0px" });
 
   if (reduced) {
     return <div className={className}>{children}</div>;
@@ -27,11 +32,10 @@ export function Reveal({
 
   if (mask) {
     return (
-      <div className={`overflow-hidden ${className ?? ""}`}>
+      <div ref={maskRef} className={`overflow-hidden ${className ?? ""}`}>
         <motion.div
           initial={{ y: "110%" }}
-          whileInView={{ y: 0 }}
-          viewport={{ once, margin: "-10% 0px" }}
+          animate={maskInView ? { y: 0 } : { y: "110%" }}
           transition={{ duration: 0.9, ease: EASE, delay }}
         >
           {children}

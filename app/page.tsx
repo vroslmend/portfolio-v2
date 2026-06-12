@@ -10,19 +10,24 @@ export default function Home() {
     <div className="flex flex-col gap-24 pb-8">
       <section className="flex flex-col gap-7">
         <Reveal mask>
-          <h1 className="text-[26px] font-medium tracking-tight text-fg sm:text-[30px]">
-            <span className="text-muted">hello — i&apos;m</span> ammar hassan.
+          <p className="font-mono text-[12px] tracking-[0.12em] text-muted">
+            hello, i&apos;m
+          </p>
+        </Reveal>
+        <Reveal mask delay={0.08}>
+          <h1 className="text-[38px] font-medium leading-[1.1] tracking-tight text-fg sm:text-[48px]">
+            ammar hassan<span className="text-faint">.</span>
           </h1>
         </Reveal>
-        <Reveal delay={0.12}>
+        <Reveal delay={0.18}>
           <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
-            I&apos;m a software engineering student in Lahore who spends most
-            of his time building for the web — multiplayer games, tools for my
+            A software engineering student in Lahore who spends most of his
+            time building for the web: multiplayer games, tools for my
             university, and a few things that{" "}
             <span className="accent-serif">people actually use</span>.
           </p>
         </Reveal>
-        <Reveal delay={0.24}>
+        <Reveal delay={0.28}>
           <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
             Right now I&apos;m in my final year, spending my free time on side
             projects and slowly going deeper into AI. Have a look at{" "}

@@ -22,7 +22,7 @@ export const site = {
     linkedin: "https://www.linkedin.com/in/ammar-hassan-8aa48a233/",
     resume: "/resume.pdf",
   },
-  now: "final year of my degree, building side projects, open to internships and junior roles",
+  now: "final year of my degree, building side projects, open to work",
 } as const;
 
 export const projects: Project[] = [
@@ -43,7 +43,7 @@ export const projects: Project[] = [
     year: "2025",
     tagline: "multiplayer card game",
     description:
-      "An online multiplayer card game you can actually play with friends. I wrote the game server myself with Socket.IO — rooms, turns, reconnects — and learned a lot about keeping several players' screens in sync.",
+      "An online multiplayer card game you can actually play with friends. I wrote the game server myself with Socket.IO, handling rooms, turns and reconnects, and learned a lot about keeping several players' screens in sync.",
     stack: ["Next.js", "Node.js", "Socket.IO"],
     links: {
       live: "https://check-the-game.vercel.app",
@@ -57,7 +57,7 @@ export const projects: Project[] = [
     year: "2024",
     tagline: "ai image platform",
     description:
-      "An AI image editing app — generative fill, restore, recolor, background removal — with a credits system and payments through Stripe. Built with Next.js, Cloudinary and MongoDB.",
+      "An AI image editing app with generative fill, restore, recolor and background removal, plus a credits system and payments through Stripe. Built with Next.js, Cloudinary and MongoDB.",
     stack: ["Next.js", "TypeScript", "Cloudinary AI", "Stripe"],
     links: {
       live: "https://imaginify-six-sigma.vercel.app",
@@ -104,7 +104,7 @@ export const projects: Project[] = [
     year: "2026",
     tagline: "you are here",
     description:
-      "This website. Next.js, Tailwind and Motion — kept deliberately quiet.",
+      "This website. Built with Next.js, Tailwind and Motion, and kept deliberately quiet.",
     stack: ["Next.js 16", "Tailwind v4", "Motion"],
     links: { github: "https://github.com/vroslmend" },
     featured: false,
