@@ -51,7 +51,8 @@ export default function AboutPage() {
               currently
             </span>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-              Making a deliberate move into AI engineering. Right now that
+              Making a deliberate move into AI engineering — agents that do
+              real work, with humans kept where it matters. Right now that
               means learning Python properly; everything else gets built on
               top of it.
             </p>

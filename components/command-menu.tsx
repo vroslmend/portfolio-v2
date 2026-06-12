@@ -85,6 +85,9 @@ export function CommandMenu() {
                   <Item onSelect={() => run(() => router.push("/work"))}>
                     work
                   </Item>
+                  <Item onSelect={() => run(() => router.push("/writing"))}>
+                    writing
+                  </Item>
                   <Item onSelect={() => run(() => router.push("/about"))}>
                     about
                   </Item>

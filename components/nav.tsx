@@ -9,6 +9,7 @@ import { site } from "@/data/site";
 const links = [
   { href: "/work", label: "work" },
   { href: "/about", label: "about" },
+  { href: "/writing", label: "writing" },
 ];
 
 export function Nav() {
@@ -30,7 +31,9 @@ export function Nav() {
             <Magnetic key={l.href} strength={0.2}>
               <Link
                 href={l.href}
-                data-active={pathname === l.href}
+                data-active={
+                  pathname === l.href || pathname.startsWith(`${l.href}/`)
+                }
                 className="u-link font-mono text-xs tracking-[0.08em] text-muted transition-colors duration-300 hover:text-fg data-[active=true]:text-fg"
               >
                 {l.label}
