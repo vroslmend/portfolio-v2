@@ -73,7 +73,9 @@ export const projects: Project[] = [
     description:
       "Lap-time analysis for go-karting sessions with my friends. It scrapes our results from the track's website, then uses Pandas and NumPy to chart fastest laps, consistency and how everyone stacks up.",
     stack: ["Python", "Pandas", "NumPy"],
-    links: { github: "https://github.com/vroslmend/sportzilla-laptime-analysis" },
+    links: {
+      github: "https://github.com/vroslmend/sportzilla-laptime-analysis",
+    },
     featured: true,
   },
   {
@@ -144,7 +146,8 @@ export const toolbox = [
   "MongoDB + Vector Search",
   "Gemini API",
   "Tailwind CSS",
-  "SQL Server",
+  "SQL",
   "Docker",
+  "Vercel",
   "Git / Linux",
 ];

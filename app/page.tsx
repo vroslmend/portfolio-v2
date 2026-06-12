@@ -33,7 +33,7 @@ export default function Home() {
         <Reveal delay={0.28}>
           <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
             Right now I&apos;m in my final year, spending my free time on side
-            projects and slowly going deeper into AI. Have a look at{" "}
+            projects and slowly working my way into AI engineering. Have a look at{" "}
             <Link href="/work" className="p-link">
               my work
             </Link>
