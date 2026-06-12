@@ -24,10 +24,9 @@ export default function Home() {
         />
         <Reveal delay={0.18}>
           <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
-            A software engineering student in Lahore who spends most of his
-            time building for the web — multiplayer games, tools for my
-            university, and a few things that{" "}
-            <span className="accent-serif">people actually use</span>.
+            I design and build for the web from Lahore. I care about how
+            things work, how they look — and lately, whether they can{" "}
+            <span className="accent-serif">think</span>.
           </p>
         </Reveal>
         <Reveal delay={0.28}>
