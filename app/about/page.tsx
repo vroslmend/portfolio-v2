@@ -51,9 +51,9 @@ export default function AboutPage() {
               currently
             </span>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-              Spending more of my time on the AI side of things, working with
-              chatbots, vector search and the Gemini API, and putting what I
-              learn into my projects.
+              Making a deliberate move into AI engineering. Right now that
+              means learning Python properly; everything else gets built on
+              top of it.
             </p>
           </div>
         </Reveal>
@@ -63,8 +63,10 @@ export default function AboutPage() {
               off hours
             </span>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-              Usually go-karting with friends. Naturally, I ended up writing a
-              tool to analyse our lap times.
+              Gaming, sim racing, and cars — despite the Prius in the
+              driveway. Karting with friends is where the lap-time tool came
+              from. Away from screens, it&apos;s the mountains and air you
+              can actually breathe.
             </p>
           </div>
         </Reveal>

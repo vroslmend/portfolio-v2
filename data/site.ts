@@ -22,7 +22,7 @@ export const site = {
     linkedin: "https://www.linkedin.com/in/ammar-hassan-8aa48a233/",
     resume: "/resume.pdf",
   },
-  now: "final year of my degree, building side projects, open to work",
+  now: "final year of my degree, going deep on python and ai engineering, open to work",
 } as const;
 
 export const projects: Project[] = [
