@@ -44,7 +44,7 @@ export function WorkList({ projects }: { projects: Project[] }) {
               <span className="ml-auto shrink-0 font-mono text-[11px] text-faint transition-colors duration-300 group-hover:text-muted">
                 {p.year}
               </span>
-              <span className="shrink-0 font-mono text-xs text-faint transition-all duration-500 ease-out-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-fg">
+              <span className="shrink-0 font-mono text-xs text-faint transition-[color,transform] duration-500 ease-out-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-fg">
                 ↗
               </span>
             </a>
