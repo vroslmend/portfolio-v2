@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {};
 
 /** Shows the command-menu shortcut with the right modifier for the visitor's OS. */
 export function KbdHint() {
-  const [label, setLabel] = useState<string | null>(null);
-
-  useEffect(() => {
-    const isMac = /mac|iphone|ipad/i.test(navigator.userAgent);
-    setLabel(isMac ? "⌘ k" : "ctrl k");
-  }, []);
+  const label = useSyncExternalStore(
+    emptySubscribe,
+    () => (/mac|iphone|ipad/i.test(navigator.userAgent) ? "⌘ k" : "ctrl k"),
+    () => null
+  );
 
   if (!label) return null;
 

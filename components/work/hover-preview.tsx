@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import {
   AnimatePresence,
@@ -11,25 +11,29 @@ import {
 import type { Project } from "@/data/site";
 import { EASE } from "@/lib/motion";
 
+const emptySubscribe = () => () => {};
+
 /** Cursor-following screenshot preview for the work list (fine pointers only). */
 export function HoverPreview({ project }: { project: Project | null }) {
-  const [finePointer, setFinePointer] = useState(false);
+  const finePointer = useSyncExternalStore(
+    emptySubscribe,
+    () => window.matchMedia("(pointer: fine)").matches,
+    () => false
+  );
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const sx = useSpring(x, { stiffness: 180, damping: 22, mass: 0.5 });
   const sy = useSpring(y, { stiffness: 180, damping: 22, mass: 0.5 });
 
   useEffect(() => {
-    const mq = window.matchMedia("(pointer: fine)");
-    setFinePointer(mq.matches);
-    if (!mq.matches) return;
+    if (!finePointer) return;
     function onMove(e: MouseEvent) {
       x.set(e.clientX + 24);
       y.set(e.clientY - 90);
     }
     window.addEventListener("mousemove", onMove, { passive: true });
     return () => window.removeEventListener("mousemove", onMove);
-  }, [x, y]);
+  }, [finePointer, x, y]);
 
   if (!finePointer) return null;
 
