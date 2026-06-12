@@ -50,9 +50,12 @@ export default function WorkPage() {
                       href={p.links.live}
                       target="_blank"
                       rel="noreferrer"
-                      className="u-link font-mono text-[11px] tracking-[0.12em] text-fg"
+                      className="u-link group font-mono text-[11px] tracking-[0.12em] text-fg"
                     >
-                      live ↗
+                      live{" "}
+                      <span className="inline-block transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                        ↗
+                      </span>
                     </a>
                   )}
                   {p.links.github && (
@@ -60,9 +63,12 @@ export default function WorkPage() {
                       href={p.links.github}
                       target="_blank"
                       rel="noreferrer"
-                      className="u-link font-mono text-[11px] tracking-[0.12em] text-fg"
+                      className="u-link group font-mono text-[11px] tracking-[0.12em] text-fg"
                     >
-                      github ↗
+                      github{" "}
+                      <span className="inline-block transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                        ↗
+                      </span>
                     </a>
                   )}
                   <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.14em] text-faint">

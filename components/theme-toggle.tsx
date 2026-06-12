@@ -62,7 +62,7 @@ export function ThemeToggle() {
       ref={ref}
       onClick={toggle}
       aria-label="toggle theme"
-      className="group relative grid size-7 place-items-center text-muted transition-colors duration-300 hover:text-fg"
+      className="group relative grid size-7 place-items-center text-muted transition-[color,transform] duration-300 hover:text-fg active:scale-90"
     >
       <svg
         viewBox="0 0 24 24"

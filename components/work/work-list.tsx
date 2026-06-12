@@ -21,16 +21,16 @@ export function WorkList({ projects }: { projects: Project[] }) {
               onMouseLeave={() => setActive(null)}
               className="group flex items-baseline gap-4 py-5"
             >
-              <span className="w-6 shrink-0 font-mono text-[11px] text-faint">
+              <span className="w-6 shrink-0 font-mono text-[11px] text-faint transition-colors duration-300 group-hover:text-fg">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <span className="text-[17px] font-medium tracking-tight text-fg transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
                 {p.name}
               </span>
-              <span className="hidden flex-1 truncate text-sm text-muted sm:inline">
+              <span className="hidden flex-1 truncate text-sm text-faint transition-colors duration-300 group-hover:text-muted sm:inline">
                 {p.tagline}
               </span>
-              <span className="ml-auto shrink-0 font-mono text-[11px] text-faint">
+              <span className="ml-auto shrink-0 font-mono text-[11px] text-faint transition-colors duration-300 group-hover:text-muted">
                 {p.year}
               </span>
               <span className="shrink-0 font-mono text-xs text-faint transition-all duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-fg">

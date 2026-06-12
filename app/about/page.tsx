@@ -23,16 +23,17 @@ export default function AboutPage() {
         </Reveal>
         <Reveal delay={0.12}>
           <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
-            I&apos;m Ammar Hassan, a developer from Lahore who likes taking
-            ideas from <span className="accent-serif">scratch to shipped</span>.
+            I&apos;m Ammar Hassan, a developer from Lahore. I like building
+            for the web and{" "}
+            <span className="accent-serif">getting the details right</span>.
           </p>
         </Reveal>
       </section>
 
       <section className="flex flex-col">
         <Reveal>
-          <div className="grid gap-x-10 gap-y-2 border-t border-line py-6 sm:grid-cols-[1fr_2fr]">
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+          <div className="group grid gap-x-10 gap-y-2 border-t border-line py-6 transition-colors duration-500 hover:border-faint sm:grid-cols-[1fr_2fr]">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint transition-colors duration-500 group-hover:text-muted">
               background
             </span>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
@@ -43,8 +44,8 @@ export default function AboutPage() {
           </div>
         </Reveal>
         <Reveal delay={0.06}>
-          <div className="grid gap-x-10 gap-y-2 border-t border-line py-6 sm:grid-cols-[1fr_2fr]">
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+          <div className="group grid gap-x-10 gap-y-2 border-t border-line py-6 transition-colors duration-500 hover:border-faint sm:grid-cols-[1fr_2fr]">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint transition-colors duration-500 group-hover:text-muted">
               currently
             </span>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
@@ -55,8 +56,8 @@ export default function AboutPage() {
           </div>
         </Reveal>
         <Reveal delay={0.12}>
-          <div className="grid gap-x-10 gap-y-2 border-y border-line py-6 sm:grid-cols-[1fr_2fr]">
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+          <div className="group grid gap-x-10 gap-y-2 border-y border-line py-6 transition-colors duration-500 hover:border-faint sm:grid-cols-[1fr_2fr]">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint transition-colors duration-500 group-hover:text-muted">
               off hours
             </span>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
@@ -73,7 +74,7 @@ export default function AboutPage() {
         </Reveal>
         {experience.map((e) => (
           <Reveal key={e.company} delay={0.08}>
-            <div className="grid gap-x-10 gap-y-2 border-t border-line pt-5 sm:grid-cols-[1fr_2fr]">
+            <div className="grid gap-x-10 gap-y-2 border-t border-line pt-5 transition-colors duration-500 hover:border-faint sm:grid-cols-[1fr_2fr]">
               <div>
                 <h3 className="text-[15px] font-medium tracking-tight">
                   {e.company}
@@ -97,7 +98,7 @@ export default function AboutPage() {
         <div className="flex flex-col">
           {education.map((e, i) => (
             <Reveal key={e.school} delay={i * 0.06}>
-              <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line py-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line py-4 transition-colors duration-500 hover:border-faint">
                 <span className="text-[15px] font-medium tracking-tight">
                   {e.school}
                 </span>
@@ -119,7 +120,7 @@ export default function AboutPage() {
           <p className="max-w-[60ch] font-mono text-[12.5px] leading-[2.1] tracking-[0.04em] text-muted">
             {toolbox.map((t, i) => (
               <span key={t}>
-                <span className="transition-colors duration-300 hover:text-fg">
+                <span className="inline-block transition-[color,transform] duration-300 hover:-translate-y-px hover:text-fg">
                   {t}
                 </span>
                 {i < toolbox.length - 1 && (

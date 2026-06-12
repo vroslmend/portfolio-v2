@@ -55,9 +55,12 @@ export default function Home() {
             </h2>
             <Link
               href="/work"
-              className="u-link font-mono text-[11px] tracking-[0.12em] text-muted hover:text-fg"
+              className="group font-mono text-[11px] tracking-[0.12em] text-muted transition-colors duration-300 hover:text-fg"
             >
-              all work →
+              all work{" "}
+              <span className="inline-block transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
+                →
+              </span>
             </Link>
           </div>
         </Reveal>
