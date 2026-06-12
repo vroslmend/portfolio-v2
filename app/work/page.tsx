@@ -58,7 +58,7 @@ export default function WorkPage() {
                       className="u-link group font-mono text-[11px] tracking-[0.12em] text-fg"
                     >
                       live{" "}
-                      <span className="inline-block transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                      <span className="inline-block transition-transform duration-500 ease-out-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
                         ↗
                       </span>
                     </a>
@@ -71,7 +71,7 @@ export default function WorkPage() {
                       className="u-link group font-mono text-[11px] tracking-[0.12em] text-fg"
                     >
                       github{" "}
-                      <span className="inline-block transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                      <span className="inline-block transition-transform duration-500 ease-out-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
                         ↗
                       </span>
                     </a>
@@ -85,7 +85,7 @@ export default function WorkPage() {
 
       <section className="flex flex-col gap-6">
         <Reveal>
-          <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+          <h2 className="select-none font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
             smaller things
           </h2>
         </Reveal>

@@ -20,7 +20,7 @@ export function Nav() {
         <Magnetic strength={0.2}>
           <Link
             href="/"
-            className="font-mono text-[13px] tracking-tight text-fg transition-[letter-spacing] duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] hover:tracking-[0.06em]"
+            className="font-mono text-[13px] tracking-tight text-fg transition-[letter-spacing] duration-500 ease-out-expo hover:tracking-[0.06em]"
           >
             {site.wordmark}
           </Link>

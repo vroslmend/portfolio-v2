@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+    <h2 className="select-none font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
       {children}
     </h2>
   );
@@ -119,10 +119,10 @@ export default function AboutPage() {
           <SectionLabel>toolbox</SectionLabel>
         </Reveal>
         <Reveal delay={0.08}>
-          <p className="max-w-[60ch] font-mono text-[12.5px] leading-[2.1] tracking-[0.04em] text-muted">
+          <p className="max-w-[60ch] select-none font-mono text-[12.5px] leading-[2.1] tracking-[0.04em] text-muted">
             {toolbox.map((t, i) => (
               <span key={t}>
-                <span className="inline-block transition-[color,transform] duration-300 hover:-translate-y-px hover:text-fg">
+                <span className="inline-block cursor-default transition-[color,transform] duration-300 hover:-translate-y-px hover:text-fg">
                   {t}
                 </span>
                 {i < toolbox.length - 1 && (

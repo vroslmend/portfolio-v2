@@ -54,7 +54,7 @@ export default function Home() {
       <section className="flex flex-col gap-6">
         <Reveal>
           <div className="flex items-baseline justify-between">
-            <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+            <h2 className="select-none font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
               selected work
             </h2>
             <Link
@@ -62,7 +62,7 @@ export default function Home() {
               className="group font-mono text-[11px] tracking-[0.12em] text-muted transition-colors duration-300 hover:text-fg"
             >
               all work{" "}
-              <span className="inline-block transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
+              <span className="inline-block transition-transform duration-500 ease-out-expo group-hover:translate-x-1">
                 →
               </span>
             </Link>

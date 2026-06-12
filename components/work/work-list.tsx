@@ -15,14 +15,15 @@ export function WorkList({ projects }: { projects: Project[] }) {
       <HoverPreview project={active} />
       <ul className="work-list border-t border-line">
         {projects.map((p, i) => (
-          <motion.li
-            key={p.slug}
-            className="work-row border-b border-line"
-            initial={reduced ? false : { opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-8% 0px" }}
-            transition={{ duration: 0.7, ease: EASE, delay: i * 0.07 }}
-          >
+          <li key={p.slug} className="work-row border-b border-line">
+            {/* Entrance lives on an inner wrapper: the row itself keeps its
+                CSS-driven hover dimming, which inline motion styles would fight. */}
+            <motion.div
+              initial={reduced ? false : { opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-8% 0px" }}
+              transition={{ duration: 0.7, ease: EASE, delay: i * 0.07 }}
+            >
             <a
               href={p.links.live ?? p.links.github}
               target="_blank"
@@ -34,7 +35,7 @@ export function WorkList({ projects }: { projects: Project[] }) {
               <span className="w-6 shrink-0 font-mono text-[11px] text-faint transition-colors duration-300 group-hover:text-fg">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <span className="text-[17px] font-medium tracking-tight text-fg transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
+              <span className="text-[17px] font-medium tracking-tight text-fg transition-transform duration-500 ease-out-expo group-hover:translate-x-1.5">
                 {p.name}
               </span>
               <span className="hidden flex-1 truncate text-sm text-faint transition-colors duration-300 group-hover:text-muted sm:inline">
@@ -43,11 +44,12 @@ export function WorkList({ projects }: { projects: Project[] }) {
               <span className="ml-auto shrink-0 font-mono text-[11px] text-faint transition-colors duration-300 group-hover:text-muted">
                 {p.year}
               </span>
-              <span className="shrink-0 font-mono text-xs text-faint transition-all duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-fg">
+              <span className="shrink-0 font-mono text-xs text-faint transition-all duration-500 ease-out-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-fg">
                 ↗
               </span>
             </a>
-          </motion.li>
+            </motion.div>
+          </li>
         ))}
       </ul>
     </div>

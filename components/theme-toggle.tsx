@@ -70,7 +70,7 @@ export function ThemeToggle() {
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
-        className="size-[15px] transition-transform duration-700 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-45"
+        className="size-[15px] transition-transform duration-700 ease-out-expo group-hover:rotate-45"
         suppressHydrationWarning
       >
         {isDark ? (
