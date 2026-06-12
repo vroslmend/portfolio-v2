@@ -7,6 +7,7 @@
   --faint: #686868;
   --line: #232323;
   --surface: #161616;
+  --shadow-dialog: rgba(0, 0, 0, 0.55);
 }
 
 .light {
@@ -15,7 +16,8 @@
   --muted: #6e6a62;
   --faint: #a39f97;
   --line: #dedbd4;
-  --surface: #eceae5;
+  --surface: #e7e4dd;
+  --shadow-dialog: rgba(26, 25, 21, 0.14);
 }
 
 @theme inline {
@@ -161,6 +163,17 @@ body::after {
 }
 .work-row {
   transition: opacity 0.4s var(--ease-out-expo);
+}
+
+/* ---- command menu ---- */
+[cmdk-input]:focus-visible {
+  outline: none;
+}
+[cmdk-list] {
+  scrollbar-width: none;
+}
+[cmdk-list]::-webkit-scrollbar {
+  display: none;
 }
 
 /* ---- command menu group entrance ---- */

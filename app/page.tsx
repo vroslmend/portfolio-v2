@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Drift } from "@/components/drift";
 import { NameReveal } from "@/components/name-reveal";
 import { Reveal } from "@/components/reveal";
 import { WorkList } from "@/components/work/work-list";
@@ -9,6 +10,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-24 pb-8">
+      <Drift>
       <section className="flex flex-col gap-7">
         <Reveal mask>
           <p className="font-mono text-[12px] tracking-[0.12em] text-muted">
@@ -47,6 +49,7 @@ export default function Home() {
           </p>
         </Reveal>
       </section>
+      </Drift>
 
       <section className="flex flex-col gap-6">
         <Reveal>

@@ -68,14 +68,14 @@ export function CommandMenu() {
           >
             <Command
               label="command menu"
-              className="overflow-hidden rounded-lg border border-line bg-bg shadow-[0_24px_80px_-24px_rgba(0,0,0,0.6)]"
+              className="overflow-hidden rounded-lg border border-line bg-bg shadow-[0_24px_80px_-24px_var(--shadow-dialog)]"
             >
               <Command.Input
                 autoFocus
                 placeholder="type a command…"
                 className="w-full border-b border-line bg-transparent px-5 py-4 font-mono text-[13px] text-fg outline-none placeholder:text-faint"
               />
-              <Command.List className="max-h-[300px] overflow-y-auto p-2">
+              <Command.List className="max-h-[min(420px,55vh)] overflow-y-auto p-2">
                 <Command.Empty className="px-3 py-6 text-center font-mono text-xs text-faint">
                   nothing found.
                 </Command.Empty>

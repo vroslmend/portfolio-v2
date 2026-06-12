@@ -84,7 +84,7 @@ export const projects: Project[] = [
     description:
       "A Python tool that reads university timetable PDFs and finds clash-free course combinations. Built it because making my own schedule by hand every semester was miserable.",
     stack: ["Python"],
-    links: { github: "https://github.com/vroslmend" },
+    links: { github: "https://github.com/vroslmend/course-scheduler" },
     featured: false,
   },
   {
@@ -106,7 +106,7 @@ export const projects: Project[] = [
     description:
       "This website. Built with Next.js, Tailwind and Motion, and kept deliberately quiet.",
     stack: ["Next.js 16", "Tailwind v4", "Motion"],
-    links: { github: "https://github.com/vroslmend" },
+    links: { github: "https://github.com/vroslmend/portfolio-v2" },
     featured: false,
   },
 ];
