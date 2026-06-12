@@ -44,6 +44,9 @@ export default function WorkPage() {
                 <p className="max-w-[60ch] text-[14.5px] leading-[1.8] text-muted text-pretty">
                   {p.description}
                 </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
+                  {p.stack.join(" · ")}
+                </p>
                 <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
                   {p.links.live && (
                     <a
@@ -71,9 +74,6 @@ export default function WorkPage() {
                       </span>
                     </a>
                   )}
-                  <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-                    {p.stack.join(" · ")}
-                  </span>
                 </div>
               </div>
             </article>

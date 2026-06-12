@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0e0e0c;
-  --fg: #e8e6e1;
-  --muted: #a8a49c;
-  --faint: #5c5953;
-  --line: #26241f;
-  --surface: #161512;
+  --bg: #0e0e0e;
+  --fg: #eaeaea;
+  --muted: #a1a1a1;
+  --faint: #686868;
+  --line: #232323;
+  --surface: #161616;
 }
 
 .light {
