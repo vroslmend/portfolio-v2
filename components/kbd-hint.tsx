@@ -14,5 +14,13 @@ export function KbdHint() {
 
   if (!label) return null;
 
-  return <span className="hidden sm:inline">{label}</span>;
+  return (
+    <button
+      type="button"
+      onClick={() => window.dispatchEvent(new Event("open-cmdk"))}
+      className="hidden cursor-pointer transition-colors duration-300 hover:text-muted sm:inline"
+    >
+      {label}
+    </button>
+  );
 }

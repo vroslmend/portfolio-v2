@@ -5,6 +5,8 @@ import { projects } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "work — ammar hassan",
+  description:
+    "Selected projects: CUI Central, Check!, Imaginify, Sportzilla, and other things built over the last few years.",
 };
 
 export default function WorkPage() {
@@ -23,7 +25,7 @@ export default function WorkPage() {
         {featured.map((p, i) => (
           <Reveal key={p.slug} delay={i * 0.05}>
             <article
-              className={`grid gap-x-10 gap-y-3 border-t border-line py-10 sm:grid-cols-[1fr_2fr] ${
+              className={`group grid gap-x-10 gap-y-3 border-t border-line py-10 transition-colors duration-500 hover:border-faint sm:grid-cols-[1fr_2fr] ${
                 i === featured.length - 1 ? "border-b" : ""
               }`}
             >
@@ -87,9 +89,7 @@ export default function WorkPage() {
             smaller things
           </h2>
         </Reveal>
-        <Reveal delay={0.1}>
-          <WorkList projects={smaller} />
-        </Reveal>
+        <WorkList projects={smaller} />
       </section>
     </div>
   );

@@ -1,18 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import type { Project } from "@/data/site";
 import { HoverPreview } from "@/components/work/hover-preview";
+import { EASE } from "@/lib/motion";
 
 export function WorkList({ projects }: { projects: Project[] }) {
   const [active, setActive] = useState<Project | null>(null);
+  const reduced = useReducedMotion();
 
   return (
     <div className="relative">
       <HoverPreview project={active} />
       <ul className="work-list border-t border-line">
         {projects.map((p, i) => (
-          <li key={p.slug} className="work-row border-b border-line">
+          <motion.li
+            key={p.slug}
+            className="work-row border-b border-line"
+            initial={reduced ? false : { opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-8% 0px" }}
+            transition={{ duration: 0.7, ease: EASE, delay: i * 0.07 }}
+          >
             <a
               href={p.links.live ?? p.links.github}
               target="_blank"
@@ -37,7 +47,7 @@ export function WorkList({ projects }: { projects: Project[] }) {
                 ↗
               </span>
             </a>
-          </li>
+          </motion.li>
         ))}
       </ul>
     </div>

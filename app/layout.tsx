@@ -25,10 +25,33 @@ const newsreader = Newsreader({
   weight: ["400", "500"],
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "ammar hassan — software engineer",
   description:
-    "Software engineer in Lahore building realtime web products — multiplayer games, live dashboards, and things with AI inside.",
+    "Software engineer in Lahore building for the web — multiplayer games, campus tools, and a few things with AI inside.",
+  openGraph: {
+    title: "ammar hassan — software engineer",
+    description:
+      "Software engineer in Lahore building for the web — multiplayer games, campus tools, and a few things with AI inside.",
+    url: "/",
+    siteName: "ammar hassan",
+    locale: "en",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ammar hassan — software engineer",
+    description:
+      "Software engineer in Lahore building for the web — multiplayer games, campus tools, and a few things with AI inside.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

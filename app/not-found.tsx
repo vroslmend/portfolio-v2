@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Reveal } from "@/components/reveal";
+
+export const metadata: Metadata = {
+  title: "404 — ammar hassan",
+};
 
 export default function NotFound() {
   return (

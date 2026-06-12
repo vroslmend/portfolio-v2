@@ -22,8 +22,15 @@ export function CommandMenu() {
       }
       if (e.key === "Escape") setOpen(false);
     }
+    function onOpenEvent() {
+      setOpen(true);
+    }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("open-cmdk", onOpenEvent);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("open-cmdk", onOpenEvent);
+    };
   }, []);
 
   function run(action: () => void) {

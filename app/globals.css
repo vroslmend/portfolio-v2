@@ -118,6 +118,27 @@ body::after {
   border-radius: 2px;
 }
 
+/* ---- scrollbars ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 99px;
+  border: 3px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--faint);
+}
+
 /* ---- theme switch: circular view transition ---- */
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -140,6 +161,23 @@ body::after {
 }
 .work-row {
   transition: opacity 0.4s var(--ease-out-expo);
+}
+
+/* ---- command menu group entrance ---- */
+@keyframes cmdkIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+[cmdk-group] {
+  animation: cmdkIn 0.45s var(--ease-out-expo) both;
+}
+[cmdk-group]:nth-of-type(2) {
+  animation-delay: 0.06s;
+}
+[cmdk-group]:nth-of-type(3) {
+  animation-delay: 0.12s;
 }
 
 /* ---- pulsing clock colon ---- */

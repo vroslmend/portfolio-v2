@@ -71,7 +71,7 @@ export const projects: Project[] = [
     year: "2025",
     tagline: "karting telemetry analysis",
     description:
-      "Lap-time analysis for go-karting sessions with my friends. It scrapes our results from the track's website, then uses Pandas and NumPy to chart fastest laps, consistency and how everyone stacks up against each other.",
+      "Lap-time analysis for go-karting sessions with my friends. It scrapes our results from the track's website, then uses Pandas and NumPy to chart fastest laps, consistency and how everyone stacks up.",
     stack: ["Python", "Pandas", "NumPy"],
     links: { github: "https://github.com/vroslmend/sportzilla-laptime-analysis" },
     featured: true,

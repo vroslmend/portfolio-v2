@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NameReveal } from "@/components/name-reveal";
 import { Reveal } from "@/components/reveal";
 import { WorkList } from "@/components/work/work-list";
 import { projects, site } from "@/data/site";
@@ -14,11 +15,11 @@ export default function Home() {
             hello, i&apos;m
           </p>
         </Reveal>
-        <Reveal mask delay={0.08}>
-          <h1 className="text-[38px] font-medium leading-[1.1] tracking-tight text-fg sm:text-[48px]">
-            ammar hassan<span className="text-faint">.</span>
-          </h1>
-        </Reveal>
+        <NameReveal
+          text="ammar hassan"
+          delay={0.12}
+          className="text-[38px] font-medium leading-[1.15] tracking-tight text-fg sm:text-[48px]"
+        />
         <Reveal delay={0.18}>
           <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
             A software engineering student in Lahore who spends most of his
@@ -64,9 +65,7 @@ export default function Home() {
             </Link>
           </div>
         </Reveal>
-        <Reveal delay={0.1}>
-          <WorkList projects={featured} />
-        </Reveal>
+        <WorkList projects={featured} />
       </section>
 
       <section>
