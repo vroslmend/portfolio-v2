@@ -1,26 +1,148 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0e0e0c;
+  --fg: #e8e6e1;
+  --muted: #a8a49c;
+  --faint: #5c5953;
+  --line: #26241f;
+  --surface: #161512;
+}
+
+.light {
+  --bg: #f4f3f0;
+  --fg: #1a1915;
+  --muted: #6e6a62;
+  --faint: #a39f97;
+  --line: #dedbd4;
+  --surface: #eceae5;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-newsreader);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-geist-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.5s var(--ease-out-expo);
+}
+
+::selection {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+/* ---- film grain ---- */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.light body::after {
+  opacity: 0.05;
+}
+
+/* ---- serif italic accent ---- */
+.accent-serif {
+  font-family: var(--font-newsreader), serif;
+  font-style: italic;
+  font-size: 1.06em;
+  letter-spacing: 0.01em;
+}
+
+/* ---- animated underline links ---- */
+.u-link {
+  position: relative;
+  display: inline-block;
+}
+.u-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 1px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s var(--ease-out-expo);
+}
+.u-link:hover::after,
+.u-link[data-active="true"]::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* inline prose links: underline always on, lifts on hover */
+.p-link {
+  color: var(--fg);
+  border-bottom: 1px solid var(--faint);
+  transition: border-color 0.3s ease;
+}
+.p-link:hover {
+  border-color: var(--fg);
+}
+
+/* ---- theme switch: circular view transition ---- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+/* ---- work list dimming ---- */
+.work-list:hover .work-row {
+  opacity: 0.35;
+}
+.work-list:hover .work-row:hover {
+  opacity: 1;
+}
+.work-row {
+  transition: opacity 0.4s var(--ease-out-expo);
+}
+
+/* ---- pulsing clock colon ---- */
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+.clock-colon {
+  animation: blink 2s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
