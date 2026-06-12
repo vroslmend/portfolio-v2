@@ -37,7 +37,7 @@ function RowPreview({ project, show }: { project: Project; show: boolean }) {
               height={340}
               loading="eager"
               unoptimized
-              className="block h-auto w-full saturate-[0.85]"
+              className="preview-img block h-auto w-full"
             />
           </div>
         </motion.div>

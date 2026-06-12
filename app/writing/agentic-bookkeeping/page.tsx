@@ -32,7 +32,7 @@ function PipelineDiagram() {
           >
             <span
               aria-hidden
-              className={`absolute -left-1 top-[3px] size-[7px] rounded-full ${
+              className={`absolute -left-[4px] top-[9px] size-[7px] rounded-full ${
                 step.gate ? "bg-fg" : "border border-faint bg-bg"
               }`}
             />

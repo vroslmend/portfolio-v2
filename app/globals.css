@@ -161,6 +161,16 @@ body::after {
   z-index: 2;
 }
 
+/* ---- project preview images ----
+   Pulled most of the way toward monochrome so screenshots sit inside the
+   theme instead of shouting over it. A trace of color survives. */
+.preview-img {
+  filter: grayscale(0.94) contrast(1.04) brightness(0.97);
+}
+.light .preview-img {
+  filter: grayscale(0.94) contrast(1.02);
+}
+
 /* ---- shared hairlines ----
    A row's bottom line is structurally the next row's top border, so
    hovering a row also brightens the following sibling's top edge. */
