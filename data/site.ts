@@ -90,6 +90,19 @@ export const projects: Project[] = [
     featured: false,
   },
   {
+    slug: "docs-crawler",
+    name: "Docs Crawler",
+    year: "2025",
+    tagline: "documentation to markdown",
+    description:
+      "A Python crawler that walks a library's documentation site and turns every page into clean markdown. Built it to feed current docs to AI assistants and read them offline.",
+    stack: ["Python", "Crawl4AI", "asyncio"],
+    links: {
+      github: "https://github.com/vroslmend/crawl4ai-documentation-crawler",
+    },
+    featured: false,
+  },
+  {
     slug: "lead-tracker",
     name: "Lead Tracker",
     year: "2023",
