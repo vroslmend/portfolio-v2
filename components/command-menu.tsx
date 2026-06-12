@@ -152,6 +152,7 @@ export function CommandMenu() {
                     )}
                     {q === "sudo" && (
                       <Item
+                        value="sudo"
                         onSelect={() => {
                           setDenied(true);
                           setTimeout(() => {
