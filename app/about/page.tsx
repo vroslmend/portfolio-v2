@@ -23,26 +23,45 @@ export default function AboutPage() {
         </Reveal>
         <Reveal delay={0.12}>
           <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
-            I&apos;m Ammar Hassan, a{" "}
-            <span className="accent-serif">final year</span> software
-            engineering student at COMSATS University in Lahore.
+            I&apos;m Ammar Hassan, a developer from Lahore who likes taking
+            ideas from <span className="accent-serif">scratch to shipped</span>.
           </p>
         </Reveal>
-        <Reveal delay={0.24}>
-          <div className="flex max-w-[58ch] flex-col gap-5 text-[15px] leading-[1.8] text-muted">
-            <p className="text-pretty">
+      </section>
+
+      <section className="flex flex-col">
+        <Reveal>
+          <div className="grid gap-x-10 gap-y-2 border-t border-line py-6 sm:grid-cols-[1fr_2fr]">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+              background
+            </span>
+            <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
               I started out with plain HTML, CSS and JavaScript, and over time
               moved to React, Next.js and Node. Most of what I know comes from
-              building real projects rather than coursework. I&apos;ve made a
-              multiplayer card game, a campus platform for my university, and
-              an AI image editing app, and each one taught me more than any
-              class did.
+              building real projects rather than coursework.
             </p>
-            <p className="text-pretty">
-              These days I&apos;m spending more of my time on the AI side of
-              things, working with chatbots, vector search and the Gemini API.
-              Away from the keyboard I like go-karting with friends, and
-              naturally I ended up writing a tool to analyse our lap times.
+          </div>
+        </Reveal>
+        <Reveal delay={0.06}>
+          <div className="grid gap-x-10 gap-y-2 border-t border-line py-6 sm:grid-cols-[1fr_2fr]">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+              currently
+            </span>
+            <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
+              Spending more of my time on the AI side of things, working with
+              chatbots, vector search and the Gemini API, and putting what I
+              learn into my projects.
+            </p>
+          </div>
+        </Reveal>
+        <Reveal delay={0.12}>
+          <div className="grid gap-x-10 gap-y-2 border-y border-line py-6 sm:grid-cols-[1fr_2fr]">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+              off hours
+            </span>
+            <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
+              Usually go-karting with friends. Naturally, I ended up writing a
+              tool to analyse our lap times.
             </p>
           </div>
         </Reveal>

@@ -43,7 +43,7 @@ export function Nav() {
               download="Ammar-Hassan_Resume.pdf"
               className="u-link font-mono text-xs tracking-[0.08em] text-muted transition-colors duration-300 hover:text-fg"
             >
-              resume&thinsp;↓
+              resume
             </a>
           </Magnetic>
           <ThemeToggle />
