@@ -10,27 +10,26 @@ export default function Home() {
     <div className="flex flex-col gap-24 pb-8">
       <section className="flex flex-col gap-7">
         <Reveal mask>
-          <h1 className="text-[15px] font-medium text-muted">
-            hello — i&apos;m ammar.
+          <h1 className="text-[26px] font-medium tracking-tight text-fg sm:text-[30px]">
+            <span className="text-muted">hello — i&apos;m</span> ammar hassan.
           </h1>
         </Reveal>
         <Reveal delay={0.12}>
           <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
-            I build things for the web that update{" "}
-            <span className="accent-serif">while you&apos;re looking</span> at
-            them — multiplayer games, realtime dashboards, and lately, products
-            with AI <span className="accent-serif">thinking</span> inside.
+            I&apos;m a software engineering student in Lahore who spends most
+            of his time building for the web — multiplayer games, tools for my
+            university, and a few things that{" "}
+            <span className="accent-serif">people actually use</span>.
           </p>
         </Reveal>
         <Reveal delay={0.24}>
           <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-            Software engineering student in Lahore. Last summer I worked on
-            citizen-facing systems at Punjab Safe Cities Authority. You can
-            look at{" "}
+            Right now I&apos;m in my final year, spending my free time on side
+            projects and slowly going deeper into AI. Have a look at{" "}
             <Link href="/work" className="p-link">
               my work
             </Link>
-            , read{" "}
+            , read a bit{" "}
             <Link href="/about" className="p-link">
               about me
             </Link>

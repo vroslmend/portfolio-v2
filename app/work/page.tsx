@@ -15,9 +15,7 @@ export default function WorkPage() {
     <div className="flex flex-col gap-20 pb-8">
       <Reveal mask>
         <h1 className="text-[15px] font-medium text-muted">
-          things i&apos;ve built — the{" "}
-          <span className="accent-serif text-fg">hard parts</span> were the fun
-          parts.
+          a selection of things i&apos;ve built over the last few years.
         </h1>
       </Reveal>
 

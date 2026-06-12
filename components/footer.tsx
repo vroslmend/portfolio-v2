@@ -1,3 +1,4 @@
+import { KbdHint } from "@/components/kbd-hint";
 import { LocalTime } from "@/components/local-time";
 import { site } from "@/data/site";
 
@@ -28,7 +29,7 @@ export function Footer() {
         </div>
         <LocalTime />
         <div className="flex items-baseline gap-5 font-mono text-[11px] tracking-[0.12em] text-faint">
-          <span className="hidden sm:inline">⌘k</span>
+          <KbdHint />
           <span>© 2026</span>
         </div>
       </div>

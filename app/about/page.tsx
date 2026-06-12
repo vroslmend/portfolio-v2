@@ -23,26 +23,25 @@ export default function AboutPage() {
         </Reveal>
         <Reveal delay={0.12}>
           <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
-            I like the parts of the web most people route around — race
-            conditions, payment lifecycles, state that has to be{" "}
-            <span className="accent-serif">right everywhere at once</span>.
+            I&apos;m Ammar Hassan — a software engineering student at COMSATS
+            University in Lahore, in my{" "}
+            <span className="accent-serif">final year</span>.
           </p>
         </Reveal>
         <Reveal delay={0.24}>
           <div className="flex max-w-[58ch] flex-col gap-5 text-[15px] leading-[1.8] text-muted">
             <p className="text-pretty">
-              I&apos;m a software engineering student at COMSATS University,
-              Lahore. I started with the usual — React, Next.js, Node — and got
-              pulled toward systems that update the moment you look at them: a
-              card game where every client has to agree on the board, a campus
-              platform where seven services share one realtime backbone.
+              I got into web development through the usual path — HTML, CSS,
+              JavaScript — and gradually moved into React, Next.js and Node.
+              Most of what I know comes from building actual projects rather
+              than coursework: a multiplayer card game, a campus platform for
+              my university, an AI image editing app.
             </p>
             <p className="text-pretty">
-              That curiosity has grown into AI engineering — RAG pipelines,
-              vector search, agents doing useful work inside real products
-              rather than demos. Off the keyboard it&apos;s karting telemetry:
-              I scrape our lap times and argue with friends about the
-              statistics.
+              Lately I&apos;ve been exploring the AI side of things — chatbots
+              with retrieval, vector search, the Gemini API. Outside of code
+              I&apos;m usually go-karting with friends; I even built a tool to
+              analyse our lap times, because of course I did.
             </p>
           </div>
         </Reveal>
@@ -118,11 +117,11 @@ export default function AboutPage() {
         </Reveal>
         <Reveal delay={0.08}>
           <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted">
-            The single-page version lives at{" "}
+            If you&apos;d like the one-page version, here&apos;s my{" "}
             <a href={site.links.resume} download="Ammar-Hassan_Resume.pdf" className="p-link">
-              résumé.pdf
+              resume
             </a>
-            . Or skip the paperwork —{" "}
+            . Or just email me —{" "}
             <a href={`mailto:${site.email}`} className="p-link">
               {site.email}
             </a>

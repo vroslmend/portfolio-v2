@@ -44,7 +44,7 @@ export function CommandMenu() {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[110] grid place-items-start justify-items-center bg-bg/60 pt-[18vh] backdrop-blur-sm"
+          className="fixed inset-0 z-110 grid place-items-start justify-items-center bg-bg/60 pt-[18vh] backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -101,7 +101,7 @@ export function CommandMenu() {
                       run(() => window.open(site.links.resume, "_blank"))
                     }
                   >
-                    download résumé
+                    download resume
                   </Item>
                 </Group>
 
@@ -140,7 +140,7 @@ function Group({
   return (
     <Command.Group
       heading={heading}
-      className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.16em] [&_[cmdk-group-heading]]:text-faint"
+      className="**:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:pb-1 **:[[cmdk-group-heading]]:pt-3 **:[[cmdk-group-heading]]:font-mono **:[[cmdk-group-heading]]:text-[10px] **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-[0.16em] **:[[cmdk-group-heading]]:text-faint"
     >
       {children}
     </Command.Group>

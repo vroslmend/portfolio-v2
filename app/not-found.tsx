@@ -11,7 +11,7 @@ export default function NotFound() {
       </Reveal>
       <Reveal delay={0.1}>
         <p className="text-[19px] text-fg">
-          nothing here. <span className="accent-serif">intentionally?</span>
+          this page doesn&apos;t exist.
         </p>
       </Reveal>
       <Reveal delay={0.2}>

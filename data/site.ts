@@ -22,7 +22,7 @@ export const site = {
     linkedin: "https://www.linkedin.com/in/ammar-hassan-8aa48a233/",
     resume: "/resume.pdf",
   },
-  now: "building realtime web products and learning to put AI inside them",
+  now: "final year of my degree, building side projects, open to internships and junior roles",
 } as const;
 
 export const projects: Project[] = [
@@ -32,7 +32,7 @@ export const projects: Project[] = [
     year: "2025",
     tagline: "campus operating system",
     description:
-      "Seven campus services — cafeteria ordering, room booking, faculty availability, a job portal — folded into one Next.js 15 monorepo with role-based access for students, faculty, and admins. A RAG agent on Gemini and MongoDB Vector Search answers student questions against live application data.",
+      "A platform for my university that brings cafeteria pre-ordering, room booking, faculty availability and a job portal into one place, with separate flows for students, teachers and admins. It also has a Gemini-powered chatbot that answers questions about the campus from a custom knowledge base.",
     stack: ["Next.js 15", "Socket.IO", "Gemini", "MongoDB"],
     links: { live: "https://cui-central.vercel.app" },
     featured: true,
@@ -43,7 +43,7 @@ export const projects: Project[] = [
     year: "2025",
     tagline: "multiplayer card game",
     description:
-      "A realtime card game on a custom WebSocket engine — concurrent rooms, sub-50ms state sync, event-driven throughout. Most of the work was invisible: hunting race conditions until every client agreed on the board, every time.",
+      "An online multiplayer card game you can actually play with friends. I wrote the game server myself with Socket.IO — rooms, turns, reconnects — and learned a lot about keeping several players' screens in sync.",
     stack: ["Next.js", "Node.js", "Socket.IO"],
     links: {
       live: "https://check-the-game.vercel.app",
@@ -57,7 +57,7 @@ export const projects: Project[] = [
     year: "2024",
     tagline: "ai image platform",
     description:
-      "Generative fill, restore, and recolor for high-res images, with type-safe API routes end to end. Stripe webhooks drive a small credit economy — the whole payment lifecycle handled without drama.",
+      "An AI image editing app — generative fill, restore, recolor, background removal — with a credits system and payments through Stripe. Built with Next.js, Cloudinary and MongoDB.",
     stack: ["Next.js", "TypeScript", "Cloudinary AI", "Stripe"],
     links: {
       live: "https://imaginify-six-sigma.vercel.app",
@@ -71,7 +71,7 @@ export const projects: Project[] = [
     year: "2025",
     tagline: "karting telemetry analysis",
     description:
-      "A Python pipeline for 50,000+ lap-time telemetry points scraped from real karting sessions. Swapping iterative loops for NumPy vectorization cut processing time by 30%; statistical heatmaps surface driver consistency and tyre degradation.",
+      "Lap-time analysis for go-karting sessions with my friends. It scrapes our results from the track's website, then uses Pandas and NumPy to chart fastest laps, consistency and how everyone stacks up against each other.",
     stack: ["Python", "Pandas", "NumPy"],
     links: { github: "https://github.com/vroslmend/sportzilla-laptime-analysis" },
     featured: true,
@@ -82,7 +82,7 @@ export const projects: Project[] = [
     year: "2025",
     tagline: "clash-free timetable optimizer",
     description:
-      "A Python CLI that parses university timetable PDFs and finds every clash-free combination of your courses — ranked by gap time, with smart swap suggestions when no valid schedule exists.",
+      "A Python tool that reads university timetable PDFs and finds clash-free course combinations. Built it because making my own schedule by hand every semester was miserable.",
     stack: ["Python"],
     links: { github: "https://github.com/vroslmend" },
     featured: false,
@@ -93,7 +93,7 @@ export const projects: Project[] = [
     year: "2023",
     tagline: "chrome extension",
     description:
-      "A small productivity tool that saves leads straight from the active tab — Chrome Extensions API with localStorage persistence.",
+      "A small Chrome extension for saving links from the current tab. One of the first things I ever built.",
     stack: ["JavaScript", "Chrome API"],
     links: { github: "https://github.com/vroslmend/lead-tracker-extension" },
     featured: false,
@@ -104,7 +104,7 @@ export const projects: Project[] = [
     year: "2026",
     tagline: "you are here",
     description:
-      "Whisper-minimal, monochrome, obsessively animated. Next.js 16, Tailwind v4, Motion, and Lenis.",
+      "This website. Next.js, Tailwind and Motion — kept deliberately quiet.",
     stack: ["Next.js 16", "Tailwind v4", "Motion"],
     links: { github: "https://github.com/vroslmend" },
     featured: false,
@@ -117,7 +117,7 @@ export const experience = [
     role: "Web Development Intern",
     period: "jun – aug 2024",
     description:
-      "Maintained citizen-facing government portals serving high-traffic provincial services on Node.js, and traced Punjab's automated E-Challan pipeline from AI camera detection to dashboard.",
+      "Worked on citizen-facing government web portals and got an inside look at how Punjab's automated e-challan system works, from the traffic cameras through to the dashboards.",
   },
 ];
 
