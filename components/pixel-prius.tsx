@@ -28,13 +28,7 @@ export function PixelPrius({
       onAnimationComplete={onDone}
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- tiny easter-egg sprite, next/image overhead not worth it */}
-      <img
-        src="/prius.png"
-        alt=""
-        width={110}
-        height={40}
-        className="[image-rendering:pixelated]"
-      />
+      <img src="/prius.png" alt="" width={110} height={40} />
       {fast && (
         <span className="absolute -left-10 top-3 font-mono text-[11px] tracking-[0.3em] text-faint">
           ✺✺

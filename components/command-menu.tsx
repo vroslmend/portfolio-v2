@@ -33,11 +33,16 @@ export function CommandMenu() {
       setSearch("");
       setOpen(true);
     }
+    function onDrivePrius() {
+      setDriving("cruise");
+    }
     window.addEventListener("keydown", onKey);
     window.addEventListener("open-cmdk", onOpenEvent);
+    window.addEventListener("drive-prius", onDrivePrius);
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("open-cmdk", onOpenEvent);
+      window.removeEventListener("drive-prius", onDrivePrius);
     };
   }, []);
 

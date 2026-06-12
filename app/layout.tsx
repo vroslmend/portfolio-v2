@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Newsreader } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import {
+  Geist,
+  Geist_Mono,
+  Newsreader,
+  Noto_Nastaliq_Urdu,
+} from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
@@ -23,6 +29,14 @@ const newsreader = Newsreader({
   subsets: ["latin"],
   style: ["italic"],
   weight: ["400", "500"],
+});
+
+const nastaliq = Noto_Nastaliq_Urdu({
+  variable: "--font-nastaliq",
+  subsets: ["arabic"],
+  weight: ["400", "600"],
+  // Only ~1 in 4 visits renders Urdu; the browser fetches this lazily.
+  preload: false,
 });
 
 const SITE_URL =
@@ -62,7 +76,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} ${nastaliq.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"
@@ -80,6 +94,7 @@ export default function RootLayout({
           <CommandMenu />
           <PageEffects />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );

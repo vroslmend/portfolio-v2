@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PriusTrigger } from "@/components/prius-trigger";
 import { Reveal } from "@/components/reveal";
 import { education, experience, site, toolbox } from "@/data/site";
 
@@ -64,10 +65,10 @@ export default function AboutPage() {
               off hours
             </span>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-              Gaming, sim racing, and cars — despite the Prius in the
-              driveway. Karting with friends is where the lap-time tool came
-              from. Away from screens, it&apos;s the mountains and air you
-              can actually breathe.
+              Gaming, sim racing, and cars — despite the <PriusTrigger />.
+              Karting with friends is where the lap-time tool came from. Away
+              from screens, it&apos;s the mountains and air you can actually
+              breathe.
             </p>
           </div>
         </Reveal>
