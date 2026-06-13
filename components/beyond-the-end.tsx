@@ -92,10 +92,14 @@ export function BeyondTheEnd() {
   useMotionValueEvent(priusMV, "change", (v) => setPriusShown(Math.round(v)));
 
   function tryCountUp() {
-    if (countedUp.current || !counts || lift.get() < 0.4) return;
+    // Hold off until the panel has nearly arrived and the text has faded in,
+    // so the roll reads as a deliberate count-up on a settled panel rather
+    // than something flickering past mid-snap.
+    if (countedUp.current || !counts || lift.get() < 0.7) return;
     countedUp.current = true;
-    animate(visitsMV, counts.visits, { duration: 1, ease: EASE });
-    animate(priusMV, counts.prius, { duration: 1, ease: EASE });
+    const opts = { duration: 1.1, ease: EASE, delay: 0.12 };
+    animate(visitsMV, counts.visits, opts);
+    animate(priusMV, counts.prius, opts);
   }
   useMotionValueEvent(lift, "change", () => tryCountUp());
   useEffect(() => {
