@@ -105,13 +105,18 @@ export default function AboutPage() {
         <div className="rows-hover flex flex-col">
           {education.map((e, i) => (
             <Reveal key={e.school} delay={i * 0.06}>
-              <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line py-4 transition-colors duration-500 hover:border-faint">
+              <div className="flex flex-col gap-y-1 border-t border-line py-4 transition-colors duration-500 hover:border-faint sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-6">
                 <span className="text-[15px] font-medium tracking-tight">
                   {e.school}
                 </span>
-                <span className="text-sm text-muted">{e.degree}</span>
-                <span className="font-mono text-[11px] text-faint">
-                  {e.period}
+                {/* Mobile: degree and period share one justified meta line.
+                    sm+: display:contents drops this wrapper so all three sit
+                    in the row's flex, restoring the original layout. */}
+                <span className="flex items-baseline justify-between gap-x-6 sm:contents">
+                  <span className="text-sm text-muted">{e.degree}</span>
+                  <span className="font-mono text-[11px] text-faint">
+                    {e.period}
+                  </span>
                 </span>
               </div>
             </Reveal>
