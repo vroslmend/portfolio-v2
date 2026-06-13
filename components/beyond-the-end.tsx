@@ -16,10 +16,16 @@ import { EASE } from "@/lib/motion";
 const API = process.env.NEXT_PUBLIC_COUNTER_API_URL;
 const PANEL = 248; // panel height (px) and the height it rises to
 const DEAD = 160; // overscroll (px) absorbed before anything happens
-const COMMIT = 300; // overscroll at which it snaps the rest of the way open
-const PEEK_CEIL = 0.38; // how far it peeks during the drag, before committing
+const PEEK_SPAN = 150; // overscroll past DEAD that rises to the full peek
+const PEEK_CEIL = 0.4; // how far it peeks before committing
+const PEEK_CREEP = 0.1; // slight extra rise while pushing from peek toward commit
+// Commit takes a deliberate push on a wheel — one stroke peeks and falls back,
+// it opens only on a longer/second push. Touch already needs a real swipe, so
+// that bar stays lighter.
+const COMMIT_WHEEL = 600;
+const COMMIT_TOUCH = 300;
 const CLOSE = 150; // once open, scroll up until pull drops here -> snap closed
-const IDLE_MS = 150; // a partial (uncommitted) peek springs back after this idle
+const IDLE_MS = 200; // a partial (uncommitted) peek springs back after this idle
 
 const QUIPS = [
   "these numbers live in a tiny database in the cloud.",
@@ -144,10 +150,10 @@ export function BeyondTheEnd() {
       setRevealed(false);
       lenis?.start();
     }
-    function update(delta: number) {
+    function update(delta: number, commit: number) {
       pull = Math.max(0, pull + delta);
       if (open) {
-        pull = Math.min(pull, COMMIT);
+        pull = Math.min(pull, commit);
         if (pull <= CLOSE) {
           release(); // scrolled back up enough -> snap closed
           return;
@@ -155,16 +161,24 @@ export function BeyondTheEnd() {
         lift.set(1);
         return;
       }
-      if (pull >= COMMIT) {
+      if (pull >= commit) {
         open = true; // crossed the commit point -> snap the rest of the way
-        pull = COMMIT;
+        pull = commit;
         lift.set(1);
         setRevealed(true); // kick off the staggered content reveal
         return;
       }
-      // peeking, not yet committed
-      const peek = ((pull - DEAD) / (COMMIT - DEAD)) * PEEK_CEIL;
-      lift.set(Math.max(0, peek));
+      // peeking, not yet committed: rise quickly to the full peek, then a slow
+      // creep toward the (further) commit point so it reads as resistance.
+      const over = Math.max(0, pull - DEAD);
+      let peek: number;
+      if (over <= PEEK_SPAN) {
+        peek = (over / PEEK_SPAN) * PEEK_CEIL;
+      } else {
+        const t = Math.min((over - PEEK_SPAN) / Math.max(1, commit - DEAD - PEEK_SPAN), 1);
+        peek = PEEK_CEIL + t * PEEK_CREEP;
+      }
+      lift.set(peek);
       if (pull <= 0) release();
     }
 
@@ -172,7 +186,7 @@ export function BeyondTheEnd() {
       if (!engaged && !(atBottom() && e.deltaY > 0)) return;
       engage();
       e.preventDefault();
-      update(e.deltaY);
+      update(e.deltaY, COMMIT_WHEEL);
       clearTimeout(idle);
       // a partial peek that you stop on springs back closed
       idle = setTimeout(() => {
@@ -193,7 +207,7 @@ export function BeyondTheEnd() {
       if (!engaged && !(atBottom() && dy > 0)) return;
       engage();
       e.preventDefault();
-      update(dy);
+      update(dy, COMMIT_TOUCH);
       touchY = e.touches[0].clientY;
     }
     function onTouchEnd() {
@@ -224,7 +238,7 @@ export function BeyondTheEnd() {
     return (
       <section
         aria-hidden
-        className="flex cursor-default select-none items-center justify-center border-t border-line px-6"
+        className="flex cursor-default select-none items-center justify-center border-t border-line bg-panel px-6"
         style={{ height: PANEL }}
       >
         <div className="flex flex-col items-center gap-5">
@@ -272,7 +286,7 @@ export function BeyondTheEnd() {
       <motion.section
         aria-hidden
         style={{ y, height: PANEL }}
-        className="fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center border-t border-line bg-bg px-6"
+        className="fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center bg-panel px-6 shadow-[0_-30px_60px_-30px_var(--shadow-dialog)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-faint/50 before:to-transparent"
       >
         <motion.div
           variants={container}

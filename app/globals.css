@@ -7,6 +7,7 @@
   --faint: #686868;
   --line: #232323;
   --surface: #161616;
+  --panel: #121212;
   --shadow-dialog: rgba(0, 0, 0, 0.55);
 }
 
@@ -17,6 +18,7 @@
   --faint: #a39f97;
   --line: #dedbd4;
   --surface: #e7e4dd;
+  --panel: #edebe6;
   --shadow-dialog: rgba(26, 25, 21, 0.14);
 }
 
@@ -27,6 +29,7 @@
   --color-faint: var(--faint);
   --color-line: var(--line);
   --color-surface: var(--surface);
+  --color-panel: var(--panel);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-newsreader);
