@@ -29,6 +29,16 @@ const QUIPS = [
   "you found the bottom of the world.",
 ];
 
+// staggered entrance: the panel commits, then each line settles in turn
+const container = {
+  hidden: {},
+  show: { transition: { delayChildren: 0.18, staggerChildren: 0.09 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: EASE } },
+};
+
 type Counts = { visits: number; prius: number };
 
 // stable per-client random pick; SSR + hydration always see QUIPS[0]
@@ -41,13 +51,12 @@ export function BeyondTheEnd() {
   const reduced = useReducedMotion();
   const lenis = useLenis();
   const [counts, setCounts] = useState<Counts | null>(null);
+  const [revealed, setRevealed] = useState(false);
   const quip = useSyncExternalStore(emptySubscribe, pickQuip, () => QUIPS[0]);
 
   // reveal 0..1 springed -> bursty wheel becomes smooth motion
   const lift = useSpring(0, { stiffness: 210, damping: 22 });
   const y = useTransform(lift, (v) => Math.max(0, PANEL * (1 - v)));
-  const contentOpacity = useTransform(lift, [0.2, 0.75], [0, 1]);
-  const contentY = useTransform(lift, [0, 1], [22, 0]); // content settles up as it rises
   const hintOpacity = useMotionValue(0);
 
   // ----- counter data (runs for everyone, independent of the reveal) -----
@@ -82,7 +91,7 @@ export function BeyondTheEnd() {
     };
   }, []);
 
-  // ----- numbers count up the first time it's most of the way up -----
+  // ----- numbers roll up the first time the panel is revealed -----
   const [visitsShown, setVisitsShown] = useState(0);
   const [priusShown, setPriusShown] = useState(0);
   const visitsMV = useMotionValue(0);
@@ -91,27 +100,22 @@ export function BeyondTheEnd() {
   useMotionValueEvent(visitsMV, "change", (v) => setVisitsShown(Math.round(v)));
   useMotionValueEvent(priusMV, "change", (v) => setPriusShown(Math.round(v)));
 
-  function tryCountUp() {
-    // Hold off until the panel has nearly arrived and the text has faded in,
-    // so the roll reads as a deliberate count-up on a settled panel rather
-    // than something flickering past mid-snap.
-    if (countedUp.current || !counts || lift.get() < 0.7) return;
+  // The roll waits for the stats line to finish sliding in, so it counts on a
+  // settled, visible row. easeInOut ticks at an even pace start to finish.
+  useEffect(() => {
+    if (!revealed || !counts || countedUp.current) return;
     countedUp.current = true;
-    const opts = { duration: 1.1, ease: EASE, delay: 0.12 };
+    const opts = { duration: 1.5, ease: "easeInOut" as const, delay: 0.55 };
     animate(visitsMV, counts.visits, opts);
     animate(priusMV, counts.prius, opts);
-  }
-  useMotionValueEvent(lift, "change", () => tryCountUp());
+  }, [revealed, counts, visitsMV, priusMV]);
+
+  // once counted, keep the shown numbers in sync (e.g. a fresh prius hit)
   useEffect(() => {
-    if (!counts) return;
-    if (countedUp.current) {
-      visitsMV.set(counts.visits);
-      priusMV.set(counts.prius);
-    } else {
-      tryCountUp();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [counts]);
+    if (!counts || !countedUp.current) return;
+    visitsMV.set(counts.visits);
+    priusMV.set(counts.prius);
+  }, [counts, visitsMV, priusMV]);
 
   // ----- the bottom-sheet snap gesture -----
   useEffect(() => {
@@ -137,6 +141,7 @@ export function BeyondTheEnd() {
       open = false;
       pull = 0;
       lift.set(0);
+      setRevealed(false);
       lenis?.start();
     }
     function update(delta: number) {
@@ -154,6 +159,7 @@ export function BeyondTheEnd() {
         open = true; // crossed the commit point -> snap the rest of the way
         pull = COMMIT;
         lift.set(1);
+        setRevealed(true); // kick off the staggered content reveal
         return;
       }
       // peeking, not yet committed
@@ -213,33 +219,7 @@ export function BeyondTheEnd() {
 
   if (!API) return null;
 
-  const colophon = (
-    <motion.div
-      style={reduced ? undefined : { opacity: contentOpacity, y: contentY }}
-      className="flex flex-col items-center gap-5"
-    >
-      <span className="select-none font-mono text-[10px] uppercase tracking-[0.3em] text-faint">
-        past the end
-      </span>
-      <dl className="flex flex-col items-center gap-2.5 font-mono text-[13px] sm:flex-row sm:items-baseline sm:gap-10">
-        <div className="flex items-baseline gap-3">
-          <dt className="text-faint">visitors</dt>
-          <dd className="tabular-nums text-fg">
-            {(reduced ? (counts?.visits ?? 0) : visitsShown).toLocaleString()}
-          </dd>
-        </div>
-        <div className="flex items-baseline gap-3">
-          <dt className="text-faint">prius driven</dt>
-          <dd className="tabular-nums text-fg">
-            {(reduced ? (counts?.prius ?? 0) : priusShown).toLocaleString()}×
-          </dd>
-        </div>
-      </dl>
-      <p className="max-w-[34ch] text-center text-[13.5px] text-muted">{quip}</p>
-      <span className="accent-serif text-[20px] text-faint">ah.</span>
-    </motion.div>
-  );
-
+  // reduced motion: no gesture, no animation — show a static panel
   if (reduced) {
     return (
       <section
@@ -247,7 +227,29 @@ export function BeyondTheEnd() {
         className="flex items-center justify-center border-t border-line px-6"
         style={{ height: PANEL }}
       >
-        {colophon}
+        <div className="flex flex-col items-center gap-5">
+          <span className="select-none font-mono text-[10px] uppercase tracking-[0.3em] text-faint">
+            past the end
+          </span>
+          <dl className="flex flex-col items-center gap-2.5 font-mono text-[13px] sm:flex-row sm:items-baseline sm:gap-10">
+            <div className="flex items-baseline gap-3">
+              <dt className="text-faint">visitors</dt>
+              <dd className="tabular-nums text-fg">
+                {(counts?.visits ?? 0).toLocaleString()}
+              </dd>
+            </div>
+            <div className="flex items-baseline gap-3">
+              <dt className="text-faint">prius driven</dt>
+              <dd className="tabular-nums text-fg">
+                {(counts?.prius ?? 0).toLocaleString()}×
+              </dd>
+            </div>
+          </dl>
+          <p className="max-w-[34ch] text-center text-[13.5px] text-muted">
+            {quip}
+          </p>
+          <span className="accent-serif text-[20px] text-faint">ah.</span>
+        </div>
       </section>
     );
   }
@@ -272,7 +274,48 @@ export function BeyondTheEnd() {
         style={{ y, height: PANEL }}
         className="fixed inset-x-0 bottom-0 z-90 flex flex-col items-center justify-center border-t border-line bg-bg px-6"
       >
-        {colophon}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate={revealed ? "show" : "hidden"}
+          className="flex flex-col items-center gap-5"
+        >
+          <motion.span
+            variants={item}
+            className="select-none font-mono text-[10px] uppercase tracking-[0.3em] text-faint"
+          >
+            past the end
+          </motion.span>
+          <motion.dl
+            variants={item}
+            className="flex flex-col items-center gap-2.5 font-mono text-[13px] sm:flex-row sm:items-baseline sm:gap-10"
+          >
+            <div className="flex items-baseline gap-3">
+              <dt className="text-faint">visitors</dt>
+              <dd className="tabular-nums text-fg">
+                {visitsShown.toLocaleString()}
+              </dd>
+            </div>
+            <div className="flex items-baseline gap-3">
+              <dt className="text-faint">prius driven</dt>
+              <dd className="tabular-nums text-fg">
+                {priusShown.toLocaleString()}×
+              </dd>
+            </div>
+          </motion.dl>
+          <motion.p
+            variants={item}
+            className="max-w-[34ch] text-center text-[13.5px] text-muted"
+          >
+            {quip}
+          </motion.p>
+          <motion.span
+            variants={item}
+            className="accent-serif text-[20px] text-faint"
+          >
+            ah.
+          </motion.span>
+        </motion.div>
       </motion.section>
     </>
   );
