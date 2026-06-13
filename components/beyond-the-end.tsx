@@ -224,7 +224,7 @@ export function BeyondTheEnd() {
     return (
       <section
         aria-hidden
-        className="flex items-center justify-center border-t border-line px-6"
+        className="flex cursor-default select-none items-center justify-center border-t border-line px-6"
         style={{ height: PANEL }}
       >
         <div className="flex flex-col items-center gap-5">
@@ -272,7 +272,7 @@ export function BeyondTheEnd() {
       <motion.section
         aria-hidden
         style={{ y, height: PANEL }}
-        className="fixed inset-x-0 bottom-0 z-90 flex flex-col items-center justify-center border-t border-line bg-bg px-6"
+        className="fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center border-t border-line bg-bg px-6"
       >
         <motion.div
           variants={container}

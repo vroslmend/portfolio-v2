@@ -35,7 +35,7 @@ export function NameReveal({
 
   return (
     <h1
-      className={`relative cursor-default ${className ?? ""}`}
+      className={`relative cursor-default select-none ${className ?? ""}`}
       aria-label={`${text}.`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
