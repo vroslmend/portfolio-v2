@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 
 /**
@@ -17,6 +17,11 @@ export function PixelPrius({
   const [distance] = useState(() =>
     typeof window === "undefined" ? 1600 : window.innerWidth + 260
   );
+
+  // one mount === one drive; let the footer counter know
+  useEffect(() => {
+    window.dispatchEvent(new Event("prius-drove"));
+  }, []);
 
   return (
     <motion.div
