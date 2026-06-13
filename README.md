@@ -2,7 +2,7 @@
 
 My corner of the internet. Quiet, monochrome, and built with probably too much attention to detail.
 
-**Live:** coming soon
+**Live:** [ammarhassan.dev](https://ammarhassan.dev)
 
 ## Stack
 
