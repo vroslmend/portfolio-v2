@@ -2,6 +2,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
+import { useTheme } from "next-themes";
 import {
   AnimatePresence,
   motion,
@@ -15,6 +16,7 @@ const emptySubscribe = () => () => {};
 
 /** Cursor-following screenshot preview for the work list (fine pointers only). */
 export function HoverPreview({ project }: { project: Project | null }) {
+  const { resolvedTheme } = useTheme();
   const finePointer = useSyncExternalStore(
     emptySubscribe,
     () => window.matchMedia("(pointer: fine)").matches,
@@ -52,7 +54,11 @@ export function HoverPreview({ project }: { project: Project | null }) {
           <div className="w-[300px] overflow-hidden rounded-md border border-line bg-surface shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]">
             {project.image ? (
               <Image
-                src={project.image}
+                src={
+                  resolvedTheme === "light" && project.imageLight
+                    ? project.imageLight
+                    : project.image
+                }
                 alt=""
                 width={640}
                 height={340}

@@ -7,6 +7,7 @@ export type Project = {
   stack: string[];
   links: { live?: string; github?: string };
   image?: string;
+  imageLight?: string;
   featured: boolean;
 };
 
@@ -127,6 +128,8 @@ export const projects: Project[] = [
       "This website. Built with Next.js, Tailwind and Motion, and kept deliberately quiet.",
     stack: ["Next.js 16", "Tailwind v4", "Motion"],
     links: { github: "https://github.com/vroslmend/portfolio-v2" },
+    image: "/images/projects/this-site.webp",
+    imageLight: "/images/projects/this-site-light.webp",
     featured: false,
   },
 ];
