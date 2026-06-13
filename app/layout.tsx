@@ -12,6 +12,7 @@ import { Footer } from "@/components/footer";
 import { CommandMenu } from "@/components/command-menu";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { PageEffects } from "@/components/page-effects";
+import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,12 +39,6 @@ const nastaliq = Noto_Nastaliq_Urdu({
   // Only ~1 in 4 visits renders Urdu; the browser fetches this lazily.
   preload: false,
 });
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000");
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
