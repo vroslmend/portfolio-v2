@@ -98,11 +98,11 @@ export default function AgenticBookkeepingEssay() {
         </Reveal>
         <Reveal delay={0.2}>
           <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-            Earlier this year I spoke with a US accounting firm about their
-            client bookkeeping operation. Afterwards I wrote them a short
-            architecture concept: how much of the recurring monthly work could
-            AI agents honestly take on today, without pretending the failure
-            modes don&apos;t exist. This is that concept.
+            Earlier this year I talked with a US accounting firm about how they
+            handle their clients&apos; bookkeeping. Afterwards I wrote up a short
+            architecture concept for them: how much of the routine monthly work
+            could AI agents realistically take on today, without ignoring the
+            ways they fail. This is that writeup.
           </p>
         </Reveal>
       </header>
@@ -118,47 +118,48 @@ export default function AgenticBookkeepingEssay() {
           goes out.
         </p>
         <p className="text-pretty">
-          Most of the first three steps follows learnable rules. A vendor maps
-          to the same category month after month; a certain pattern always
-          means a transfer; a certain anomaly always deserves a closer look.
-          The interesting move is shifting the rule-based parts to software so
-          human time concentrates on the parts that actually require judgment.
+          Most of those first three steps follow rules you can learn. A vendor
+          gets filed under the same category every month. A certain pattern
+          always means a transfer. A certain odd transaction always deserves a
+          second look. The useful idea is to hand the rule-based parts to
+          software, so people spend their time on the parts that actually need
+          judgment.
         </p>
       </Section>
 
       <Section n="02" title="The shape of the system">
         <p className="text-pretty">
-          Three coordinated agents and one human approval gate. The accounting
-          platform stays the system of record, and no agent writes to it
-          directly — every entry passes through a person first.
+          Three agents working together, and one human approval gate. The
+          accounting platform stays the system of record, and no agent writes to
+          it directly. Every entry goes through a person first.
         </p>
         <PipelineDiagram />
         <p className="text-pretty">
-          The first agent categorizes. For each transaction it checks history
-          before it checks intelligence: a vector lookup over the
-          client&apos;s past categorizations, so a vendor that has been filed
-          the same way fifty times costs nothing to file the fifty-first time.
-          Only genuinely novel transactions go to the language model, which
-          gets the transaction, the chart of accounts and the closest
-          historical examples, and returns a category with a confidence score.
-          High confidence is queued for approval; low confidence is flagged
-          for an explicit human decision.
+          The first agent categorizes. For each transaction it looks at history
+          before it asks the model anything: a vector lookup over how the client
+          has categorized things before, so a vendor that has been filed the
+          same way fifty times doesn&apos;t need the model on the fifty-first.
+          Only genuinely new transactions go to the language model. It gets the
+          transaction, the chart of accounts, and the closest past examples, and
+          returns a category with a confidence score. High confidence goes into
+          the approval queue. Low confidence gets flagged for a person to
+          decide.
         </p>
         <p className="text-pretty">
-          The second agent reconciles — matching recorded entries against the
-          bank statement and flagging what&apos;s missing, duplicated, or off
-          by some amount. The third reads the closed period, compares it
-          against prior ones, and produces an exception list sorted by
-          severity: the category that suddenly tripled, the payroll account
-          that went quiet in a month with payroll, the suspiciously round
-          number where amounts are usually messy.
+          The second agent reconciles. It matches the recorded entries against
+          the bank statement and flags anything missing, duplicated, or off by
+          some amount. The third reads the closed period and compares it to
+          earlier ones, then produces a list of exceptions sorted by how much
+          they matter: a category that suddenly tripled, a payroll account that
+          went quiet in a month that had payroll, a round number sitting where
+          the amounts are usually messy.
         </p>
         <p className="text-pretty">
-          The reviewer sees all of it in one dashboard — proposed category,
-          confidence, the system&apos;s reasoning, one-click approve, edit, or
-          reject. Bookkeepers stop categorizing hundreds of routine
-          transactions and start reviewing a short list of flagged ones, with
-          a full audit trail of what was decided and why.
+          The reviewer sees all of it in one dashboard: the proposed category,
+          the confidence, the reasoning, and buttons to approve, edit, or
+          reject. Instead of categorizing hundreds of routine transactions,
+          bookkeepers review a short list of flagged ones, and there&apos;s a
+          full audit trail of what was decided and why.
         </p>
       </Section>
 
@@ -167,78 +168,75 @@ export default function AgenticBookkeepingEssay() {
           <b className="font-medium text-fg">
             The language model never touches arithmetic.
           </b>{" "}
-          Language models are text predictors with well-documented arithmetic
-          failure modes, and in bookkeeping a single wrong sum can mean a
-          misfiled return. So the split is enforced in code: the model reads
-          descriptions, matches vendors, explains its choices — and
-          deterministic Python does every sum, balance check, and match. If
-          debits and credits don&apos;t balance, the pipeline halts. No number
-          that reaches the books was generated by AI. This is the single most
-          consequential decision in the design.
+          Language models are text predictors, and they are well known for
+          getting arithmetic wrong. In bookkeeping a single wrong sum can mean a
+          misfiled return. So the split is enforced in the code. The model reads
+          descriptions, matches vendors, and explains its choices. Plain Python
+          does every sum, every balance check, and every match. If the debits
+          and credits don&apos;t balance, the pipeline stops. No number that
+          reaches the books was written by the AI. This is the most important
+          decision in the whole design.
         </p>
         <p className="text-pretty">
           <b className="font-medium text-fg">
-            The approval gate is code, not policy.
+            The approval gate is code, not a policy.
           </b>{" "}
-          The orchestration layer physically pauses before any write and
-          resumes only on explicit human approval — at maximum model
-          confidence, still. Loosening that later, for narrow categories the
-          accountants trust, is their decision to make, not the
-          software&apos;s.
+          The orchestration layer actually pauses before any write and only
+          continues once a person approves, even when the model is fully
+          confident. Relaxing that later, for a few narrow categories the
+          accountants trust, is their call to make, not the software&apos;s.
         </p>
         <p className="text-pretty">
-          <b className="font-medium text-fg">Boring database, on purpose.</b>{" "}
-          Decisions, approvals, and write events live in PostgreSQL because
-          financial records need ACID guarantees — a crashed write either
-          commits fully or not at all. The same database does vector search
-          for the history lookups, so the system learns from every approved
-          categorization: accuracy goes up and API cost goes down as history
-          accumulates.
-        </p>
-        <p className="text-pretty">
-          <b className="font-medium text-fg">
-            Client data stays inside one envelope.
-          </b>{" "}
-          The model is accessed through the firm&apos;s existing cloud
-          provider rather than a public AI API, so financial data never leaves
-          that infrastructure and nothing is retained for training — the
-          posture a licensed firm&apos;s confidentiality obligations actually
-          require.
+          <b className="font-medium text-fg">A boring database, on purpose.</b>{" "}
+          Decisions, approvals, and writes are stored in PostgreSQL, because
+          financial records need ACID guarantees: a write either fully commits
+          or doesn&apos;t happen at all. The same database also handles the
+          vector search for the history lookups, so the system keeps learning
+          from every approved categorization. The more history it has, the more
+          accurate it gets, and the less it has to call the model.
         </p>
         <p className="text-pretty">
           <b className="font-medium text-fg">
-            Work with the APIs you actually get.
+            Client data never leaves the firm.
           </b>{" "}
-          The dominant accounting platform doesn&apos;t expose bank-feed data
-          through its public API, so the pipeline ingests from the source —
-          CSV exports or a bank-data provider — and writes approved entries
-          back through the standard API. And because real client bases are
-          never on one platform, the agents are platform-agnostic: they emit
-          structured journal entries, and an integration layer translates per
-          destination.
+          The model is reached through the firm&apos;s own cloud provider instead
+          of a public AI API, so the financial data stays inside their
+          infrastructure and nothing is kept for training. For a licensed firm
+          with confidentiality obligations, that isn&apos;t optional.
+        </p>
+        <p className="text-pretty">
+          <b className="font-medium text-fg">
+            Work with the APIs you actually have.
+          </b>{" "}
+          The main accounting platform doesn&apos;t expose bank-feed data
+          through its public API, so the pipeline takes that data from the
+          source instead, either CSV exports or a bank-data provider, and writes
+          the approved entries back through the standard API. And since real
+          client lists are never all on one platform, the agents don&apos;t
+          assume one. They produce structured journal entries, and a separate
+          integration layer translates those for each destination.
         </p>
       </Section>
 
       <Section n="04" title="Limits">
         <p className="text-pretty">
-          The design covers the highest-volume, most repetitive work:
-          categorization, reconciliation, quality review. It does not attempt
-          multi-entity consolidations, sales tax, foreign currency, or the
-          journal entries that never come from a bank feed — depreciation,
-          payroll allocations, amortization. The QA agent would notice those
-          are missing; it wouldn&apos;t create them. And nothing here touches
-          professional judgment: GAAP questions, audit defense, tax planning
-          stay human.
+          The design covers the high-volume, repetitive work: categorization,
+          reconciliation, and review. It doesn&apos;t try to handle multi-entity
+          consolidations, sales tax, foreign currency, or the entries that never
+          come from a bank feed, like depreciation, payroll allocations, and
+          amortization. The QA agent would notice those are missing, but it
+          wouldn&apos;t create them. And none of this touches professional
+          judgment. GAAP questions, audit defense, and tax planning stay with
+          people.
         </p>
       </Section>
 
       <Section n="05" title="Closing">
         <p className="text-pretty">
-          What I wanted the concept to show is that the recurring portion of
-          this work is genuinely automatable now — with proper respect for
-          the failure modes of language models and the integrity requirements
-          of financial data. This stopped being a research problem. It&apos;s
-          an engineering problem, and a{" "}
+          What I wanted the concept to show is that the routine part of this
+          work really can be automated now, as long as you respect how language
+          models fail and how strict financial data has to be. It isn&apos;t a
+          research problem anymore. It&apos;s an engineering one, and a{" "}
           <span className="accent-serif">solvable</span> one.
         </p>
       </Section>

@@ -9,6 +9,12 @@ export const metadata: Metadata = {
 
 const pieces = [
   {
+    slug: "visitor-counter",
+    title: "A visitor counter, taken too seriously",
+    tagline: "a build note",
+    date: "june 2026 · 6 min",
+  },
+  {
     slug: "agentic-bookkeeping",
     title: "Agents that do bookkeeping, with humans where it matters",
     tagline: "an architecture concept",

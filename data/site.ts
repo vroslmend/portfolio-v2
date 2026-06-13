@@ -63,7 +63,6 @@ export const projects: Project[] = [
       "An AI image editing app with generative fill, restore, recolor and background removal, plus a credits system and payments through Stripe. Built with Next.js, Cloudinary and MongoDB.",
     stack: ["Next.js", "TypeScript", "Cloudinary AI", "Stripe"],
     links: {
-      live: "https://imaginify-six-sigma.vercel.app",
       github: "https://github.com/vroslmend/next-ai-saas-app",
     },
     image: "/images/projects/imaginify.webp",
@@ -82,6 +81,17 @@ export const projects: Project[] = [
       github: "https://github.com/vroslmend/sportzilla-laptime-analysis",
     },
     image: "/images/projects/karting-analysis.webp",
+    featured: true,
+  },
+  {
+    slug: "cloud-visitor-counter",
+    name: "Cloud Visitor Counter",
+    year: "2026",
+    tagline: "serverless, the long way",
+    description:
+      "The live visitor and Prius counts at the bottom of this site, running as their own small AWS service. A Python Lambda and DynamoDB sit behind an API Gateway, all of it defined in Terraform and deployed by GitHub Actions with no stored keys. It's a tiny backend, but I built the full production setup around it on purpose, as my take on the Cloud Resume Challenge.",
+    stack: ["AWS Lambda", "DynamoDB", "API Gateway", "Terraform", "GitHub Actions"],
+    links: { github: "https://github.com/vroslmend/cloud-visitor-counter" },
     featured: true,
   },
   {
@@ -174,6 +184,9 @@ export const toolbox = [
   "Gemini API",
   "SQL",
   "Docker",
+  "AWS",
+  "Terraform",
+  "GitHub Actions",
   "Vercel",
   "Git / Linux",
 ];
