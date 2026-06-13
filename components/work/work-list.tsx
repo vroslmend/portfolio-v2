@@ -5,10 +5,12 @@ import { motion, useReducedMotion } from "motion/react";
 import type { Project } from "@/data/site";
 import { HoverPreview } from "@/components/work/hover-preview";
 import { EASE } from "@/lib/motion";
+import { usePreloadImages } from "@/lib/use-preload-images";
 
 export function WorkList({ projects }: { projects: Project[] }) {
   const [active, setActive] = useState<Project | null>(null);
   const reduced = useReducedMotion();
+  usePreloadImages(projects);
 
   return (
     <div className="relative">

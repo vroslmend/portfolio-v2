@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Project } from "@/data/site";
 import { Reveal } from "@/components/reveal";
 import { EASE } from "@/lib/motion";
+import { usePreloadImages } from "@/lib/use-preload-images";
 
 const arrowClass =
   "inline-block transition-transform duration-500 ease-out-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5";
@@ -48,6 +49,7 @@ function RowPreview({ project, show }: { project: Project; show: boolean }) {
 
 export function FeaturedList({ projects }: { projects: Project[] }) {
   const [active, setActive] = useState<number | null>(null);
+  usePreloadImages(projects);
 
   // A row's bottom line is the next row's top border, so hover state has to
   // brighten both edges of the hovered row from here, not via CSS hover.
@@ -78,7 +80,7 @@ export function FeaturedList({ projects }: { projects: Project[] }) {
                   {p.name}
                 </h2>
               </div>
-              <p className="pl-[26px] font-mono text-[11px] tracking-[0.08em] text-faint sm:pl-0 sm:pt-1">
+              <p className="pl-6.5 font-mono text-[11px] tracking-[0.08em] text-faint sm:pl-0 sm:pt-1">
                 {p.tagline} · {p.year}
               </p>
             </div>
