@@ -69,10 +69,10 @@ export const projects: Project[] = [
     featured: true,
   },
   {
-    slug: "sportzilla",
-    name: "Sportzilla",
+    slug: "karting-analysis",
+    name: "Karting Analysis",
     year: "2025",
-    tagline: "karting telemetry analysis",
+    tagline: "lap-time analysis",
     description:
       "Lap-time analysis for go-karting sessions with my friends. It scrapes our results from the track's website, then uses Pandas and NumPy to chart fastest laps, consistency and how everyone stacks up.",
     stack: ["Python", "Pandas", "NumPy"],
@@ -80,7 +80,7 @@ export const projects: Project[] = [
       live: "https://karting-dashboard.vercel.app/",
       github: "https://github.com/vroslmend/sportzilla-laptime-analysis",
     },
-    image: "/images/projects/sportzilla.webp",
+    image: "/images/projects/karting-analysis.webp",
     featured: true,
   },
   {
