@@ -18,7 +18,7 @@ export function ThemeToggle() {
     const next = resolvedTheme === "dark" ? "light" : "dark";
 
     const doc = document as Document & {
-      startViewTransition?: (cb: () => void) => { ready: Promise<void> };
+      startViewTransition?: (cb: () => void) => unknown;
     };
 
     if (
@@ -32,27 +32,21 @@ export function ThemeToggle() {
     const rect = ref.current?.getBoundingClientRect();
     const cx = rect ? rect.left + rect.width / 2 : window.innerWidth - 40;
     const cy = rect ? rect.top + rect.height / 2 : 30;
-    const radius = Math.hypot(
-      Math.max(cx, window.innerWidth - cx),
-      Math.max(cy, window.innerHeight - cy)
-    );
+    // small overshoot so the farthest corner is fully covered before the
+    // reveal ends; otherwise the last uncovered sliver swaps in instantly
+    const radius =
+      Math.hypot(
+        Math.max(cx, window.innerWidth - cx),
+        Math.max(cy, window.innerHeight - cy)
+      ) * 1.05;
 
-    const transition = doc.startViewTransition(() => setTheme(next));
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${cx}px ${cy}px)`,
-            `circle(${radius}px at ${cx}px ${cy}px)`,
-          ],
-        },
-        {
-          duration: 650,
-          easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-          pseudoElement: "::view-transition-new(root)",
-        }
-      );
-    });
+    // hand the circle's origin + radius to the CSS @keyframes
+    const root = document.documentElement;
+    root.style.setProperty("--vt-x", `${cx}px`);
+    root.style.setProperty("--vt-y", `${cy}px`);
+    root.style.setProperty("--vt-r", `${radius}px`);
+
+    doc.startViewTransition(() => setTheme(next));
   }
 
   const isDark = mounted && resolvedTheme === "dark";
