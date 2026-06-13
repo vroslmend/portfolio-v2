@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Magnetic } from "@/components/magnetic";
 import { site } from "@/data/site";
@@ -21,9 +22,10 @@ export function Nav() {
         <Magnetic strength={0.2}>
           <Link
             href="/"
-            className="font-mono text-[13px] tracking-tight text-fg transition-[letter-spacing] duration-500 ease-out-expo hover:tracking-[0.06em]"
+            aria-label="ammar hassan — home"
+            className="group block py-1 text-fg"
           >
-            ammar<span className="hidden min-[350px]:inline"> hassan</span>
+            <Logo className="h-4.25 w-auto translate-y-[4.5px]" />
           </Link>
         </Magnetic>
         <div className="flex items-center gap-3.5 sm:gap-6">
