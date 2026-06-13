@@ -10,6 +10,7 @@ import { ThemeProvider } from "next-themes";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { CommandMenu } from "@/components/command-menu";
+import { BeyondTheEnd } from "@/components/beyond-the-end";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { PageEffects } from "@/components/page-effects";
 import { SITE_URL } from "@/lib/site-url";
@@ -85,6 +86,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
+            <BeyondTheEnd />
           </SmoothScroll>
           <CommandMenu />
           <PageEffects />

@@ -1,4 +1,3 @@
-import { FooterStats } from "@/components/footer-stats";
 import { KbdHint } from "@/components/kbd-hint";
 import { LocalTime } from "@/components/local-time";
 import { site } from "@/data/site";
@@ -41,9 +40,6 @@ export function Footer() {
           <KbdHint />
           <span>© 2026</span>
         </div>
-      </div>
-      <div className="pt-4">
-        <FooterStats />
       </div>
     </footer>
   );
