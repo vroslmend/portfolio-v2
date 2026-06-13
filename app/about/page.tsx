@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import { PriusTrigger } from "@/components/prius-trigger";
 import { Reveal } from "@/components/reveal";
 import { education, experience, site, toolbox } from "@/data/site";
@@ -125,14 +126,21 @@ export default function AboutPage() {
         <Reveal delay={0.08}>
           <p className="max-w-[60ch] select-none font-mono text-[12.5px] leading-[2.1] tracking-[0.04em] text-muted">
             {toolbox.map((t, i) => (
-              <span key={t}>
-                <span className="inline-block cursor-default transition-[color,transform] duration-300 hover:-translate-y-px hover:text-fg">
-                  {t}
+              // Each word+dot is one nowrap unit; the only breakable space is
+              // between units, so a wrapped line always starts with a word and
+              // never an orphaned dot (inline-block words otherwise let the
+              // browser break right before their trailing separator).
+              <Fragment key={t}>
+                <span className="whitespace-nowrap">
+                  <span className="inline-block cursor-default transition-[color,transform] duration-300 hover:-translate-y-px hover:text-fg">
+                    {t}
+                  </span>
+                  {i < toolbox.length - 1 && (
+                    <span className="text-faint"> ·</span>
+                  )}
                 </span>
-                {i < toolbox.length - 1 && (
-                  <span className="text-faint"> · </span>
-                )}
-              </span>
+                {i < toolbox.length - 1 && " "}
+              </Fragment>
             ))}
           </p>
         </Reveal>
