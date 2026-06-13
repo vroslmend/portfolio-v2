@@ -36,6 +36,9 @@
 
 html {
   background: var(--bg);
+  /* stop the browser's native overscroll bounce from fighting the
+     "past the end" reveal gesture */
+  overscroll-behavior-y: none;
 }
 
 body {

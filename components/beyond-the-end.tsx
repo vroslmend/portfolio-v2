@@ -1,27 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   animate,
   motion,
   useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
+  useSpring,
   useTransform,
 } from "motion/react";
 import { useLenis } from "lenis/react";
 import { EASE } from "@/lib/motion";
 
 const API = process.env.NEXT_PUBLIC_COUNTER_API_URL;
-// First DEADZONE px of overscroll do nothing ("the scroll just stops"); only
-// past that does the panel start to give. THRESHOLD is the full-reveal point.
-const DEADZONE = 160;
-const THRESHOLD = 650;
-const SNAP = 0.4; // release past this fraction of the reveal -> snaps open
+const PANEL = 248; // panel height (px) and the height it rises to
+const DEAD = 160; // overscroll (px) absorbed before anything happens
+const COMMIT = 300; // overscroll at which it snaps the rest of the way open
+const PEEK_CEIL = 0.38; // how far it peeks during the drag, before committing
+const CLOSE = 150; // once open, scroll up until pull drops here -> snap closed
+const IDLE_MS = 150; // a partial (uncommitted) peek springs back after this idle
 
 const QUIPS = [
-  "these numbers live in a tiny database in mumbai.",
-  "no cookies — just counting.",
+  "these numbers live in a tiny database in the cloud.",
+  "most people never scroll this far.",
   "the prius remains undefeated.",
   "thanks for scrolling past the end.",
   "you found the bottom of the world.",
@@ -29,15 +31,23 @@ const QUIPS = [
 
 type Counts = { visits: number; prius: number };
 
+// stable per-client random pick; SSR + hydration always see QUIPS[0]
+let clientQuip: string | null = null;
+const pickQuip = () =>
+  (clientQuip ??= QUIPS[Math.floor(Math.random() * QUIPS.length)]);
+const emptySubscribe = () => () => {};
+
 export function BeyondTheEnd() {
   const reduced = useReducedMotion();
   const lenis = useLenis();
   const [counts, setCounts] = useState<Counts | null>(null);
-  const [quip] = useState(() => QUIPS[Math.floor(Math.random() * QUIPS.length)]);
+  const quip = useSyncExternalStore(emptySubscribe, pickQuip, () => QUIPS[0]);
 
-  const progress = useMotionValue(0);
-  const y = useTransform(progress, [0, 1], ["100%", "0%"]);
-  const contentOpacity = useTransform(progress, [0.45, 1], [0, 1]);
+  // reveal 0..1 springed -> bursty wheel becomes smooth motion
+  const lift = useSpring(0, { stiffness: 210, damping: 22 });
+  const y = useTransform(lift, (v) => Math.max(0, PANEL * (1 - v)));
+  const contentOpacity = useTransform(lift, [0.2, 0.75], [0, 1]);
+  const contentY = useTransform(lift, [0, 1], [22, 0]); // content settles up as it rises
   const hintOpacity = useMotionValue(0);
 
   // ----- counter data (runs for everyone, independent of the reveal) -----
@@ -72,7 +82,7 @@ export function BeyondTheEnd() {
     };
   }, []);
 
-  // ----- numbers count up the first time the panel is pulled open -----
+  // ----- numbers count up the first time it's most of the way up -----
   const [visitsShown, setVisitsShown] = useState(0);
   const [priusShown, setPriusShown] = useState(0);
   const visitsMV = useMotionValue(0);
@@ -82,18 +92,15 @@ export function BeyondTheEnd() {
   useMotionValueEvent(priusMV, "change", (v) => setPriusShown(Math.round(v)));
 
   function tryCountUp() {
-    if (countedUp.current || !counts) return;
-    if (progress.get() <= 0.5) return;
+    if (countedUp.current || !counts || lift.get() < 0.4) return;
     countedUp.current = true;
-    animate(visitsMV, counts.visits, { duration: 1.1, ease: EASE });
-    animate(priusMV, counts.prius, { duration: 1.1, ease: EASE });
+    animate(visitsMV, counts.visits, { duration: 1, ease: EASE });
+    animate(priusMV, counts.prius, { duration: 1, ease: EASE });
   }
-  // fires whichever happens second: the panel opening, or the data arriving
-  useMotionValueEvent(progress, "change", () => tryCountUp());
+  useMotionValueEvent(lift, "change", () => tryCountUp());
   useEffect(() => {
     if (!counts) return;
     if (countedUp.current) {
-      // already revealed once — just reflect the latest values
       visitsMV.set(counts.visits);
       priusMV.set(counts.prius);
     } else {
@@ -102,54 +109,65 @@ export function BeyondTheEnd() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [counts]);
 
-  // ----- the overscroll gesture -----
+  // ----- the bottom-sheet snap gesture -----
   useEffect(() => {
     if (reduced || !API) return;
-    let over = 0;
+    let pull = 0; // accumulated overscroll (px)
+    let open = false; // committed-open state
     let engaged = false;
-    let snapTimer: ReturnType<typeof setTimeout> | undefined;
+    let idle: ReturnType<typeof setTimeout> | undefined;
 
     const docEl = document.documentElement;
     const atBottom = () =>
       window.scrollY + window.innerHeight >= docEl.scrollHeight - 2;
 
-    // raw overscroll -> reveal fraction, with the deadzone absorbed up front
-    const toProgress = (o: number) =>
-      Math.max(0, Math.min(1, (o - DEADZONE) / (THRESHOLD - DEADZONE)));
-
-    function apply(next: number) {
-      over = Math.max(0, Math.min(THRESHOLD, next));
-      progress.set(toProgress(over));
-      if (over === 0 && engaged) {
-        engaged = false;
-        lenis?.start();
-      }
-    }
-
     function engage() {
       if (!engaged) {
         engaged = true;
+        lenis?.stop(); // freeze the viewport at the bottom while pulling
         hintOpacity.set(0);
-        lenis?.stop();
       }
     }
-
-    function snap() {
-      const target = toProgress(over) > SNAP ? THRESHOLD : 0;
-      animate(over, target, {
-        duration: 0.5,
-        ease: EASE,
-        onUpdate: (v) => apply(v),
-      });
+    function release() {
+      engaged = false;
+      open = false;
+      pull = 0;
+      lift.set(0);
+      lenis?.start();
+    }
+    function update(delta: number) {
+      pull = Math.max(0, pull + delta);
+      if (open) {
+        pull = Math.min(pull, COMMIT);
+        if (pull <= CLOSE) {
+          release(); // scrolled back up enough -> snap closed
+          return;
+        }
+        lift.set(1);
+        return;
+      }
+      if (pull >= COMMIT) {
+        open = true; // crossed the commit point -> snap the rest of the way
+        pull = COMMIT;
+        lift.set(1);
+        return;
+      }
+      // peeking, not yet committed
+      const peek = ((pull - DEAD) / (COMMIT - DEAD)) * PEEK_CEIL;
+      lift.set(Math.max(0, peek));
+      if (pull <= 0) release();
     }
 
     function onWheel(e: WheelEvent) {
       if (!engaged && !(atBottom() && e.deltaY > 0)) return;
       engage();
       e.preventDefault();
-      apply(over + e.deltaY);
-      clearTimeout(snapTimer);
-      snapTimer = setTimeout(snap, 130);
+      update(e.deltaY);
+      clearTimeout(idle);
+      // a partial peek that you stop on springs back closed
+      idle = setTimeout(() => {
+        if (!open) release();
+      }, IDLE_MS);
     }
 
     function onScroll() {
@@ -165,11 +183,11 @@ export function BeyondTheEnd() {
       if (!engaged && !(atBottom() && dy > 0)) return;
       engage();
       e.preventDefault();
-      apply(over + dy);
+      update(dy);
       touchY = e.touches[0].clientY;
     }
     function onTouchEnd() {
-      if (engaged) snap();
+      if (!open) release(); // lift off mid-peek -> springs back closed
     }
 
     window.addEventListener("wheel", onWheel, { passive: false });
@@ -179,71 +197,78 @@ export function BeyondTheEnd() {
     window.addEventListener("touchend", onTouchEnd);
     onScroll();
     return () => {
-      clearTimeout(snapTimer);
+      clearTimeout(idle);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
-      lenis?.start();
+      lenis?.start(); // never leave Lenis paused
     };
-  }, [reduced, progress, hintOpacity, lenis]);
+  }, [reduced, lift, hintOpacity, lenis]);
 
   if (!API) return null;
 
+  const colophon = (
+    <motion.div
+      style={reduced ? undefined : { opacity: contentOpacity, y: contentY }}
+      className="flex flex-col items-center gap-5"
+    >
+      <span className="select-none font-mono text-[10px] uppercase tracking-[0.3em] text-faint">
+        past the end
+      </span>
+      <dl className="flex flex-col items-center gap-2.5 font-mono text-[13px] sm:flex-row sm:items-baseline sm:gap-10">
+        <div className="flex items-baseline gap-3">
+          <dt className="text-faint">visitors</dt>
+          <dd className="tabular-nums text-fg">
+            {(reduced ? (counts?.visits ?? 0) : visitsShown).toLocaleString()}
+          </dd>
+        </div>
+        <div className="flex items-baseline gap-3">
+          <dt className="text-faint">prius driven</dt>
+          <dd className="tabular-nums text-fg">
+            {(reduced ? (counts?.prius ?? 0) : priusShown).toLocaleString()}×
+          </dd>
+        </div>
+      </dl>
+      <p className="max-w-[34ch] text-center text-[13.5px] text-muted">{quip}</p>
+      <span className="accent-serif text-[20px] text-faint">ah.</span>
+    </motion.div>
+  );
+
+  if (reduced) {
+    return (
+      <section
+        aria-hidden
+        className="flex items-center justify-center border-t border-line px-6"
+        style={{ height: PANEL }}
+      >
+        {colophon}
+      </section>
+    );
+  }
+
   return (
     <>
-      {/* whisper hint at the very bottom — fades in only when you're at the end */}
       <motion.div
         aria-hidden
         style={{ opacity: hintOpacity }}
         className="pointer-events-none fixed inset-x-0 bottom-3 z-40 flex justify-center font-mono text-[11px] tracking-[0.4em] text-faint"
       >
-        ⌄
+        <motion.span
+          animate={{ y: [0, 3, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          ⌄
+        </motion.span>
       </motion.div>
 
-      {/* the panel beyond the end */}
       <motion.section
         aria-hidden
-        style={{ y }}
-        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-bg"
+        style={{ y, height: PANEL }}
+        className="fixed inset-x-0 bottom-0 z-90 flex flex-col items-center justify-center border-t border-line bg-bg px-6"
       >
-        <motion.div
-          style={{ opacity: contentOpacity }}
-          className="flex flex-col items-center gap-9"
-        >
-          <span className="select-none font-mono text-[10px] uppercase tracking-[0.3em] text-faint">
-            past the end
-          </span>
-
-          <dl className="flex flex-col gap-3 font-mono text-[13px]">
-            <div className="flex items-baseline justify-between gap-12">
-              <dt className="text-faint">visitors</dt>
-              <dd className="tabular-nums text-fg">
-                {visitsShown.toLocaleString()}
-              </dd>
-            </div>
-            <div className="flex items-baseline justify-between gap-12">
-              <dt className="text-faint">prius driven</dt>
-              <dd className="tabular-nums text-fg">
-                {priusShown.toLocaleString()}×
-              </dd>
-            </div>
-          </dl>
-
-          <p className="max-w-[34ch] text-center text-[14px] leading-relaxed text-muted">
-            {quip}
-          </p>
-
-          <span className="accent-serif text-[22px] text-faint">ah.</span>
-        </motion.div>
-
-        <motion.span
-          style={{ opacity: contentOpacity }}
-          className="absolute bottom-8 select-none font-mono text-[10px] tracking-[0.2em] text-faint"
-        >
-          scroll up to return
-        </motion.span>
+        {colophon}
       </motion.section>
     </>
   );
