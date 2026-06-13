@@ -1,6 +1,6 @@
 "use client";
 
-/** The about page's "Prius in the driveway" — click it and it drives by. */
+/** The about page's "2nd-gen Prius" — click it and it drives by. */
 export function PriusTrigger() {
   return (
     <button
@@ -9,7 +9,7 @@ export function PriusTrigger() {
       onClick={() => window.dispatchEvent(new Event("drive-prius"))}
       className="cursor-pointer border-b border-dashed border-faint transition-colors duration-300 hover:border-fg"
     >
-      Prius in the driveway
+      2nd-gen Prius
     </button>
   );
 }

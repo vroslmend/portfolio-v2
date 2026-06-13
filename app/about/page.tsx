@@ -65,10 +65,10 @@ export default function AboutPage() {
               off hours
             </span>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-              Gaming, sim racing, and cars — despite the <PriusTrigger />.
-              Karting with friends is where the lap-time tool came from. Away
-              from screens, it&apos;s the mountains and air you can actually
-              breathe.
+              Mostly video games with friends. Otherwise a lot of padel
+              I&apos;ve never gotten good at, some cycling, and pretending the
+              next new coffee place will be worth it. Forever defending the{" "}
+              <PriusTrigger /> as the best car ever.
             </p>
           </div>
         </Reveal>
