@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import {
+  AnimatePresence,
+  motion,
+  useInView,
+  useReducedMotion,
+} from "motion/react";
 import { EASE } from "@/lib/motion";
 
 type NowPlaying = {
@@ -11,7 +17,9 @@ type NowPlaying = {
   url?: string | null;
 };
 
-// three bars, each on its own cadence so they bob out of phase
+const PEEK_MS = 4000; // how long the one-time auto-peek stays open
+const CLOSE_MS = 1500; // delay before collapsing after the pointer leaves
+
 const BARS = [
   { duration: 0.9, delay: 0 },
   { duration: 1.15, delay: 0.18 },
@@ -21,13 +29,15 @@ const BARS = [
 function Equalizer() {
   const reduced = useReducedMotion();
   return (
-    <span aria-hidden className="flex h-3 items-end gap-[2px]">
+    <span aria-hidden className="flex h-3 shrink-0 items-end gap-[2px]">
       {BARS.map((bar, i) => (
         <motion.span
           key={i}
           className="block h-3 w-[2px] origin-bottom bg-current"
           initial={{ scaleY: 0.4 }}
-          animate={reduced ? { scaleY: 0.6 } : { scaleY: [0.35, 1, 0.45, 0.85, 0.35] }}
+          animate={
+            reduced ? { scaleY: 0.6 } : { scaleY: [0.35, 1, 0.45, 0.85, 0.35] }
+          }
           transition={
             reduced
               ? { duration: 0.3, ease: "easeOut" }
@@ -44,8 +54,142 @@ function Equalizer() {
   );
 }
 
+/** The track title + artist, crossfading when the song changes. */
+function TrackText({
+  playing,
+  trackKey,
+}: {
+  playing: NowPlaying;
+  trackKey: string;
+}) {
+  return (
+    <span className="relative block min-w-0 overflow-hidden">
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={trackKey}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -5 }}
+          transition={{ duration: 0.3, ease: EASE }}
+          className="block truncate"
+        >
+          {playing.title}
+          <span className="text-faint/60"> · </span>
+          {playing.artist}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+/** Always-shown line (every page except the home footer). */
+function StaticLine({
+  playing,
+  trackKey,
+}: {
+  playing: NowPlaying;
+  trackKey: string;
+}) {
+  return (
+    <motion.a
+      href={playing.url ?? "#"}
+      target="_blank"
+      rel="noreferrer"
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 6 }}
+      transition={{ duration: 0.45, ease: EASE }}
+      className="group absolute inset-x-0 bottom-full mb-4 flex select-none items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] text-faint"
+    >
+      <span className="shrink-0">listening to</span>
+      <span className="flex min-w-0 items-center gap-2.5 text-muted transition-colors duration-300 group-hover:text-fg">
+        <Equalizer />
+        <TrackText playing={playing} trackKey={trackKey} />
+      </span>
+    </motion.a>
+  );
+}
+
+/**
+ * Home footer: collapsed to just the bars. The label + song unfurl from the
+ * side once when the footer first scrolls into view, tuck away after a beat,
+ * and reopen on hover (closing again shortly after the pointer leaves).
+ */
+function PeekLine({
+  playing,
+  trackKey,
+}: {
+  playing: NowPlaying;
+  trackKey: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLAnchorElement>(null);
+  const inView = useInView(ref, { once: true });
+  const peeked = useRef(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // one-time auto-peek the first time it scrolls into view
+  useEffect(() => {
+    if (!inView || peeked.current) return;
+    peeked.current = true;
+    setOpen(true);
+    const t = setTimeout(() => setOpen(false), PEEK_MS);
+    return () => clearTimeout(t);
+  }, [inView]);
+
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+
+  return (
+    <motion.a
+      ref={ref}
+      href={playing.url ?? "#"}
+      target="_blank"
+      rel="noreferrer"
+      onMouseEnter={() => {
+        clearTimeout(closeTimer.current);
+        setOpen(true);
+      }}
+      onMouseLeave={() => {
+        closeTimer.current = setTimeout(() => setOpen(false), CLOSE_MS);
+      }}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 6 }}
+      transition={{ duration: 0.45, ease: EASE }}
+      className="absolute bottom-full left-0 mb-4 flex w-fit select-none items-center font-mono text-[11px] tracking-[0.12em] text-faint"
+    >
+      {/* only "listening to" collapses; the bars + song stay visible */}
+      <motion.span
+        initial={false}
+        animate={{ width: open ? "auto" : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.5, ease: EASE }}
+        className="overflow-hidden"
+      >
+        <span className="inline-block whitespace-nowrap pr-2.5">
+          listening to
+        </span>
+      </motion.span>
+      <span className="flex min-w-0 items-center gap-2.5 text-muted">
+        <Equalizer />
+        <TrackText playing={playing} trackKey={trackKey} />
+      </span>
+    </motion.a>
+  );
+}
+
 export function NowPlaying() {
+  const isHome = usePathname() === "/";
+  const reduced = useReducedMotion();
+  const [canHover, setCanHover] = useState(false);
   const [data, setData] = useState<NowPlaying | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const update = () => setCanHover(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -60,8 +204,6 @@ export function NowPlaying() {
     };
 
     load();
-    // poll often enough that stopping/skipping a track updates on its own,
-    // and refetch the moment the tab is focused again
     const id = setInterval(load, 20_000);
     const onVisible = () => {
       if (document.visibilityState === "visible") load();
@@ -75,47 +217,20 @@ export function NowPlaying() {
   }, []);
 
   const playing = data?.isPlaying ? data : null;
-  const trackKey = playing ? `${playing.title} ${playing.artist}` : "";
+  const trackKey = playing ? `${playing.title} ${playing.artist}` : "";
+
+  // the peek/hover treatment only makes sense where hover exists and motion is
+  // allowed; everywhere else (touch, reduced motion, other pages) stays static
+  const peek = isHome && canHover && !reduced;
 
   return (
     <AnimatePresence>
-      {playing && (
-        <motion.a
-          key="now-playing"
-          href={playing.url ?? "#"}
-          target="_blank"
-          rel="noreferrer"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 6 }}
-          transition={{ duration: 0.45, ease: EASE }}
-          // Absolute + anchored just above the footer's top border: showing or
-          // hiding it never reflows the footer (no shift) and it reserves no
-          // space when idle (no bulk). It lives in the footer's empty top padding.
-          className="group absolute inset-x-0 bottom-full mb-4 flex select-none items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] text-faint"
-        >
-          <span className="shrink-0">listening to</span>
-          <span className="flex min-w-0 items-center gap-2.5 text-muted transition-colors duration-300 group-hover:text-fg">
-            <Equalizer />
-            <span className="relative block min-w-0 overflow-hidden">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.span
-                  key={trackKey}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.3, ease: EASE }}
-                  className="block truncate"
-                >
-                  {playing.title}
-                  <span className="text-faint/60"> · </span>
-                  {playing.artist}
-                </motion.span>
-              </AnimatePresence>
-            </span>
-          </span>
-        </motion.a>
-      )}
+      {playing &&
+        (peek ? (
+          <PeekLine key="now-playing" playing={playing} trackKey={trackKey} />
+        ) : (
+          <StaticLine key="now-playing" playing={playing} trackKey={trackKey} />
+        ))}
     </AnimatePresence>
   );
 }
