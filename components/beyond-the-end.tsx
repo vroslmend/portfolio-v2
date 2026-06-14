@@ -58,12 +58,25 @@ export function BeyondTheEnd() {
   const lenis = useLenis();
   const [counts, setCounts] = useState<Counts | null>(null);
   const [revealed, setRevealed] = useState(false);
+  // kept out of the DOM entirely while resting (see below)
+  const [panelShown, setPanelShown] = useState(false);
   const quip = useSyncExternalStore(emptySubscribe, pickQuip, () => QUIPS[0]);
 
   // reveal 0..1 springed -> bursty wheel becomes smooth motion
   const lift = useSpring(0, { stiffness: 210, damping: 22 });
   const y = useTransform(lift, (v) => Math.max(0, PANEL * (1 - v)));
   const hintOpacity = useMotionValue(0);
+  // the panel's shadow + top hairline project upward, so while it sits off
+  // screen they'd bleed back into the viewport (a translucent band stuck to the
+  // bottom, worst on mobile Chrome as the address bar resizes the viewport).
+  // Fade them in with the reveal so nothing shows until the panel actually rises.
+  const edgeOpacity = useTransform(lift, [0, 0.12], [0, 1]);
+  // Mobile Chrome miscalculates a fixed + transformed element's position while
+  // the address bar hides/shows on scroll, so an off-screen-via-translate panel
+  // peeks above the toolbar mid-drag. visibility:hidden isn't enough (the
+  // composited transform layer still gets mispainted), so we drop it from the
+  // DOM with display:none until the gesture actually starts lifting it.
+  useMotionValueEvent(lift, "change", (v) => setPanelShown(v > 0.0005));
 
   // ----- counter data (runs for everyone, independent of the reveal) -----
   useEffect(() => {
@@ -285,9 +298,14 @@ export function BeyondTheEnd() {
 
       <motion.section
         aria-hidden
-        style={{ y, height: PANEL }}
-        className="fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center bg-panel px-6 shadow-[0_-30px_60px_-30px_var(--shadow-dialog)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-faint/50 before:to-transparent"
+        style={{ y, height: PANEL, display: panelShown ? undefined : "none" }}
+        className="fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center bg-panel px-6"
       >
+        <motion.div
+          aria-hidden
+          style={{ opacity: edgeOpacity }}
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-faint/50 to-transparent shadow-[0_-30px_60px_-30px_var(--shadow-dialog)]"
+        />
         <motion.div
           variants={container}
           initial="hidden"
