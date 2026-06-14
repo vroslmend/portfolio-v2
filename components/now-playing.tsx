@@ -178,16 +178,7 @@ function PeekLine({
 
 export function NowPlaying() {
   const reduced = useReducedMotion();
-  const [canHover, setCanHover] = useState(false);
   const [data, setData] = useState<NowPlaying | null>(null);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const update = () => setCanHover(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
 
   useEffect(() => {
     let active = true;
@@ -217,9 +208,9 @@ export function NowPlaying() {
   const playing = data?.isPlaying ? data : null;
   const trackKey = playing ? `${playing.title} ${playing.artist}` : "";
 
-  // the peek/hover treatment only makes sense where hover exists and motion is
-  // allowed; touch and reduced motion fall back to the static always-shown line
-  const peek = canHover && !reduced;
+  // peek/collapse everywhere except reduced motion (which keeps the static line).
+  // On touch the hover-reopen just doesn't fire, but the auto-peek + collapse do.
+  const peek = !reduced;
 
   return (
     <AnimatePresence>
