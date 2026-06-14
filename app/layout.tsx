@@ -43,13 +43,13 @@ const nastaliq = Noto_Nastaliq_Urdu({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "ammar hassan — software engineer",
+  title: "ammar hassan · software engineer",
   description:
-    "Software engineer in Lahore building for the web — multiplayer games, campus tools, and a few things with AI inside.",
+    "Software engineer in Lahore building for the web. Multiplayer games, campus tools, and a few things with AI inside.",
   openGraph: {
-    title: "ammar hassan — software engineer",
+    title: "ammar hassan · software engineer",
     description:
-      "Software engineer in Lahore building for the web — multiplayer games, campus tools, and a few things with AI inside.",
+      "Software engineer in Lahore building for the web. Multiplayer games, campus tools, and a few things with AI inside.",
     url: "/",
     siteName: "ammar hassan",
     locale: "en",
@@ -57,9 +57,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ammar hassan — software engineer",
+    title: "ammar hassan · software engineer",
     description:
-      "Software engineer in Lahore building for the web — multiplayer games, campus tools, and a few things with AI inside.",
+      "Software engineer in Lahore building for the web. Multiplayer games, campus tools, and a few things with AI inside.",
   },
   robots: { index: true, follow: true },
 };
