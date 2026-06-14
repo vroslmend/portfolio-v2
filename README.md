@@ -1,4 +1,4 @@
-# ammar hassan — personal site
+# ammar hassan · personal site
 
 My corner of the internet. Quiet, monochrome, and built with probably too much attention to detail.
 
