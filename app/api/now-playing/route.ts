@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 
-// Runs per request (never prerendered) so the "currently playing" track is live.
-export const dynamic = "force-dynamic";
+// Let Vercel's CDN serve one shared response for a few seconds, so a burst of
+// visitors (or fast polling) doesn't each hit Spotify. The route still runs
+// per request (the no-store fetches below keep it dynamic); this only governs
+// how long the edge may reuse a response.
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30",
+};
 
 const TOKEN_URL = "https://accounts.spotify.com/api/token";
 const NOW_PLAYING_URL =
@@ -43,7 +48,8 @@ async function getAccessToken(): Promise<string> {
   return cachedToken.value;
 }
 
-const notPlaying = () => NextResponse.json({ isPlaying: false });
+const notPlaying = () =>
+  NextResponse.json({ isPlaying: false }, { headers: CACHE_HEADERS });
 
 export async function GET() {
   if (!process.env.SPOTIFY_REFRESH_TOKEN) return notPlaying();
@@ -75,12 +81,15 @@ export async function GET() {
 
     if (!song?.is_playing || !song.item?.name) return notPlaying();
 
-    return NextResponse.json({
-      isPlaying: true,
-      title: song.item.name,
-      artist: (song.item.artists ?? []).map((a) => a.name).join(", "),
-      url: song.item.external_urls?.spotify ?? null,
-    });
+    return NextResponse.json(
+      {
+        isPlaying: true,
+        title: song.item.name,
+        artist: (song.item.artists ?? []).map((a) => a.name).join(", "),
+        url: song.item.external_urls?.spotify ?? null,
+      },
+      { headers: CACHE_HEADERS }
+    );
   } catch {
     // never leak internals; just fall back to the quiet footer
     return notPlaying();

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import {
   AnimatePresence,
   motion,
@@ -29,11 +28,11 @@ const BARS = [
 function Equalizer() {
   const reduced = useReducedMotion();
   return (
-    <span aria-hidden className="flex h-3 shrink-0 items-end gap-[2px]">
+    <span aria-hidden className="flex h-3 shrink-0 items-end gap-0.5">
       {BARS.map((bar, i) => (
         <motion.span
           key={i}
-          className="block h-3 w-[2px] origin-bottom bg-current"
+          className="block h-3 w-0.5 origin-bottom bg-current"
           initial={{ scaleY: 0.4 }}
           animate={
             reduced ? { scaleY: 0.6 } : { scaleY: [0.35, 1, 0.45, 0.85, 0.35] }
@@ -111,9 +110,9 @@ function StaticLine({
 }
 
 /**
- * Home footer: collapsed to just the bars. The label + song unfurl from the
- * side once when the footer first scrolls into view, tuck away after a beat,
- * and reopen on hover (closing again shortly after the pointer leaves).
+ * Collapsed to just the bars + song; the "listening to" label unfurls from the
+ * side once when the footer first scrolls into view, tucks away after a beat,
+ * and reopens on hover (closing shortly after the pointer leaves).
  */
 function PeekLine({
   playing,
@@ -156,20 +155,20 @@ function PeekLine({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 6 }}
       transition={{ duration: 0.45, ease: EASE }}
-      className="absolute bottom-full left-0 mb-4 flex w-fit select-none items-center font-mono text-[11px] tracking-[0.12em] text-faint"
+      className="group absolute bottom-full left-0 mb-4 flex w-fit max-w-full select-none items-center font-mono text-[11px] tracking-[0.12em] text-faint"
     >
       {/* only "listening to" collapses; the bars + song stay visible */}
       <motion.span
         initial={false}
         animate={{ width: open ? "auto" : 0, opacity: open ? 1 : 0 }}
         transition={{ duration: 0.5, ease: EASE }}
-        className="overflow-hidden"
+        className="shrink-0 overflow-hidden"
       >
         <span className="inline-block whitespace-nowrap pr-2.5">
           listening to
         </span>
       </motion.span>
-      <span className="flex min-w-0 items-center gap-2.5 text-muted">
+      <span className="flex min-w-0 items-center gap-2.5 text-muted transition-colors duration-300 group-hover:text-fg">
         <Equalizer />
         <TrackText playing={playing} trackKey={trackKey} />
       </span>
@@ -178,7 +177,6 @@ function PeekLine({
 }
 
 export function NowPlaying() {
-  const isHome = usePathname() === "/";
   const reduced = useReducedMotion();
   const [canHover, setCanHover] = useState(false);
   const [data, setData] = useState<NowPlaying | null>(null);
@@ -220,8 +218,8 @@ export function NowPlaying() {
   const trackKey = playing ? `${playing.title} ${playing.artist}` : "";
 
   // the peek/hover treatment only makes sense where hover exists and motion is
-  // allowed; everywhere else (touch, reduced motion, other pages) stays static
-  const peek = isHome && canHover && !reduced;
+  // allowed; touch and reduced motion fall back to the static always-shown line
+  const peek = canHover && !reduced;
 
   return (
     <AnimatePresence>
