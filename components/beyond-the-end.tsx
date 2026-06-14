@@ -77,6 +77,8 @@ export function BeyondTheEnd() {
   // composited transform layer still gets mispainted), so we drop it from the
   // DOM with display:none until the gesture actually starts lifting it.
   useMotionValueEvent(lift, "change", (v) => setPanelShown(v > 0.0005));
+  // lets the click-off scrim and Escape reuse the gesture's own close logic
+  const closeRef = useRef<() => void>(() => {});
 
   // ----- counter data (runs for everyone, independent of the reveal) -----
   useEffect(() => {
@@ -163,6 +165,8 @@ export function BeyondTheEnd() {
       setRevealed(false);
       lenis?.start();
     }
+    // expose close so a click off the panel / Escape can dismiss it too
+    closeRef.current = release;
     function update(delta: number, commit: number) {
       pull = Math.max(0, pull + delta);
       if (open) {
@@ -226,12 +230,16 @@ export function BeyondTheEnd() {
     function onTouchEnd() {
       if (!open) release(); // lift off mid-peek -> springs back closed
     }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && open) release();
+    }
 
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onTouchEnd);
+    window.addEventListener("keydown", onKey);
     onScroll();
     return () => {
       clearTimeout(idle);
@@ -240,6 +248,7 @@ export function BeyondTheEnd() {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("keydown", onKey);
       lenis?.start(); // never leave Lenis paused
     };
   }, [reduced, lift, hintOpacity, lenis]);
@@ -295,6 +304,14 @@ export function BeyondTheEnd() {
           ⌄
         </motion.span>
       </motion.div>
+
+      {revealed && (
+        <div
+          aria-hidden
+          onClick={() => closeRef.current()}
+          className="fixed inset-0 z-80 cursor-default"
+        />
+      )}
 
       <motion.section
         aria-hidden
