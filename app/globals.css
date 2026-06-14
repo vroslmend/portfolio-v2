@@ -217,23 +217,6 @@ body::after {
   display: none;
 }
 
-/* ---- command menu group entrance ---- */
-@keyframes cmdkIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
-[cmdk-group] {
-  animation: cmdkIn 0.45s var(--ease-out-expo) both;
-}
-[cmdk-group]:nth-of-type(2) {
-  animation-delay: 0.06s;
-}
-[cmdk-group]:nth-of-type(3) {
-  animation-delay: 0.12s;
-}
-
 /* ---- pulsing clock colon ---- */
 @keyframes blink {
   50% {
