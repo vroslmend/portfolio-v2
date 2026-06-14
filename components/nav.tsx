@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLenis } from "lenis/react";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Magnetic } from "@/components/magnetic";
@@ -15,6 +16,16 @@ const links = [
 
 export function Nav() {
   const pathname = usePathname();
+  const lenis = useLenis();
+
+  // clicking the link for the page you're already on smooth-scrolls to top
+  // (route changes are handled by SmoothScroll's scroll-to-top instead)
+  const toTopIfHere = (href: string) => (e: React.MouseEvent) => {
+    if (pathname === href) {
+      e.preventDefault();
+      lenis?.scrollTo(0, { duration: 1 });
+    }
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line/60 bg-bg/75 backdrop-blur-md transition-colors duration-500">
@@ -23,6 +34,7 @@ export function Nav() {
           <Link
             href="/"
             aria-label="ammar hassan — home"
+            onClick={toTopIfHere("/")}
             className="group block py-1 text-fg"
           >
             <Logo className="h-4.25 w-auto translate-y-[4.5px]" />
@@ -33,6 +45,7 @@ export function Nav() {
             <Magnetic key={l.href} strength={0.2}>
               <Link
                 href={l.href}
+                onClick={toTopIfHere(l.href)}
                 data-active={
                   pathname === l.href || pathname.startsWith(`${l.href}/`)
                 }

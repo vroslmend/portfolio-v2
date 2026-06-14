@@ -61,7 +61,14 @@ body {
 body::after {
   content: "";
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* Pin to the large viewport instead of inset:0 so the overlay never resizes
+     when Android Chrome's address bar collapses on the first scroll down —
+     that resize was mis-painting a translucent band across the bottom. */
+  height: 100vh;
+  height: 100lvh;
   z-index: 100;
   pointer-events: none;
   opacity: 0.035;

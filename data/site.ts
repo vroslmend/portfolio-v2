@@ -182,6 +182,8 @@ export const toolbox = [
   "Pandas / NumPy / Matplotlib",
   "MongoDB + Vector Search",
   "Gemini API",
+  "Spotify API",
+  "OAuth",
   "SQL",
   "Docker",
   "AWS",
