@@ -4,7 +4,7 @@ import { ReadingProgress } from "@/components/reading-progress";
 import { Reveal } from "@/components/reveal";
 
 export const metadata: Metadata = {
-  title: "a visitor counter, taken too seriously — ammar hassan",
+  title: "a visitor counter, taken too seriously · ammar hassan",
   description:
     "Why I wrapped a trivial visitor counter in Terraform, a keyless CI/CD pipeline, and atomic writes. A deliberately small take on the Cloud Resume Challenge.",
 };

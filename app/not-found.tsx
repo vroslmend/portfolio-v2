@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Reveal } from "@/components/reveal";
 
 export const metadata: Metadata = {
-  title: "404 — ammar hassan",
+  title: "404 · ammar hassan",
 };
 
 export default function NotFound() {

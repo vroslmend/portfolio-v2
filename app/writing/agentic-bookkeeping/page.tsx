@@ -4,7 +4,7 @@ import { ReadingProgress } from "@/components/reading-progress";
 import { Reveal } from "@/components/reveal";
 
 export const metadata: Metadata = {
-  title: "agents that do bookkeeping — ammar hassan",
+  title: "agents that do bookkeeping · ammar hassan",
   description:
     "An architecture for automating recurring bookkeeping work with AI agents, a deterministic core, and a hard human approval gate.",
 };
