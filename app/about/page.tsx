@@ -5,7 +5,7 @@ import { Reveal } from "@/components/reveal";
 import { education, experience, site, toolbox } from "@/data/site";
 
 export const metadata: Metadata = {
-  title: "about — ammar hassan",
+  title: "about · ammar hassan",
   description:
     "Developer from Lahore. Background, experience, education, and the tools I work with.",
 };

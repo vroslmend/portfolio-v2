@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "ammar hassan · software engineer";
+export const alt = "Putting my Spotify on the page, without overdoing it";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -28,23 +28,18 @@ export default function OpengraphImage() {
             color: "#686868",
           }}
         >
-          hello, i&apos;m
+          writing · june 2026
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-          <div
-            style={{
-              fontSize: 110,
-              fontWeight: 600,
-              letterSpacing: "-0.03em",
-              display: "flex",
-            }}
-          >
-            ammar hassan
-            <span style={{ color: "#686868" }}>.</span>
-          </div>
-          <div style={{ fontSize: 30, color: "#a1a1a1" }}>
-            software engineer · lahore, pakistan
-          </div>
+        <div
+          style={{
+            fontSize: 60,
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
+            lineHeight: 1.15,
+            width: 980,
+          }}
+        >
+          Putting my Spotify on the page, without overdoing it
         </div>
         <div
           style={{
@@ -57,8 +52,8 @@ export default function OpengraphImage() {
             color: "#686868",
           }}
         >
-          <div>multiplayer games · campus tools · ai products</div>
-          <div>github.com/vroslmend</div>
+          <div>ammar hassan</div>
+          <div>a build note</div>
         </div>
       </div>
     ),

@@ -28,7 +28,7 @@ export default function OpengraphImage() {
             color: "#686868",
           }}
         >
-          writing — june 2026
+          writing · june 2026
         </div>
         <div
           style={{

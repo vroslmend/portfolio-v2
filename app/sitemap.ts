@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/work",
     "/about",
     "/writing",
+    "/writing/now-playing",
     "/writing/visitor-counter",
     "/writing/agentic-bookkeeping",
   ];

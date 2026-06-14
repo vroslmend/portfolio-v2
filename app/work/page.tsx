@@ -5,7 +5,7 @@ import { WorkList } from "@/components/work/work-list";
 import { projects } from "@/data/site";
 
 export const metadata: Metadata = {
-  title: "work — ammar hassan",
+  title: "work · ammar hassan",
   description:
     "Selected projects: CUI Central, Check!, Imaginify, Karting Analysis, and other things built over the last few years.",
 };

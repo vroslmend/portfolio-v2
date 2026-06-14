@@ -3,11 +3,17 @@ import Link from "next/link";
 import { Reveal } from "@/components/reveal";
 
 export const metadata: Metadata = {
-  title: "writing — ammar hassan",
+  title: "writing · ammar hassan",
   description: "Occasional writing on systems, AI, and building things.",
 };
 
 const pieces = [
+  {
+    slug: "now-playing",
+    title: "Putting my Spotify on the page, without overdoing it",
+    tagline: "a build note",
+    date: "june 2026 · 4 min",
+  },
   {
     slug: "visitor-counter",
     title: "A visitor counter, taken too seriously",
