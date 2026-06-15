@@ -20,7 +20,8 @@ try {
 
 await mkdir(OUT, { recursive: true });
 
-const files = (await readdir(SRC)).filter((f) =>
+// recurse, so an extracted subfolder of images still gets picked up
+const files = (await readdir(SRC, { recursive: true })).filter((f) =>
   /\.(jpe?g|png|webp|tiff?)$/i.test(f),
 );
 
