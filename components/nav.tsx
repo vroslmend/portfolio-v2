@@ -12,6 +12,7 @@ const links = [
   { href: "/work", label: "work" },
   { href: "/about", label: "about" },
   { href: "/writing", label: "writing" },
+  { href: "/photos", label: "photos" },
 ];
 
 export function Nav() {
