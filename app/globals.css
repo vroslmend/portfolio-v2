@@ -55,6 +55,13 @@ body {
   color: var(--fg);
   font-family: var(--font-geist-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Cross-fade the background only after the page has mounted. The theme class
+   lands a beat after the first paint, so with this transition always-on the
+   initial settle fades in from the dark default and flashes black in light
+   mode. `theme-ready` (set on mount) holds the fade back until after that. */
+html.theme-ready body {
   transition: background-color 0.5s var(--ease-out-expo);
 }
 

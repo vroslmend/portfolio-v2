@@ -4,6 +4,10 @@ import { useEffect } from "react";
 
 export function PageEffects() {
   useEffect(() => {
+    // enable the background cross-fade only now that we've mounted, so the
+    // first paint can't fade in from the dark default and flash on refresh
+    document.documentElement.classList.add("theme-ready");
+
     const kbd = /mac|iphone|ipad/i.test(navigator.userAgent) ? "⌘ k" : "ctrl k";
     console.log(
       `%chello, fellow dev, view source all you like.\n%c→ github.com/vroslmend\n%cpsst: press ${kbd} and type 'prius'.`,
