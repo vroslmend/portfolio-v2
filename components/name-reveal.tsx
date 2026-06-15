@@ -35,7 +35,7 @@ export function NameReveal({
 
   return (
     <h1
-      className={`relative cursor-default select-none ${className ?? ""}`}
+      className={`relative w-fit cursor-default select-none ${className ?? ""}`}
       aria-label={`${text}.`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -43,7 +43,7 @@ export function NameReveal({
       {/* english layer (carries the entrance mask) */}
       <span
         aria-hidden
-        className="block overflow-hidden transition-opacity duration-500 ease-out-expo"
+        className="pointer-events-none block overflow-hidden transition-opacity duration-500 ease-out-expo"
         style={{ opacity: hovered ? 0 : 1 }}
       >
         {letters.map((ch, i) => (
@@ -75,12 +75,13 @@ export function NameReveal({
         </motion.span>
       </span>
 
-      {/* urdu layer (unclipped so nastaliq descenders can breathe) */}
+      {/* urdu layer (unclipped so nastaliq descenders can breathe). pointer-events
+          off so its overflow + hover transform never re-trigger the h1 hover */}
       <span
         aria-hidden
         dir="rtl"
         lang="ur"
-        className="font-urdu absolute inset-0 flex items-center justify-end gap-[0.3em] text-[0.94em] leading-none transition-[opacity,transform] duration-500 ease-out-expo"
+        className="font-urdu pointer-events-none absolute inset-0 flex items-center justify-end gap-[0.3em] text-[0.94em] leading-none transition-[opacity,transform] duration-500 ease-out-expo"
         style={{
           opacity: hovered ? 1 : 0,
           transform: hovered ? "translateY(-0.15em)" : "translateY(0.18em)",
