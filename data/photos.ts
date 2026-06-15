@@ -39,15 +39,17 @@ const photo = (image: StaticImageData, meta: Meta): Photo => ({
   ...meta,
 });
 
+// Order interleaves landscape/portrait so the justified rows get mixed widths
+// and the row seams don't line up into a grid. Reorder freely to taste.
 export const photos: Photo[] = [
-  photo(p01, { alt: "a photo i took", year: "2026" }),
-  photo(p02, { alt: "a photo i took", year: "2026" }),
-  photo(p03, { alt: "a photo i took", year: "2026" }),
-  photo(p04, { alt: "a photo i took", year: "2026" }),
-  photo(p05, { alt: "a photo i took", year: "2026" }),
-  photo(p06, { alt: "a photo i took", year: "2026" }),
-  photo(p07, { alt: "a photo i took", year: "2025" }),
-  photo(p08, { alt: "a photo i took", year: "2025" }),
-  photo(p09, { alt: "a photo i took", year: "2025" }),
-  photo(p10, { alt: "a photo i took", year: "2024" }),
+  photo(p01, { alt: "a photo i took", year: "2026" }), // landscape
+  photo(p05, { alt: "a photo i took", year: "2026" }), // portrait
+  photo(p03, { alt: "a photo i took", year: "2026" }), // landscape
+  photo(p02, { alt: "a photo i took", year: "2026" }), // portrait
+  photo(p04, { alt: "a photo i took", year: "2026" }), // landscape
+  photo(p09, { alt: "a photo i took", year: "2025" }), // portrait
+  photo(p06, { alt: "a photo i took", year: "2026" }), // landscape
+  photo(p10, { alt: "a photo i took", year: "2024" }), // portrait
+  photo(p07, { alt: "a photo i took", year: "2025" }), // landscape
+  photo(p08, { alt: "a photo i took", year: "2025" }), // landscape
 ];
