@@ -260,10 +260,14 @@ export function BeyondTheEnd() {
     return (
       <section
         aria-hidden
-        className="flex cursor-default select-none items-center justify-center border-t border-line bg-panel px-6"
+        className="panel-glass relative flex cursor-default select-none items-center justify-center border-t border-line bg-panel/80 px-6 backdrop-blur-md"
         style={{ height: PANEL }}
       >
-        <div className="flex flex-col items-center gap-5">
+        <div
+          aria-hidden
+          className="panel-bloom pointer-events-none absolute inset-0"
+        />
+        <div className="relative z-10 flex flex-col items-center gap-5">
           <span className="select-none font-mono text-[10px] uppercase tracking-[0.3em] text-faint">
             past the end
           </span>
@@ -316,8 +320,13 @@ export function BeyondTheEnd() {
       <motion.section
         aria-hidden
         style={{ y, height: PANEL, display: panelShown ? undefined : "none" }}
-        className="fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center bg-panel px-6"
+        className="panel-glass fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center bg-panel/80 px-6 backdrop-blur-md"
       >
+        <motion.div
+          aria-hidden
+          style={{ opacity: edgeOpacity }}
+          className="panel-bloom pointer-events-none absolute inset-0"
+        />
         <motion.div
           aria-hidden
           style={{ opacity: edgeOpacity }}
@@ -327,7 +336,7 @@ export function BeyondTheEnd() {
           variants={container}
           initial="hidden"
           animate={revealed ? "show" : "hidden"}
-          className="flex flex-col items-center gap-5"
+          className="relative z-10 flex flex-col items-center gap-5"
         >
           <motion.span
             variants={item}
