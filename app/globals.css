@@ -228,6 +228,22 @@ body::after {
   }
 }
 
+/* The fullscreen view: a transparent native <dialog> centred over a dimmed,
+   lightly blurred backdrop. The image itself carries no greyscale here. */
+.photo-dialog {
+  margin: auto;
+  max-width: min(1200px, 92vw);
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--fg);
+  overflow: visible;
+}
+.photo-dialog::backdrop {
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: blur(4px);
+}
+
 /* ---- "past the end" frosted glass ----
    The glassiness is the edge, not a glow: a crisp specular highlight catches
    light along the top rim (`panel-glass`), over a translucent + lightly blurred
