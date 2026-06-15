@@ -24,12 +24,7 @@ export default function PhotosPage() {
         </Reveal>
       </section>
 
-      {/* break out of the layout's max-w-3xl column so the wall has room */}
-      <div className="relative left-1/2 w-screen -translate-x-1/2 px-6">
-        <div className="mx-auto max-w-5xl">
-          <PhotoGallery photos={photos} />
-        </div>
-      </div>
+      <PhotoGallery photos={photos} />
     </div>
   );
 }

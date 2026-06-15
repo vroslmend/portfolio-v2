@@ -26,7 +26,7 @@ function renderPhoto(
         fill
         sizes={sizes}
         placeholder="blur"
-        quality={78}
+        quality={75}
         className="photo-img object-cover"
       />
     </div>
@@ -43,13 +43,13 @@ export function PhotoWall({
   return (
     <RowsPhotoAlbum
       photos={photos}
-      targetRowHeight={260}
-      spacing={10}
-      defaultContainerWidth={1024}
+      targetRowHeight={200}
+      spacing={8}
+      defaultContainerWidth={720}
       onClick={({ index }) => onOpen(index)}
       sizes={{
-        size: "1024px",
-        sizes: [{ viewport: "(max-width: 1080px)", size: "calc(100vw - 48px)" }],
+        size: "720px",
+        sizes: [{ viewport: "(max-width: 768px)", size: "calc(100vw - 48px)" }],
       }}
       render={{ image: renderPhoto }}
     />
