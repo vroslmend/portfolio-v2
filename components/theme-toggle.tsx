@@ -18,7 +18,7 @@ export function ThemeToggle() {
     const next = resolvedTheme === "dark" ? "light" : "dark";
 
     const doc = document as Document & {
-      startViewTransition?: (cb: () => void) => unknown;
+      startViewTransition?: (cb: () => void) => { finished: Promise<unknown> };
     };
 
     if (
@@ -46,7 +46,20 @@ export function ThemeToggle() {
     root.style.setProperty("--vt-y", `${cy}px`);
     root.style.setProperty("--vt-r", `${radius}px`);
 
-    doc.startViewTransition(() => setTheme(next));
+    const transition = doc.startViewTransition(() => setTheme(next));
+
+    // Chromium drops backdrop-filter while rendering the VT snapshot, so the
+    // glass nav's blur snaps back hard the instant the reveal ends. Ease it
+    // back to its resting blur(12px) instead — leaves the rest of the swap as
+    // is, just smooths that one jarring return.
+    transition.finished.then(() => {
+      document
+        .querySelector("header")
+        ?.animate(
+          [{ backdropFilter: "blur(0px)" }, { backdropFilter: "blur(12px)" }],
+          { duration: 450, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }
+        );
+    });
   }
 
   const isDark = mounted && resolvedTheme === "dark";
