@@ -208,6 +208,31 @@ body::after {
   filter: grayscale(0.94) contrast(1.02);
 }
 
+/* ---- photo wall ----
+   Grayscale at rest, blooming to full colour on hover/focus of the tile. A plain
+   filter transition (not backdrop-filter), so it animates cleanly. The hover
+   target carries `group/photo` (placed on the album's button in the wall). */
+.photo-img {
+  filter: grayscale(1) contrast(1.02);
+  transition:
+    filter 0.5s var(--ease-out-expo),
+    transform 0.5s var(--ease-out-expo);
+}
+.group\/photo:hover .photo-img,
+.group\/photo:focus-visible .photo-img {
+  filter: grayscale(0) contrast(1);
+  transform: scale(1.015);
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo-img {
+    transition: none;
+  }
+  .group\/photo:hover .photo-img,
+  .group\/photo:focus-visible .photo-img {
+    transform: none;
+  }
+}
+
 /* ---- "past the end" frosted glass ----
    The glassiness is the edge, not a glow: a crisp specular highlight catches
    light along the top rim (`panel-glass`), over a translucent + lightly blurred
