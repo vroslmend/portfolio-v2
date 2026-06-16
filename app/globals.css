@@ -176,16 +176,19 @@ body::after {
 
 /* ---- theme switch: circular view transition ----
    Driven by a CSS keyframe (not Element.animate's pseudoElement option) so it
-   runs in Firefox too, not just Chromium. The toggle sets --vt-x/y/r. */
-::view-transition-old(root),
-::view-transition-new(root) {
+   runs in Firefox too, not just Chromium. The toggle sets --vt-x/y/r and adds
+   the `theme-vt` class to <html> for the duration of the swap, so this circular
+   reveal applies ONLY to the theme toggle — other view transitions (the photo
+   morph) keep the browser's default root crossfade. */
+.theme-vt::view-transition-old(root),
+.theme-vt::view-transition-new(root) {
   mix-blend-mode: normal;
 }
-::view-transition-old(root) {
+.theme-vt::view-transition-old(root) {
   z-index: 1;
   animation: none; /* old theme stays put underneath */
 }
-::view-transition-new(root) {
+.theme-vt::view-transition-new(root) {
   z-index: 2;
   animation: theme-reveal 600ms cubic-bezier(0, 0, 0.2, 1);
 }
@@ -196,6 +199,36 @@ body::after {
   to {
     clip-path: circle(var(--vt-r, 150%) at var(--vt-x, 50%) var(--vt-y, 50%));
   }
+}
+
+/* The photo morph (scoped by `photo-vt` on <html>) animates ONLY the shared
+   `photo-hero` image. Freeze the root group so the rest of the page switches
+   instantly instead of crossfading — otherwise a tile still settling its lazy
+   load on the very first open flickers as the odd one out. */
+.photo-vt::view-transition-old(root),
+.photo-vt::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+/* Don't cross-fade the hero to an empty frame. The larger dialog image often
+   hasn't painted when the new snapshot is captured, so the default fade leaves
+   a gap where the dim scrim (bg-coloured) shows through — a flash. Holding both
+   frames opaque keeps the already-loaded tile image visible underneath until
+   the full image paints; the group still morphs size and position. */
+.photo-vt::view-transition-old(photo-hero),
+.photo-vt::view-transition-new(photo-hero) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+/* Keep the photo above the dim during the morph. In the live DOM the <img>
+   sits above the fixed scrim, but the view-transition groups capture in DOM
+   order (scrim first), which would otherwise paint the dim over the photo while
+   it morphs. Explicit z-index restores the intended stacking. */
+.photo-vt::view-transition-group(photo-scrim) {
+  z-index: 1;
+}
+.photo-vt::view-transition-group(photo-hero) {
+  z-index: 2;
 }
 
 /* ---- project preview images ----
@@ -217,9 +250,15 @@ body::after {
      on hover. No transform/layout change, so the image can never shift. */
   filter: grayscale(1) contrast(1.02) brightness(0.96);
   transition: filter 0.6s var(--ease-out-expo);
+  /* Hold a compositor layer permanently. Without it the filter transition
+     promotes the image to a fresh GPU layer on each hover, and the compositor
+     rasterises that new layer low-res first then sharp, so every hover flashes
+     a blur-to-sharp snap. A persistent layer is rasterised once at full res. */
+  will-change: filter;
 }
 .group\/photo:hover .photo-img,
-.group\/photo:focus-visible .photo-img {
+.group\/photo:focus-visible .photo-img,
+.photo-img.is-hero {
   filter: grayscale(0) contrast(1) brightness(1);
 }
 @media (prefers-reduced-motion: reduce) {
@@ -240,8 +279,21 @@ body::after {
   overflow: visible;
 }
 .photo-dialog::backdrop {
-  background: color-mix(in srgb, var(--bg) 86%, transparent);
-  backdrop-filter: blur(4px);
+  /* transparent: the dim is the .photo-scrim element instead, so it can ride
+     the view transition. The backdrop still catches click-to-close. */
+  background: transparent;
+}
+.photo-scrim {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* clicks fall through to the dialog's ::backdrop */
+  /* solid dim, no backdrop-filter: Chromium drops backdrop-filter while it
+     renders a view-transition snapshot, which flickered the whole wall. A flat
+     colour crossfades cleanly, so the dim can ride the morph. */
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  /* its own name → the browser crossfades it in/out in step with the photo
+     morph, instead of the wall snapping sharp the instant the dialog closes */
+  view-transition-name: photo-scrim;
 }
 
 /* ---- "past the end" frosted glass ----
