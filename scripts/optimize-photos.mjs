@@ -148,3 +148,28 @@ for (const e of await readdir(OUT)) {
 
 await writeFile(DATA_OUT, JSON.stringify(out, null, 2) + "\n");
 console.log(`✓ wrote ${DATA_OUT} (${Object.keys(out).length} entries)`);
+
+// Source files sitting in the seed folder but NOT in the manifest are never
+// built (the list is the gatekeeper). Print paste-ready stubs for them so
+// adding one is a copy, not a hunt for the exact base name. (Delete a source
+// from the seed folder if you never want it — then it stops showing here.)
+const unlisted = [...sources.keys()].filter((b) => !wanted.has(b)).sort();
+if (unlisted.length) {
+  console.log(
+    `\nℹ ${unlisted.length} source file(s) not in the manifest. To include one, paste its block into the manifest array in ${"data/photos.manifest.mjs"}:\n`,
+  );
+  for (const base of unlisted) {
+    const { width = 0, height = 0, orientation = 1 } = await sharp(
+      sources.get(base),
+    ).metadata();
+    const [w, h] = orientation >= 5 ? [height, width] : [width, height];
+    console.log(`  // ${w >= h ? "landscape" : "portrait"}`);
+    console.log(`  {`);
+    console.log(`    file: ${JSON.stringify(base)},`);
+    console.log(`    title: "",`);
+    console.log(`    location: "",`);
+    console.log(`    alt: "",`);
+    console.log(`  },`);
+  }
+  console.log("");
+}
