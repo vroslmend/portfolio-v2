@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { Reveal } from "@/components/reveal";
 import { PhotoWall } from "@/components/photos/photo-wall";
 import { PhotoLightbox } from "@/components/photos/photo-lightbox";
 import type { Photo } from "@/data/photos";
@@ -100,14 +99,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
 
   return (
     <>
-      <Reveal delay={0.18}>
-        <PhotoWall
-          photos={photos}
-          hero={hero}
-          expanded={expanded}
-          onOpen={go}
-        />
-      </Reveal>
+      <PhotoWall photos={photos} hero={hero} expanded={expanded} onOpen={go} />
       <PhotoLightbox
         photos={photos}
         index={expanded}
