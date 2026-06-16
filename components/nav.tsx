@@ -41,7 +41,7 @@ export function Nav() {
             <Logo className="h-4.25 w-auto translate-y-[4.5px]" />
           </Link>
         </Magnetic>
-        <div className="flex items-center gap-3.5 sm:gap-6">
+        <div className="flex items-center gap-4 sm:gap-6">
           {links.map((l) => (
             <Magnetic key={l.href} strength={0.2}>
               <Link
@@ -56,15 +56,18 @@ export function Nav() {
               </Link>
             </Magnetic>
           ))}
-          <Magnetic strength={0.2}>
-            <a
-              href={site.links.resume}
-              download="Ammar-Hassan_Resume.pdf"
-              className="u-link font-mono text-xs tracking-[0.08em] text-muted transition-colors duration-300 hover:text-fg"
-            >
-              resume
-            </a>
-          </Magnetic>
+          {/* resume lives in the footer on phones to keep the bar from crowding */}
+          <div className="hidden sm:block">
+            <Magnetic strength={0.2}>
+              <a
+                href={site.links.resume}
+                download="Ammar-Hassan_Resume.pdf"
+                className="u-link font-mono text-xs tracking-[0.08em] text-muted transition-colors duration-300 hover:text-fg"
+              >
+                resume
+              </a>
+            </Magnetic>
+          </div>
           <ThemeToggle />
         </div>
       </nav>

@@ -29,6 +29,19 @@ export function Footer() {
           >
             linkedin
           </a>
+          {/* shown only on phones, where it is dropped from the top nav. The
+              hide sits on a wrapper, not the .u-link itself: .u-link is an
+              unlayered rule and would otherwise win over the `sm:hidden`
+              utility's display. */}
+          <span className="sm:hidden">
+            <a
+              href={site.links.resume}
+              download="Ammar-Hassan_Resume.pdf"
+              className="u-link hover:text-fg"
+            >
+              resume
+            </a>
+          </span>
         </div>
         <LocalTime />
         <div className="flex items-baseline gap-5 font-mono text-[11px] tracking-[0.12em] text-faint">

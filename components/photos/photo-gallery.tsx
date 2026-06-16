@@ -39,6 +39,12 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
   // The caption fades in only once the morph has finished (see go), so it reads
   // as its own beat instead of being lost inside the image morph.
   const [settled, setSettled] = useState(true);
+  // How the dialog image is named for the next transition. "morph" shares
+  // `photo-hero` with the tile (open/close grow-shrink). "cross" gives it a
+  // non-shared, alternating name so stepping between two different photos
+  // dissolves in place instead of morphing one box into the other (which, with
+  // differing aspect ratios, looked like an awkward vertical collapse).
+  const [mode, setMode] = useState<"morph" | "cross">("morph");
   // True while a morph is mid-flight. Starting a second transition over a live
   // one makes the browser skip the first (a judder, worst in Firefox), so a
   // press during a morph jumps instantly instead of stacking transitions.
@@ -53,8 +59,13 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     const doc = document as Doc;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    const opening = expanded === null && next !== null;
+    const closing = next === null;
+    const stepping = expanded !== null && next !== null;
+
     if (!doc.startViewTransition || reduced || busy.current) {
       set(next);
+      if (next !== null) setMode(stepping ? "cross" : "morph");
       setSettled(true);
       return;
     }
@@ -70,30 +81,36 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
 
     // Opening: the old snapshot is captured before the callback runs, so the
     // target tile must already carry `photo-hero` — paint it synchronously now.
-    const opening = expanded === null && next !== null;
     if (opening) flushSync(() => setHero(next));
+    // Closing: a prior nav may have left the dialog on a `cross` name; restore
+    // `photo-hero` before the old snapshot so it morphs back to the tile.
+    if (closing) flushSync(() => setMode("morph"));
 
-    // Freeze the root group for the duration: only `photo-hero` should morph.
+    // Freeze the root group for the duration: only the photo should animate.
     // Otherwise the whole wall crossfades, and any tile still decoding its lazy
     // image on the first open flickers blur→full as the "odd one out".
     const root = document.documentElement;
     root.classList.add("photo-vt");
-    // Stepping between two open photos: let the hero crossfade (a slide-less
-    // dissolve between the two images) rather than the hard-hold open/close use.
-    const stepping = expanded !== null && next !== null;
-    if (stepping) root.classList.add("photo-vt-step");
 
-    const vt = doc.startViewTransition(() => flushSync(() => set(next)));
+    const vt = doc.startViewTransition(() =>
+      flushSync(() => {
+        setMode(stepping ? "cross" : "morph");
+        set(next);
+      }),
+    );
 
     // `catch` so a skipped/aborted transition still cleans up.
     vt.finished.catch(() => {}).finally(() => {
-      root.classList.remove("photo-vt", "photo-vt-step");
+      root.classList.remove("photo-vt");
       busy.current = false;
       setSettled(true); // morph done: let the caption rise in
+      // Now that the dialog is settled open, switch it to a cross name so the
+      // next left/right step dissolves cleanly between two different photos.
+      if (next !== null) setMode("cross");
       // Once fully closed, drop the name so no stray tile participates in an
       // unrelated transition (e.g. the theme toggle, which also uses View
       // Transitions).
-      if (next === null) setHero(null);
+      else setHero(null);
     });
   }
 
@@ -104,6 +121,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
         photos={photos}
         index={expanded}
         settled={settled}
+        mode={mode}
         onClose={() => go(null)}
         onNavigate={(i) => go(i)}
       />

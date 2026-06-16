@@ -7,16 +7,19 @@ export function PhotoLightbox({
   photos,
   index,
   settled,
+  mode,
   onClose,
   onNavigate,
 }: {
   photos: Photo[];
   index: number | null;
   settled: boolean;
+  mode: "morph" | "cross";
   onClose: () => void;
   onNavigate: (index: number) => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const touch = useRef<{ x: number; y: number } | null>(null);
   const photo = index === null ? null : photos[index];
   const prev =
     index === null ? 0 : (index - 1 + photos.length) % photos.length;
@@ -67,6 +70,19 @@ export function PhotoLightbox({
       onClick={(e) => {
         // a click landing on the dialog element itself is the backdrop
         if (e.target === ref.current) onClose();
+      }}
+      onTouchStart={(e) => {
+        touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }}
+      onTouchEnd={(e) => {
+        const start = touch.current;
+        touch.current = null;
+        if (!start || index === null) return;
+        const dx = e.changedTouches[0].clientX - start.x;
+        const dy = e.changedTouches[0].clientY - start.y;
+        // a deliberate horizontal swipe (not a tap, not a vertical drag)
+        if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
+        onNavigate(dx < 0 ? next : prev);
       }}
       className="photo-dialog"
     >
@@ -127,8 +143,16 @@ export function PhotoLightbox({
             width={photo.width}
             height={photo.height}
             decoding="async"
-            style={{ viewTransitionName: "photo-hero" }}
-            className="max-h-[82vh] w-auto rounded-sm object-contain"
+            // `photo-hero` (shared with the tile) for the open/close morph; an
+            // alternating non-shared name for steps so they dissolve in place
+            // rather than morphing one photo's box into the next.
+            style={{
+              viewTransitionName:
+                mode === "cross" && index !== null
+                  ? `photo-cross-${index % 2}`
+                  : "photo-hero",
+            }}
+            className="max-h-[82dvh] w-auto rounded-sm object-contain"
           />
           {(photo.title || photo.location || photo.year) && (
             <figcaption

@@ -35,9 +35,9 @@ function makeRender(
         initial={reduced ? false : { opacity: 0, y: 14 }}
         animate={reduced ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: EASE, delay: 0.08 + delay }}
-        onMouseEnter={() => {
-          // Decode the full-size image on hover so clicking opens straight into
-          // a decoded image with no first-paint hang (mainly a Firefox win).
+        onPointerEnter={() => {
+          // Decode the full-size image on hover/touch-contact so opening lands
+          // on a decoded image with no first-paint hang (mainly a Firefox win).
           const img = new window.Image();
           img.src = p.image.src;
           img.decode().catch(() => {});
@@ -77,7 +77,12 @@ export function PhotoWall({
   return (
     <RowsPhotoAlbum
       photos={photos}
-      targetRowHeight={200}
+      // Below ~640px the justified rows collapse into a rigid 2-up grid with
+      // every seam lined up. A target far taller than any single image forces
+      // one image per row instead: a clean, image-forward single column.
+      targetRowHeight={(containerWidth) =>
+        containerWidth < 640 ? containerWidth * 3 : 200
+      }
       spacing={8}
       defaultContainerWidth={720}
       onClick={({ index }) => onOpen(index)}

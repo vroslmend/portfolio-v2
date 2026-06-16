@@ -210,23 +210,24 @@ body::after {
   animation: none;
   mix-blend-mode: normal;
 }
-/* Open/close: hard-hold the hero (no cross-fade) so the single decoded image
-   scales cleanly as one piece. During a nav step (.photo-vt-step) we want the
-   opposite — a dissolve between two different photos — so the default
-   cross-fade is left in place there. */
-.photo-vt:not(.photo-vt-step)::view-transition-old(photo-hero),
-.photo-vt:not(.photo-vt-step)::view-transition-new(photo-hero) {
+/* Open/close hold the hero opaque (no cross-fade to an empty frame): the morph
+   is a single decoded image scaling as one piece. Steps use the `photo-cross-*`
+   names instead, which keep the default cross-fade (a dissolve in place). */
+.photo-vt::view-transition-old(photo-hero),
+.photo-vt::view-transition-new(photo-hero) {
   animation: none;
   mix-blend-mode: normal;
 }
-/* Keep the photo above the dim during the morph. In the live DOM the <img>
+/* Keep the photo above the dim during a transition. In the live DOM the <img>
    sits above the fixed scrim, but the view-transition groups capture in DOM
-   order (scrim first), which would otherwise paint the dim over the photo while
-   it morphs. Explicit z-index restores the intended stacking. */
+   order (scrim first), which would otherwise paint the dim over the photo.
+   Explicit z-index restores the stacking for both the morph and the steps. */
 .photo-vt::view-transition-group(photo-scrim) {
   z-index: 1;
 }
-.photo-vt::view-transition-group(photo-hero) {
+.photo-vt::view-transition-group(photo-hero),
+.photo-vt::view-transition-group(photo-cross-0),
+.photo-vt::view-transition-group(photo-cross-1) {
   z-index: 2;
 }
 
@@ -324,6 +325,13 @@ body::after {
 .photo-nav svg {
   width: 26px;
   height: 26px;
+}
+/* Touch devices navigate by swiping; the edge chevrons don't fit and overlap
+   the image, so hide them where there's no fine pointer. */
+@media (hover: none) and (pointer: coarse) {
+  .photo-nav {
+    display: none;
+  }
 }
 
 /* The caption is hidden through the morph and rises in once it settles (the
