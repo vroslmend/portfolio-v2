@@ -45,6 +45,8 @@ export function ThemeToggle() {
     root.style.setProperty("--vt-x", `${cx}px`);
     root.style.setProperty("--vt-y", `${cy}px`);
     root.style.setProperty("--vt-r", `${radius}px`);
+    // scope the circular reveal to this transition only (see globals.css)
+    root.classList.add("theme-vt");
 
     const transition = doc.startViewTransition(() => setTheme(next));
 
@@ -53,6 +55,7 @@ export function ThemeToggle() {
     // back to its resting blur(12px) instead — leaves the rest of the swap as
     // is, just smooths that one jarring return.
     transition.finished.then(() => {
+      root.classList.remove("theme-vt");
       document
         .querySelector("header")
         ?.animate(

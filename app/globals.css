@@ -176,16 +176,19 @@ body::after {
 
 /* ---- theme switch: circular view transition ----
    Driven by a CSS keyframe (not Element.animate's pseudoElement option) so it
-   runs in Firefox too, not just Chromium. The toggle sets --vt-x/y/r. */
-::view-transition-old(root),
-::view-transition-new(root) {
+   runs in Firefox too, not just Chromium. The toggle sets --vt-x/y/r and adds
+   the `theme-vt` class to <html> for the duration of the swap, so this circular
+   reveal applies ONLY to the theme toggle — other view transitions (the photo
+   morph) keep the browser's default root crossfade. */
+.theme-vt::view-transition-old(root),
+.theme-vt::view-transition-new(root) {
   mix-blend-mode: normal;
 }
-::view-transition-old(root) {
+.theme-vt::view-transition-old(root) {
   z-index: 1;
   animation: none; /* old theme stays put underneath */
 }
-::view-transition-new(root) {
+.theme-vt::view-transition-new(root) {
   z-index: 2;
   animation: theme-reveal 600ms cubic-bezier(0, 0, 0.2, 1);
 }
@@ -198,6 +201,36 @@ body::after {
   }
 }
 
+/* The photo morph (scoped by `photo-vt` on <html>) animates ONLY the shared
+   `photo-hero` image. Freeze the root group so the rest of the page switches
+   instantly instead of crossfading — otherwise a tile still settling its lazy
+   load on the very first open flickers as the odd one out. */
+.photo-vt::view-transition-old(root),
+.photo-vt::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+/* Open/close hold the hero opaque (no cross-fade to an empty frame): the morph
+   is a single decoded image scaling as one piece. Steps use the `photo-cross-*`
+   names instead, which keep the default cross-fade (a dissolve in place). */
+.photo-vt::view-transition-old(photo-hero),
+.photo-vt::view-transition-new(photo-hero) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+/* Keep the photo above the dim during a transition. In the live DOM the <img>
+   sits above the fixed scrim, but the view-transition groups capture in DOM
+   order (scrim first), which would otherwise paint the dim over the photo.
+   Explicit z-index restores the stacking for both the morph and the steps. */
+.photo-vt::view-transition-group(photo-scrim) {
+  z-index: 1;
+}
+.photo-vt::view-transition-group(photo-hero),
+.photo-vt::view-transition-group(photo-cross-0),
+.photo-vt::view-transition-group(photo-cross-1) {
+  z-index: 2;
+}
+
 /* ---- project preview images ----
    Pulled most of the way toward monochrome so screenshots sit inside the
    theme instead of shouting over it. A trace of color survives. */
@@ -206,6 +239,227 @@ body::after {
 }
 .light .preview-img {
   filter: grayscale(0.94) contrast(1.02);
+}
+
+/* ---- photo wall ----
+   Grayscale at rest, blooming to full colour on hover/focus of the tile. A plain
+   filter transition (not backdrop-filter), so it animates cleanly. The hover
+   target carries `group/photo` (placed on the album's button in the wall). */
+.photo-img {
+  /* paint-only: muted greyscale at rest, blooming to full colour + brightness
+     on hover. No transform/layout change, so the image can never shift. */
+  filter: grayscale(1) contrast(1.02) brightness(0.96);
+  transition: filter 0.6s var(--ease-out-expo);
+  /* Hold a compositor layer permanently. Without it the filter transition
+     promotes the image to a fresh GPU layer on each hover, and the compositor
+     rasterises that new layer low-res first then sharp, so every hover flashes
+     a blur-to-sharp snap. A persistent layer is rasterised once at full res. */
+  will-change: filter;
+}
+.group\/photo:hover .photo-img,
+.group\/photo:focus-visible .photo-img,
+.photo-img.is-hero {
+  filter: grayscale(0) contrast(1) brightness(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo-img {
+    transition: none;
+  }
+}
+
+/* The fullscreen view: a transparent native <dialog> centred over a dimmed,
+   lightly blurred backdrop. The image itself carries no greyscale here. */
+.photo-dialog {
+  margin: auto;
+  max-width: min(1200px, 92vw);
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--fg);
+  overflow: visible;
+}
+.photo-dialog::backdrop {
+  /* transparent: the dim is the .photo-scrim element instead, so it can ride
+     the view transition. The backdrop still catches click-to-close. */
+  background: transparent;
+}
+.photo-scrim {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* clicks fall through to the dialog's ::backdrop */
+  /* solid dim, no backdrop-filter: Chromium drops backdrop-filter while it
+     renders a view-transition snapshot, which flickered the whole wall. A flat
+     colour crossfades cleanly, so the dim can ride the morph. */
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  /* its own name → the browser crossfades it in/out in step with the photo
+     morph, instead of the wall snapping sharp the instant the dialog closes */
+  view-transition-name: photo-scrim;
+}
+
+/* Prev / next controls: quiet chevrons pinned to the screen edges, brightening
+   on hover. They are the touch affordance as well as the pointer one. */
+.photo-nav {
+  position: fixed;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--muted);
+  opacity: 0.6;
+  transition:
+    opacity 0.3s var(--ease-out-expo),
+    color 0.3s var(--ease-out-expo);
+}
+.photo-nav:hover {
+  opacity: 1;
+  color: var(--fg);
+}
+.photo-nav--prev {
+  left: clamp(8px, 3vw, 28px);
+}
+.photo-nav--next {
+  right: clamp(8px, 3vw, 28px);
+}
+.photo-nav svg {
+  width: 26px;
+  height: 26px;
+}
+/* Touch devices navigate by swiping; the edge chevrons don't fit and overlap
+   the image, so hide them where there's no fine pointer. */
+@media (hover: none) and (pointer: coarse) {
+  .photo-nav {
+    display: none;
+  }
+}
+
+/* The caption is hidden through the morph and rises in once it settles (the
+   gallery flips `is-settled` in the transition's `finished`), so it reads as
+   its own beat rather than a fade lost inside the image morph. */
+.photo-caption {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.55s var(--ease-out-expo),
+    transform 0.55s var(--ease-out-expo);
+}
+.photo-caption.is-settled {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo-nav {
+    transition: none;
+  }
+  .photo-caption {
+    transition: none;
+    transform: none;
+  }
+  .photo-extra,
+  .photo-extra-inner {
+    transition: none;
+  }
+}
+
+/* Fullscreen layout. The image and its caption are the only in-flow elements, so
+   the image never shifts when the spec panel toggles. .photo-extra is out of
+   flow: a panel below the caption on phones/tablets, a rail in the right margin
+   on desktop. */
+.photo-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+/* the main caption line + the ⓘ/× toggle, centred right under the image */
+.photo-cap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+.photo-info-btn {
+  color: var(--faint);
+  transition: color 0.3s var(--ease-out-expo);
+}
+.photo-info-btn:hover {
+  color: var(--muted);
+}
+.photo-info-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* the shooting-info spec sheet, out of flow; reveals by animating grid-rows
+   0fr→1fr (height eases without touching the image). */
+.photo-extra {
+  position: absolute;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.42s var(--ease-out-expo);
+  /* phones + tablets: below the caption, centred, growing into the margin */
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  margin-top: 0.7rem;
+  width: max-content;
+  max-width: min(90vw, 24rem);
+}
+.photo-extra.is-open {
+  grid-template-rows: 1fr;
+}
+.photo-extra-inner {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out-expo);
+}
+.photo-extra.is-open .photo-extra-inner {
+  opacity: 1;
+}
+
+/* quiet mono label/value pairs */
+.photo-details {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.3rem 1.4rem;
+  justify-content: center;
+  text-align: left;
+}
+.photo-details dt {
+  color: var(--faint);
+  text-align: right;
+}
+.photo-details dd {
+  margin: 0;
+  color: var(--muted);
+}
+
+@media (min-width: 64rem) {
+  /* desktop: the spec sheet becomes a rail beside the image's middle, in the
+     right margin. It's absolute, so the centred image + caption never move; it
+     expands about its own centre as the rows reveal. A gentle image max-width
+     guarantees the rail clears the viewport edge on smaller desktops. */
+  .photo-stage > img {
+    max-width: calc(100vw - 26rem);
+  }
+  .photo-extra {
+    top: 50%;
+    left: 100%;
+    right: auto;
+    margin: 0 0 0 2rem;
+    transform: translateY(-50%);
+    width: max-content;
+    max-width: 12rem;
+    text-align: left;
+  }
+  .photo-details {
+    justify-content: start;
+    column-gap: 0.9rem;
+  }
 }
 
 /* ---- "past the end" frosted glass ----
