@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { useLenis } from "lenis/react";
 import { PhotoWall } from "@/components/photos/photo-wall";
 import { PhotoLightbox } from "@/components/photos/photo-lightbox";
 import type { Photo } from "@/data/photos";
@@ -50,6 +51,19 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
   // press during a morph jumps instantly instead of stacking transitions.
   const busy = useRef(false);
 
+  // Lock background scroll while the lightbox is open. A native showModal()
+  // dialog does not stop the page scrolling behind it, and Lenis owns the
+  // scroll, so pause Lenis on open and resume on close (plain overflow:hidden
+  // would fight Lenis). Without this the wall drifts under the photo and the
+  // close morph can snap back to a tile that has moved.
+  const lenis = useLenis();
+  useEffect(() => {
+    if (!lenis) return;
+    if (expanded !== null) lenis.stop();
+    else lenis.start();
+    return () => lenis.start();
+  }, [lenis, expanded]);
+
   function set(next: number | null) {
     if (next !== null) setHero(next);
     setExpanded(next);
@@ -77,7 +91,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     // in every engine (without this, Firefox measures the unloaded image as
     // tiny on open). Race a timeout so a slow decode never stalls a click; the
     // hover/neighbour decodes usually mean it has already resolved.
-    if (next !== null) await decodeWithTimeout(photos[next].image.src, 500);
+    if (next !== null) await decodeWithTimeout(photos[next].src, 500);
 
     // Opening: the old snapshot is captured before the callback runs, so the
     // target tile must already carry `photo-hero` — paint it synchronously now.

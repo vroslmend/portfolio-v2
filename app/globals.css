@@ -356,6 +356,61 @@ body::after {
     transition: none;
     transform: none;
   }
+  .photo-cap-collapse {
+    transition: none;
+  }
+  .photo-cap-collapse > * {
+    transition: none;
+  }
+}
+
+/* Caption ↔ panel: each state is a collapsible row; animating grid-rows
+   0fr→1fr eases the caption's height so the centered image glides up/down
+   instead of snapping when the panel toggles. Exactly one is `is-open`. */
+.photo-cap-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.42s var(--ease-out-expo);
+}
+.photo-cap-collapse.is-open {
+  grid-template-rows: 1fr;
+}
+.photo-cap-collapse > * {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transition: opacity 0.28s var(--ease-out-expo);
+}
+.photo-cap-collapse.is-open > * {
+  opacity: 1;
+}
+
+/* the expanded "shooting info" grid: quiet mono label/value pairs */
+.photo-details {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.3rem 1.4rem;
+  justify-content: center;
+  text-align: left;
+}
+.photo-details dt {
+  color: var(--faint);
+  text-align: right;
+}
+.photo-details dd {
+  margin: 0;
+  color: var(--muted);
+}
+.photo-info-btn {
+  color: var(--faint);
+  transition: color 0.3s var(--ease-out-expo);
+}
+.photo-info-btn:hover {
+  color: var(--muted);
+}
+.photo-info-btn svg {
+  width: 15px;
+  height: 15px;
 }
 
 /* ---- "past the end" frosted glass ----

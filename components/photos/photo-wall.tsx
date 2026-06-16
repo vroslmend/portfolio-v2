@@ -39,17 +39,18 @@ function makeRender(
           // Decode the full-size image on hover/touch-contact so opening lands
           // on a decoded image with no first-paint hang (mainly a Firefox win).
           const img = new window.Image();
-          img.src = p.image.src;
+          img.src = p.src;
           img.decode().catch(() => {});
         }}
       >
         <Image
-          src={p.image}
+          src={p.src}
           alt={alt}
           title={title}
           fill
           sizes={sizes}
           placeholder="blur"
+          blurDataURL={p.blurDataURL}
           quality={75}
           // `is-hero` holds the active tile in colour so the morph stays
           // colour→colour; when it stops being the hero (close finishes) the
