@@ -3,11 +3,11 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import {
-  RowsPhotoAlbum,
+  MasonryPhotoAlbum,
   type RenderImageProps,
   type RenderImageContext,
 } from "react-photo-album";
-import "react-photo-album/rows.css";
+import "react-photo-album/masonry.css";
 import { EASE } from "@/lib/motion";
 import type { Photo } from "@/data/photos";
 
@@ -76,15 +76,16 @@ export function PhotoWall({
 }) {
   const reduced = useReducedMotion() ?? false;
   return (
-    <RowsPhotoAlbum
+    <MasonryPhotoAlbum
       photos={photos}
-      // Below ~640px the justified rows collapse into a rigid 2-up grid with
-      // every seam lined up. A target far taller than any single image forces
-      // one image per row instead: a clean, image-forward single column.
-      targetRowHeight={(containerWidth) =>
-        containerWidth < 640 ? containerWidth * 3 : 200
-      }
-      spacing={8}
+      // Masonry instead of justified rows: each photo keeps its own size and
+      // stacks into columns, so the bottoms stagger and the rigid cell grid is
+      // gone (a looser, scattered wall). One column below ~640px keeps the
+      // clean image-forward single column on phones; three on desktop.
+      columns={(containerWidth) => (containerWidth < 640 ? 1 : 3)}
+      // Tight gutters on desktop read as one hung wall; the single mobile column
+      // gets more air so each full-width photo lands on its own.
+      spacing={(containerWidth) => (containerWidth < 640 ? 16 : 8)}
       defaultContainerWidth={720}
       onClick={({ index }) => onOpen(index)}
       sizes={{
