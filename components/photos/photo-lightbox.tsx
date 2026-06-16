@@ -80,11 +80,10 @@ export function PhotoLightbox({
   }, [index, prev, next, photos]);
 
   const displayDate = photo ? formatDate(photo.date) : undefined;
-  // rows shown in the expanded grid, in order, skipping anything missing
-  const detailRows: [string, string][] = photo
+  // The main caption (title + location · date) stays under the image. The
+  // togglable panel is the EXIF spec sheet only — location/date are NOT repeated.
+  const specRows: [string, string][] = photo
     ? ([
-        ["location", photo.location],
-        ["date", displayDate],
         ["aperture", photo.aperture],
         ["shutter", photo.shutter],
         ["iso", photo.iso != null ? `ISO ${photo.iso}` : undefined],
@@ -92,11 +91,8 @@ export function PhotoLightbox({
         ["camera", photo.camera],
       ].filter(([, v]) => v) as [string, string][])
     : [];
-  // the ⓘ only appears when there's a spec sheet beyond the plain caption
-  const hasExif = !!(
-    photo &&
-    (photo.aperture || photo.shutter || photo.iso != null || photo.focal || photo.camera)
-  );
+  // the toggle only appears when there's a spec sheet beyond the plain caption
+  const hasExif = specRows.length > 0;
 
   return (
     <dialog
@@ -174,7 +170,13 @@ export function PhotoLightbox({
             </svg>
           </button>
 
-          <figure className="relative m-0 flex flex-col items-center gap-3">
+          {/* The stage keeps the image as the only in-flow element so it never
+              shifts when the panel toggles. The metadata block is positioned out
+              of flow: a bottom panel on phones/tablets (room below the width-
+              constrained image) and a fixed-width rail in the right margin on
+              desktop (room beside a full-height image). See .photo-stage /
+              .photo-meta in globals.css. */}
+          <figure className="photo-stage relative m-0">
           {/* a plain <img> of the full static webp (not next/image): the
               gallery decodes this exact URL before the morph so the image's
               dimensions are known when the transition snapshots it. Without it
@@ -198,45 +200,44 @@ export function PhotoLightbox({
             }}
             className="max-h-[82dvh] w-auto rounded-sm object-contain"
           />
+          {/* Main caption: title + location · date, always directly under the
+              image (centred). Constant height, in normal flow, so the image
+              never shifts. The ⓘ toggle sits with it and flips to a close (×). */}
           {(photo.title || photo.location || displayDate || hasExif) && (
             <figcaption
-              className={`photo-caption${settled ? " is-settled" : ""} select-none font-mono text-[11px] tracking-[0.08em] text-faint`}
+              className={`photo-cap photo-caption${settled ? " is-settled" : ""} select-none font-mono text-[11px] tracking-[0.08em] text-faint`}
             >
-              {/* Two collapsible rows, exactly one open at a time. Animating
-                  their height (grid-rows 0fr→1fr) instead of swapping outright
-                  means the caption grows/shrinks smoothly, so the centered image
-                  glides rather than snapping up when the panel opens. */}
-              <div className={`photo-cap-collapse${details ? "" : " is-open"}`}>
-                <div className="flex items-center justify-center gap-2">
-                  <span>
-                    {[
-                      photo.title,
-                      [photo.location, displayDate].filter(Boolean).join(" · "),
-                    ]
-                      .filter(Boolean)
-                      .join("  ·  ")}
-                  </span>
-                </div>
-              </div>
-              <div className={`photo-cap-collapse${details ? " is-open" : ""}`}>
-                <dl className="photo-details">
-                  {detailRows.map(([label, value]) => (
-                    <div key={label} className="contents">
-                      <dt>{label}</dt>
-                      <dd>{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
+              {(photo.title || photo.location || displayDate) && (
+                <span>
+                  {[
+                    photo.title,
+                    [photo.location, displayDate].filter(Boolean).join(" · "),
+                  ]
+                    .filter(Boolean)
+                    .join("  ·  ")}
+                </span>
+              )}
               {hasExif && (
-                <div className="mt-1.5 flex justify-center">
-                  <button
-                    type="button"
-                    className="photo-info-btn"
-                    aria-label="photo details"
-                    aria-expanded={details}
-                    onClick={() => setDetails((d) => !d)}
-                  >
+                <button
+                  type="button"
+                  className="photo-info-btn"
+                  aria-label={details ? "hide shooting info" : "shooting info"}
+                  aria-expanded={details}
+                  aria-controls="photo-spec-panel"
+                  onClick={() => setDetails((d) => !d)}
+                >
+                  {details ? (
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.25"
+                      strokeLinecap="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M7 7l10 10M17 7L7 17" />
+                    </svg>
+                  ) : (
                     <svg
                       viewBox="0 0 24 24"
                       fill="none"
@@ -250,10 +251,30 @@ export function PhotoLightbox({
                       <path d="M12 11v5" />
                       <path d="M12 8h.01" />
                     </svg>
-                  </button>
-                </div>
+                  )}
+                </button>
               )}
             </figcaption>
+          )}
+          {/* The shooting-info spec sheet. Positioned OUT of flow (so the image
+              is untouched): a rail in the right margin on desktop, a panel below
+              the caption on phones/tablets. Height animates via grid-rows. */}
+          {hasExif && (
+            <div
+              id="photo-spec-panel"
+              className={`photo-extra${details ? " is-open" : ""}`}
+            >
+              <div className="photo-extra-inner select-none font-mono text-[11px] tracking-[0.08em] text-faint">
+                <dl className="photo-details">
+                  {specRows.map(([label, value]) => (
+                    <div key={label} className="contents">
+                      <dt>{label}</dt>
+                      <dd>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
           )}
           </figure>
         </>

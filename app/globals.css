@@ -356,36 +356,72 @@ body::after {
     transition: none;
     transform: none;
   }
-  .photo-cap-collapse {
-    transition: none;
-  }
-  .photo-cap-collapse > * {
+  .photo-extra,
+  .photo-extra-inner {
     transition: none;
   }
 }
 
-/* Caption ↔ panel: each state is a collapsible row; animating grid-rows
-   0fr→1fr eases the caption's height so the centered image glides up/down
-   instead of snapping when the panel toggles. Exactly one is `is-open`. */
-.photo-cap-collapse {
+/* Fullscreen layout. The image and its caption are the only in-flow elements, so
+   the image never shifts when the spec panel toggles. .photo-extra is out of
+   flow: a panel below the caption on phones/tablets, a rail in the right margin
+   on desktop. */
+.photo-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+/* the main caption line + the ⓘ/× toggle, centred right under the image */
+.photo-cap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+.photo-info-btn {
+  color: var(--faint);
+  transition: color 0.3s var(--ease-out-expo);
+}
+.photo-info-btn:hover {
+  color: var(--muted);
+}
+.photo-info-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* the shooting-info spec sheet, out of flow; reveals by animating grid-rows
+   0fr→1fr (height eases without touching the image). */
+.photo-extra {
+  position: absolute;
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows 0.42s var(--ease-out-expo);
+  /* phones + tablets: below the caption, centred, growing into the margin */
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  margin-top: 0.7rem;
+  width: max-content;
+  max-width: min(90vw, 24rem);
 }
-.photo-cap-collapse.is-open {
+.photo-extra.is-open {
   grid-template-rows: 1fr;
 }
-.photo-cap-collapse > * {
+.photo-extra-inner {
   overflow: hidden;
   min-height: 0;
   opacity: 0;
-  transition: opacity 0.28s var(--ease-out-expo);
+  transition: opacity 0.3s var(--ease-out-expo);
 }
-.photo-cap-collapse.is-open > * {
+.photo-extra.is-open .photo-extra-inner {
   opacity: 1;
 }
 
-/* the expanded "shooting info" grid: quiet mono label/value pairs */
+/* quiet mono label/value pairs */
 .photo-details {
   display: grid;
   grid-template-columns: auto auto;
@@ -401,16 +437,29 @@ body::after {
   margin: 0;
   color: var(--muted);
 }
-.photo-info-btn {
-  color: var(--faint);
-  transition: color 0.3s var(--ease-out-expo);
-}
-.photo-info-btn:hover {
-  color: var(--muted);
-}
-.photo-info-btn svg {
-  width: 15px;
-  height: 15px;
+
+@media (min-width: 64rem) {
+  /* desktop: the spec sheet becomes a rail beside the image's middle, in the
+     right margin. It's absolute, so the centred image + caption never move; it
+     expands about its own centre as the rows reveal. A gentle image max-width
+     guarantees the rail clears the viewport edge on smaller desktops. */
+  .photo-stage > img {
+    max-width: calc(100vw - 26rem);
+  }
+  .photo-extra {
+    top: 50%;
+    left: 100%;
+    right: auto;
+    margin: 0 0 0 2rem;
+    transform: translateY(-50%);
+    width: max-content;
+    max-width: 12rem;
+    text-align: left;
+  }
+  .photo-details {
+    justify-content: start;
+    column-gap: 0.9rem;
+  }
 }
 
 /* ---- "past the end" frosted glass ----
