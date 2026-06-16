@@ -10,12 +10,15 @@ My corner of the internet. Quiet, monochrome, and built with probably too much a
 - [Tailwind CSS v4](https://tailwindcss.com)
 - [Motion](https://motion.dev) for animation, [Lenis](https://lenis.darkroom.engineering) for smooth scrolling
 - [cmdk](https://cmdk.paco.me) for the command menu (`⌘k` / `ctrl k`)
+- [react-photo-album](https://react-photo-album.com) for the photo wall
 - [next-themes](https://github.com/pacocoursey/next-themes) for the theme switch
 - [Vercel Analytics](https://vercel.com/analytics) for cookieless traffic numbers
 
 ## Design
 
 Dark by default, and monochrome at heart. Greys on near-black in the dark theme, warm off-whites in the light, with no real colour anywhere. The fonts are Geist and Geist Mono, with Newsreader in italic for the odd emphasized word and a Nastaliq face for my name in Urdu. There are a handful of easter eggs hidden in there too.
+
+There's a photos page as well, a wall of shots I've taken on a Pixel 5 that open fullscreen with a quiet morph and show how each one was taken.
 
 Down in the footer, a little equalizer shows whatever I'm playing on Spotify at the time, and stays quiet when I'm not. Scroll past the very bottom and a live visitor and Prius counter slides up. It's served by a small AWS backend that lives in its own repo, [cloud-visitor-counter](https://github.com/vroslmend/cloud-visitor-counter).
 
