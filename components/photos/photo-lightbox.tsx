@@ -6,14 +6,21 @@ import type { Photo } from "@/data/photos";
 export function PhotoLightbox({
   photos,
   index,
+  settled,
   onClose,
+  onNavigate,
 }: {
   photos: Photo[];
   index: number | null;
+  settled: boolean;
   onClose: () => void;
+  onNavigate: (index: number) => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const photo = index === null ? null : photos[index];
+  const prev =
+    index === null ? 0 : (index - 1 + photos.length) % photos.length;
+  const next = index === null ? 0 : (index + 1) % photos.length;
 
   useEffect(() => {
     const dialog = ref.current;
@@ -21,6 +28,30 @@ export function PhotoLightbox({
     if (index !== null && !dialog.open) dialog.showModal();
     if (index === null && dialog.open) dialog.close();
   }, [index]);
+
+  useEffect(() => {
+    if (index === null) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "ArrowRight") onNavigate((index! + 1) % photos.length);
+      if (e.key === "ArrowLeft")
+        onNavigate((index! - 1 + photos.length) % photos.length);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [index, photos.length, onNavigate]);
+
+  // Decode the neighbours ahead of time so a left/right step never pays the
+  // full-size decode on the morph frame (Firefox decodes on the main thread and
+  // visibly hangs the first time otherwise). `.decode()`, not just `.src`, is
+  // the point: downloading isn't enough, it has to be decoded before paint.
+  useEffect(() => {
+    if (index === null) return;
+    for (const i of [next, prev]) {
+      const img = new window.Image();
+      img.src = photos[i].image.src;
+      img.decode().catch(() => {});
+    }
+  }, [index, prev, next, photos]);
 
   return (
     <dialog
@@ -45,6 +76,44 @@ export function PhotoLightbox({
               view-transition-name and fade in/out in sync with the morph
               (the native ::backdrop is top-layer and can't be transitioned) */}
           <div className="photo-scrim" aria-hidden="true" />
+
+          <button
+            type="button"
+            className="photo-nav photo-nav--prev"
+            aria-label="previous photo"
+            onClick={() => onNavigate(prev)}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 6l-6 6 6 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="photo-nav photo-nav--next"
+            aria-label="next photo"
+            onClick={() => onNavigate(next)}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </button>
+
           <figure className="relative m-0 flex flex-col items-center gap-3">
           {/* a plain <img> of the full static webp (not next/image): the
               gallery decodes this exact URL before the morph so the image's
@@ -62,7 +131,9 @@ export function PhotoLightbox({
             className="max-h-[82vh] w-auto rounded-sm object-contain"
           />
           {(photo.title || photo.location || photo.year) && (
-            <figcaption className="select-none font-mono text-[11px] tracking-[0.08em] text-faint">
+            <figcaption
+              className={`photo-caption${settled ? " is-settled" : ""} select-none font-mono text-[11px] tracking-[0.08em] text-faint`}
+            >
               {[
                 photo.title,
                 [photo.location, photo.year].filter(Boolean).join(" · "),

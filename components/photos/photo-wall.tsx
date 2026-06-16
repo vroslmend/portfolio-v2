@@ -23,6 +23,13 @@ function makeRender(hero: number | null, expanded: number | null) {
       <div
         className="group/photo relative h-full w-full overflow-hidden rounded-sm bg-surface"
         style={{ aspectRatio: `${width} / ${height}` }}
+        onMouseEnter={() => {
+          // Decode the full-size image on hover so clicking opens straight into
+          // a decoded image with no first-paint hang (mainly a Firefox win).
+          const img = new window.Image();
+          img.src = p.image.src;
+          img.decode().catch(() => {});
+        }}
       >
         <Image
           src={p.image}

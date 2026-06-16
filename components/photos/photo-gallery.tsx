@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { Reveal } from "@/components/reveal";
 import { PhotoWall } from "@/components/photos/photo-wall";
@@ -37,22 +37,37 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
   // transition so the morph's "old" snapshot captures it on the tile, and the
   // dialog image takes the name only once the tile has released it.
   const [hero, setHero] = useState<number | null>(null);
+  // The caption fades in only once the morph has finished (see go), so it reads
+  // as its own beat instead of being lost inside the image morph.
+  const [settled, setSettled] = useState(true);
+  // True while a morph is mid-flight. Starting a second transition over a live
+  // one makes the browser skip the first (a judder, worst in Firefox), so a
+  // press during a morph jumps instantly instead of stacking transitions.
+  const busy = useRef(false);
+
+  function set(next: number | null) {
+    if (next !== null) setHero(next);
+    setExpanded(next);
+  }
 
   async function go(next: number | null) {
     const doc = document as Doc;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (!doc.startViewTransition || reduced) {
-      if (next !== null) setHero(next);
-      setExpanded(next);
+    if (!doc.startViewTransition || reduced || busy.current) {
+      set(next);
+      setSettled(true);
       return;
     }
+    busy.current = true;
+    setSettled(false); // hide the caption; it fades back in after the morph
 
     // Decode the destination image before the transition so its dimensions are
     // known when the dialog <img> mounts. The morph then snapshots it full size
     // in every engine (without this, Firefox measures the unloaded image as
-    // tiny on open). Race a short timeout so a slow decode never stalls a click.
-    if (next !== null) await decodeWithTimeout(photos[next].image.src, 300);
+    // tiny on open). Race a timeout so a slow decode never stalls a click; the
+    // hover/neighbour decodes usually mean it has already resolved.
+    if (next !== null) await decodeWithTimeout(photos[next].image.src, 500);
 
     // Opening: the old snapshot is captured before the callback runs, so the
     // target tile must already carry `photo-hero` — paint it synchronously now.
@@ -64,16 +79,18 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     // image on the first open flickers blur→full as the "odd one out".
     const root = document.documentElement;
     root.classList.add("photo-vt");
+    // Stepping between two open photos: let the hero crossfade (a slide-less
+    // dissolve between the two images) rather than the hard-hold open/close use.
+    const stepping = expanded !== null && next !== null;
+    if (stepping) root.classList.add("photo-vt-step");
 
-    const vt = doc.startViewTransition(() =>
-      flushSync(() => {
-        if (next !== null) setHero(next);
-        setExpanded(next);
-      }),
-    );
+    const vt = doc.startViewTransition(() => flushSync(() => set(next)));
 
-    vt.finished.then(() => {
-      root.classList.remove("photo-vt");
+    // `catch` so a skipped/aborted transition still cleans up.
+    vt.finished.catch(() => {}).finally(() => {
+      root.classList.remove("photo-vt", "photo-vt-step");
+      busy.current = false;
+      setSettled(true); // morph done: let the caption rise in
       // Once fully closed, drop the name so no stray tile participates in an
       // unrelated transition (e.g. the theme toggle, which also uses View
       // Transitions).
@@ -91,7 +108,13 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
           onOpen={go}
         />
       </Reveal>
-      <PhotoLightbox photos={photos} index={expanded} onClose={() => go(null)} />
+      <PhotoLightbox
+        photos={photos}
+        index={expanded}
+        settled={settled}
+        onClose={() => go(null)}
+        onNavigate={(i) => go(i)}
+      />
     </>
   );
 }

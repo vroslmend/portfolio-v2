@@ -210,13 +210,12 @@ body::after {
   animation: none;
   mix-blend-mode: normal;
 }
-/* Don't cross-fade the hero to an empty frame. The larger dialog image often
-   hasn't painted when the new snapshot is captured, so the default fade leaves
-   a gap where the dim scrim (bg-coloured) shows through — a flash. Holding both
-   frames opaque keeps the already-loaded tile image visible underneath until
-   the full image paints; the group still morphs size and position. */
-.photo-vt::view-transition-old(photo-hero),
-.photo-vt::view-transition-new(photo-hero) {
+/* Open/close: hard-hold the hero (no cross-fade) so the single decoded image
+   scales cleanly as one piece. During a nav step (.photo-vt-step) we want the
+   opposite — a dissolve between two different photos — so the default
+   cross-fade is left in place there. */
+.photo-vt:not(.photo-vt-step)::view-transition-old(photo-hero),
+.photo-vt:not(.photo-vt-step)::view-transition-new(photo-hero) {
   animation: none;
   mix-blend-mode: normal;
 }
@@ -294,6 +293,61 @@ body::after {
   /* its own name → the browser crossfades it in/out in step with the photo
      morph, instead of the wall snapping sharp the instant the dialog closes */
   view-transition-name: photo-scrim;
+}
+
+/* Prev / next controls: quiet chevrons pinned to the screen edges, brightening
+   on hover. They are the touch affordance as well as the pointer one. */
+.photo-nav {
+  position: fixed;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--muted);
+  opacity: 0.6;
+  transition:
+    opacity 0.3s var(--ease-out-expo),
+    color 0.3s var(--ease-out-expo);
+}
+.photo-nav:hover {
+  opacity: 1;
+  color: var(--fg);
+}
+.photo-nav--prev {
+  left: clamp(8px, 3vw, 28px);
+}
+.photo-nav--next {
+  right: clamp(8px, 3vw, 28px);
+}
+.photo-nav svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* The caption is hidden through the morph and rises in once it settles (the
+   gallery flips `is-settled` in the transition's `finished`), so it reads as
+   its own beat rather than a fade lost inside the image morph. */
+.photo-caption {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.55s var(--ease-out-expo),
+    transform 0.55s var(--ease-out-expo);
+}
+.photo-caption.is-settled {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo-nav {
+    transition: none;
+  }
+  .photo-caption {
+    transition: none;
+    transform: none;
+  }
 }
 
 /* ---- "past the end" frosted glass ----
