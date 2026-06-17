@@ -41,7 +41,7 @@ export function Nav() {
             <Logo className="h-4.25 w-auto translate-y-[4.5px]" />
           </Link>
         </Magnetic>
-        <div className="flex items-center gap-4 sm:gap-6">
+        <div className="flex items-center gap-3 sm:gap-6">
           {links.map((l) => (
             <Magnetic key={l.href} strength={0.2}>
               <Link
