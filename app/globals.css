@@ -296,6 +296,41 @@ body::after {
   view-transition-name: photo-scrim;
 }
 
+/* Loading hint: a quiet ring centred over the photo while the next full-res
+   image decodes on a cold cache. Faint and only fading in after a short beat so
+   a warm (instant) step never flashes it. Sits above the photo, below the nav. */
+.photo-spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 26px;
+  height: 26px;
+  translate: -50% -50%;
+  border-radius: 9999px;
+  border: 1.5px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  border-top-color: var(--muted);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  animation: photo-spin 0.75s linear infinite;
+  transition: opacity 0.3s var(--ease-out-expo);
+}
+.photo-spinner.is-loading {
+  /* delay the fade-in so an instant step never blinks the ring */
+  opacity: 1;
+  transition: opacity 0.3s var(--ease-out-expo) 0.18s;
+}
+@keyframes photo-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo-spinner {
+    animation-duration: 1.6s;
+  }
+}
+
 /* Prev / next controls: quiet chevrons pinned to the screen edges, brightening
    on hover. They are the touch affordance as well as the pointer one. */
 .photo-nav {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { warmPhoto } from "@/lib/preload-photos";
 import type { Photo } from "@/data/photos";
 
 const MONTHS = [
@@ -21,6 +22,7 @@ export function PhotoLightbox({
   index,
   settled,
   mode,
+  loading,
   onClose,
   onNavigate,
 }: {
@@ -28,6 +30,7 @@ export function PhotoLightbox({
   index: number | null;
   settled: boolean;
   mode: "morph" | "cross";
+  loading: boolean;
   onClose: () => void;
   onNavigate: (index: number) => void;
 }) {
@@ -67,16 +70,13 @@ export function PhotoLightbox({
   }, [index, photos.length, onNavigate]);
 
   // Decode the neighbours ahead of time so a left/right step never pays the
-  // full-size decode on the morph frame (Firefox decodes on the main thread and
-  // visibly hangs the first time otherwise). `.decode()`, not just `.src`, is
-  // the point: downloading isn't enough, it has to be decoded before paint.
+  // full-size decode on the morph frame. `warmPhoto` holds a strong reference in
+  // the shared cache, so the request can't be GC-cancelled before it finishes
+  // (a detached Image() can be), and the decoded frame stays warm for the step.
   useEffect(() => {
     if (index === null) return;
-    for (const i of [next, prev]) {
-      const img = new window.Image();
-      img.src = photos[i].src;
-      img.decode().catch(() => {});
-    }
+    warmPhoto(photos[next].src);
+    warmPhoto(photos[prev].src);
   }, [index, prev, next, photos]);
 
   const displayDate = photo ? formatDate(photo.date) : undefined;
@@ -132,6 +132,17 @@ export function PhotoLightbox({
               view-transition-name and fade in/out in sync with the morph
               (the native ::backdrop is top-layer and can't be transitioned) */}
           <div className="photo-scrim" aria-hidden="true" />
+
+          {/* quiet loading hint while the next full-res photo is still decoding
+              on a cold cache; the current photo stays put underneath until it's
+              ready. Hidden by default; .is-loading fades it in (see globals). */}
+          <div
+            className={`photo-spinner${loading ? " is-loading" : ""}`}
+            role="status"
+            aria-label="loading photo"
+            aria-hidden={!loading}
+          />
+
 
           <button
             type="button"

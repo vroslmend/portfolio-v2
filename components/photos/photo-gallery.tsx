@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { useLenis } from "lenis/react";
 import { PhotoWall } from "@/components/photos/photo-wall";
 import { PhotoLightbox } from "@/components/photos/photo-lightbox";
+import { preloadPhoto } from "@/lib/preload-photos";
 import type { Photo } from "@/data/photos";
 
 type ViewTransition = { finished: Promise<void> };
@@ -12,24 +13,8 @@ type Doc = Document & {
   startViewTransition?: (cb: () => void) => ViewTransition;
 };
 
-/** Resolve once `src` is decoded, or after `ms` so a slow load can't stall the
- *  morph. Decoding ahead of the transition means the image's dimensions are
- *  known when it mounts, so the morph snapshots it at full size in every engine
- *  (Firefox otherwise measures the unloaded image as tiny on open). */
-function decodeWithTimeout(src: string, ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      resolve();
-    };
-    const img = new window.Image();
-    img.src = src;
-    img.decode().then(finish, finish);
-    window.setTimeout(finish, ms);
-  });
-}
+type Connection = { saveData?: boolean; effectiveType?: string };
+type RIC = (cb: () => void, opts?: { timeout: number }) => number;
 
 export function PhotoGallery({ photos }: { photos: Photo[] }) {
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -46,10 +31,16 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
   // dissolves in place instead of morphing one box into the other (which, with
   // differing aspect ratios, looked like an awkward vertical collapse).
   const [mode, setMode] = useState<"morph" | "cross">("morph");
-  // True while a morph is mid-flight. Starting a second transition over a live
-  // one makes the browser skip the first (a judder, worst in Firefox), so a
-  // press during a morph jumps instantly instead of stacking transitions.
-  const busy = useRef(false);
+  // True while we're waiting for a destination image to decode before a step;
+  // drives the quiet loading hint so the wait never looks like a frozen UI.
+  const [loading, setLoading] = useState(false);
+  // Each go() takes the next ticket; a later press/close bumps it so an earlier
+  // op that is still awaiting its decode bails instead of swapping in late (the
+  // old `busy` flag let a mid-load press jump to a not-yet-loaded image).
+  const opSeq = useRef(0);
+  // Serialize view transitions: starting one over a live one makes the browser
+  // skip the first (a judder, worst in Firefox). Await the previous one first.
+  const vtDone = useRef<Promise<void>>(Promise.resolve());
 
   // Lock background scroll while the lightbox is open. A native showModal()
   // dialog does not stop the page scrolling behind it, and Lenis owns the
@@ -77,21 +68,46 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     const closing = next === null;
     const stepping = expanded !== null && next !== null;
 
-    if (!doc.startViewTransition || reduced || busy.current) {
+    const seq = ++opSeq.current;
+    if (closing) setLoading(false); // a close cancels any pending step's spinner
+
+    // Decode the destination BEFORE anything visible changes. The old code
+    // started the transition (which swapped the caption) and only then waited up
+    // to 500ms for a decode, so on a cold cache the title changed while the
+    // picture stayed put.
+    if (stepping) {
+      // Stepping: hold the current photo (and its caption) until the next is
+      // fully ready, with a quiet spinner over the wait. The timeout is only a
+      // safety valve for a request that hangs open forever — a genuine load
+      // error rejects decode() promptly, so an honest-but-slow image (poor
+      // connection) still resolves on its real decode and the caption flips only
+      // when the picture is actually there. Long, so slow links never flip early.
+      setLoading(true);
+      await preloadPhoto(photos[next!].src, 30000);
+      if (opSeq.current !== seq) return; // a newer press/close took over
+      setLoading(false);
+    } else if (next !== null) {
+      // Opening: keep it snappy — a short budget gives the morph real dimensions
+      // (Firefox otherwise measures the unloaded image as tiny), then the image
+      // fills in after the dialog is up rather than blocking the open on a cold
+      // full-size download.
+      await preloadPhoto(photos[next].src, 600);
+      if (opSeq.current !== seq) return;
+    }
+
+    if (!doc.startViewTransition || reduced) {
       set(next);
       if (next !== null) setMode(stepping ? "cross" : "morph");
       setSettled(true);
       return;
     }
-    busy.current = true;
-    setSettled(false); // hide the caption; it fades back in after the morph
 
-    // Decode the destination image before the transition so its dimensions are
-    // known when the dialog <img> mounts. The morph then snapshots it full size
-    // in every engine (without this, Firefox measures the unloaded image as
-    // tiny on open). Race a timeout so a slow decode never stalls a click; the
-    // hover/neighbour decodes usually mean it has already resolved.
-    if (next !== null) await decodeWithTimeout(photos[next].src, 500);
+    // Don't stack transitions: wait out any in-flight morph, then re-check we're
+    // still the latest op before committing.
+    await vtDone.current.catch(() => {});
+    if (opSeq.current !== seq) return;
+
+    setSettled(false); // hide the caption; it fades back in after the morph
 
     // Opening: the old snapshot is captured before the callback runs, so the
     // target tile must already carry `photo-hero` — paint it synchronously now.
@@ -112,21 +128,49 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
         set(next);
       }),
     );
+    // `catch` so a skipped/aborted transition still resolves the serializer.
+    vtDone.current = vt.finished.catch(() => {});
+    await vtDone.current;
 
-    // `catch` so a skipped/aborted transition still cleans up.
-    vt.finished.catch(() => {}).finally(() => {
-      root.classList.remove("photo-vt");
-      busy.current = false;
+    root.classList.remove("photo-vt");
+    if (opSeq.current === seq) {
       setSettled(true); // morph done: let the caption rise in
       // Now that the dialog is settled open, switch it to a cross name so the
       // next left/right step dissolves cleanly between two different photos.
       if (next !== null) setMode("cross");
-      // Once fully closed, drop the name so no stray tile participates in an
-      // unrelated transition (e.g. the theme toggle, which also uses View
-      // Transitions).
-      else setHero(null);
-    });
+    }
+    // Once fully closed, drop the name so no stray tile participates in an
+    // unrelated transition (e.g. the theme toggle, which also uses View
+    // Transitions).
+    if (next === null) setHero(null);
   }
+
+  // Idle-prefetch every full-resolution photo a moment after the wall mounts, so
+  // stepping through the lightbox is instant from the first open — but ONLY on a
+  // fast link. On a constrained connection bulk-loading 9 full images saturates
+  // the pipe and starves the one photo the user is actually waiting on (which
+  // defeats the wait-for-decode in go()). There the targeted neighbour-warm plus
+  // wait-for-decode cover stepping without hogging bandwidth. Also honours the
+  // data-saver hint. The lightbox stays correct on every link regardless.
+  useEffect(() => {
+    const conn = (navigator as { connection?: Connection }).connection;
+    if (conn?.saveData) return;
+    if (conn?.effectiveType && conn.effectiveType !== "4g") return;
+    const run = () => {
+      for (const p of photos) void preloadPhoto(p.src).catch(() => {});
+    };
+    const ric = (window as unknown as { requestIdleCallback?: RIC })
+      .requestIdleCallback;
+    if (ric) {
+      const id = ric(run, { timeout: 3000 });
+      return () =>
+        (
+          window as unknown as { cancelIdleCallback?: (id: number) => void }
+        ).cancelIdleCallback?.(id);
+    }
+    const t = window.setTimeout(run, 1500);
+    return () => window.clearTimeout(t);
+  }, [photos]);
 
   return (
     <>
@@ -136,6 +180,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
         index={expanded}
         settled={settled}
         mode={mode}
+        loading={loading}
         onClose={() => go(null)}
         onNavigate={(i) => go(i)}
       />
