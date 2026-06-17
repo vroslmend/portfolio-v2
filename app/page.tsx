@@ -25,8 +25,9 @@ export default function Home() {
           <Reveal delay={0.18}>
             <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
               I design and build for the web. I care about how things work, how
-              they look · and lately, whether they can{" "}
-              <span className="accent-serif">think</span>.
+              they look.{" "}
+              <span className="whitespace-nowrap">And lately,</span> whether
+              they can <span className="accent-serif">think</span>.
             </p>
           </Reveal>
           <Reveal delay={0.28}>
@@ -74,8 +75,8 @@ export default function Home() {
       <section>
         <Reveal>
           <p className="font-mono text-[12px] leading-relaxed tracking-[0.04em] text-faint">
-            <span className="text-muted">now</span> — {site.now}.{" "}
-            <span className="whitespace-nowrap opacity-60">· jun 2026</span>
+            <span className="text-muted">now</span>
+            <span className="opacity-60"> · jun 2026</span> — {site.now}.
           </p>
         </Reveal>
       </section>

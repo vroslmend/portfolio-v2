@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { useLenis } from "lenis/react";
 import { Command } from "cmdk";
 import {
   AnimatePresence,
@@ -22,9 +23,11 @@ export function CommandMenu() {
   const [denied, setDenied] = useState(false);
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
+  const lenis = useLenis();
 
   const q = search.trim().toLowerCase();
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const hlTop = useSpring(0, { stiffness: 620, damping: 46, mass: 0.7 });
   const hlHeight = useSpring(0, { stiffness: 620, damping: 46, mass: 0.7 });
@@ -56,6 +59,44 @@ export function CommandMenu() {
       window.removeEventListener("drive-prius", onDrivePrius);
     };
   }, []);
+
+  // Lock the page behind the panel. Lenis owns the scroll, so a plain overlay
+  // doesn't stop it drifting; pause Lenis while the menu is open (same pattern
+  // as the photo lightbox) and resume on close.
+  useEffect(() => {
+    if (!lenis) return;
+    if (open) lenis.stop();
+    else lenis.start();
+    return () => lenis.start();
+  }, [lenis, open]);
+
+  // Wheel drives the selection instead of scrolling the page. Accumulate the
+  // delta and, each time it crosses a step, nudge the highlight one row by
+  // replaying an arrow key into cmdk (which already handles wrap + scroll-into-
+  // view). Non-passive so we can swallow the scroll. The list still scrolls its
+  // selection into view as the highlight glides.
+  useEffect(() => {
+    if (!open) return;
+    let acc = 0;
+    const STEP = 50; // wheel delta per row; higher = calmer
+    function onWheel(e: WheelEvent) {
+      e.preventDefault();
+      acc += e.deltaY;
+      while (Math.abs(acc) >= STEP) {
+        const down = acc > 0;
+        acc -= down ? STEP : -STEP;
+        inputRef.current?.dispatchEvent(
+          new KeyboardEvent("keydown", {
+            key: down ? "ArrowDown" : "ArrowUp",
+            bubbles: true,
+            cancelable: true,
+          }),
+        );
+      }
+    }
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel);
+  }, [open]);
 
   // glide the box to the selected row. cmdk moves the data-selected attribute
   // imperatively (it fires no React event for keyboard nav in uncontrolled
@@ -147,6 +188,7 @@ export function CommandMenu() {
                 className="overflow-hidden rounded-lg border border-line bg-bg shadow-[0_24px_80px_-24px_var(--shadow-dialog)]"
               >
                 <Command.Input
+                  ref={inputRef}
                   autoFocus
                   value={search}
                   onValueChange={setSearch}
@@ -185,6 +227,12 @@ export function CommandMenu() {
                       onSelect={() => run(() => router.push("/about"))}
                     >
                       about
+                    </Item>
+                    <Item
+                      value="photos"
+                      onSelect={() => run(() => router.push("/photos"))}
+                    >
+                      photos
                     </Item>
                   </Group>
 
