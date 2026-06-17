@@ -53,7 +53,15 @@ export function PhotoLightbox({
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    if (index !== null && !dialog.open) dialog.showModal();
+    if (index !== null && !dialog.open) {
+      dialog.showModal();
+      // showModal() auto-focuses the first focusable child (the prev chevron),
+      // and since arrow/swipe nav is handled at the window level focus never
+      // leaves it, so Chrome leaves a :focus-visible ring stuck on the left
+      // arrow. Move focus to the dialog itself: the controls stay reachable by
+      // Tab (ring shows then, correctly) without one being pinned on open.
+      dialog.focus();
+    }
     if (index === null && dialog.open) dialog.close();
   }, [index]);
 
@@ -80,6 +88,12 @@ export function PhotoLightbox({
   }, [index, prev, next, photos]);
 
   const displayDate = photo ? formatDate(photo.date) : undefined;
+  // Caption pieces as discrete segments so they wrap as whole units (each stays
+  // on one line; the date drops cleanly to the next line, centred, when space is
+  // tight) instead of breaking mid-phrase like one long string did.
+  const capSegs = photo
+    ? [photo.title, photo.location, displayDate].filter(Boolean)
+    : [];
   // The main caption (title + location · date) stays under the image. The
   // togglable panel is the EXIF spec sheet only — location/date are NOT repeated.
   const specRows: [string, string][] = photo
@@ -97,6 +111,7 @@ export function PhotoLightbox({
   return (
     <dialog
       ref={ref}
+      tabIndex={-1}
       aria-label="photo viewer"
       onCancel={(e) => {
         // Esc is two-stage: close the details panel first if it's open. Either
@@ -214,20 +229,22 @@ export function PhotoLightbox({
           {/* Main caption: title + location · date, always directly under the
               image (centred). Constant height, in normal flow, so the image
               never shifts. The ⓘ toggle sits with it and flips to a close (×). */}
-          {(photo.title || photo.location || displayDate || hasExif) && (
+          {(capSegs.length > 0 || hasExif) && (
             <figcaption
               className={`photo-cap photo-caption${settled ? " is-settled" : ""} select-none font-mono text-[11px] tracking-[0.08em] text-faint`}
             >
-              {(photo.title || photo.location || displayDate) && (
-                <span>
-                  {[
-                    photo.title,
-                    [photo.location, displayDate].filter(Boolean).join(" · "),
-                  ]
-                    .filter(Boolean)
-                    .join("  ·  ")}
+              {capSegs.map((seg, i) => (
+                <span key={i} className="photo-cap-seg">
+                  {/* the · rides with the segment it precedes (nowrap), so a
+                      wrap leaves no dangling dot at the end of the line above */}
+                  {i > 0 && (
+                    <span className="photo-cap-sep" aria-hidden="true">
+                      ·
+                    </span>
+                  )}
+                  {seg}
                 </span>
-              )}
+              ))}
               {hasExif && (
                 <button
                   type="button"

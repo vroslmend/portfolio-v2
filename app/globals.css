@@ -283,6 +283,12 @@ body::after {
      the view transition. The backdrop still catches click-to-close. */
   background: transparent;
 }
+.photo-dialog:focus,
+.photo-dialog:focus-visible {
+  /* the dialog takes focus on open (so no nav chevron keeps a stuck ring); it's
+     a container, not a control, so it needs no visible outline of its own */
+  outline: none;
+}
 .photo-scrim {
   position: fixed;
   inset: 0;
@@ -408,12 +414,23 @@ body::after {
   align-items: center;
   gap: 0.85rem;
 }
-/* the main caption line + the ⓘ/× toggle, centred right under the image */
+/* the main caption line + the ⓘ/× toggle, centred right under the image. Wraps
+   as whole segments (title / location / date each stay on one line), so a tight
+   width drops the date to its own centred line instead of breaking mid-phrase. */
 .photo-cap {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
+  gap: 0.2rem 0.5rem;
+  max-width: min(92vw, 40rem);
+}
+.photo-cap-seg {
+  white-space: nowrap;
+}
+.photo-cap-sep {
+  color: var(--faint);
+  margin-right: 0.4em; /* gap after the dot; the flex column-gap spaces before it */
 }
 .photo-info-btn {
   color: var(--faint);
