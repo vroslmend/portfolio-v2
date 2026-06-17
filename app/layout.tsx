@@ -87,8 +87,11 @@ export default function RootLayout({
             </main>
             <Footer />
             <BeyondTheEnd />
+            {/* inside SmoothScroll so it can reach the Lenis context and pause
+                page scroll while open (it's a fixed overlay, unaffected by the
+                root-mode Lenis, which transforms nothing) */}
+            <CommandMenu />
           </SmoothScroll>
-          <CommandMenu />
           <PageEffects />
         </ThemeProvider>
         <Analytics />

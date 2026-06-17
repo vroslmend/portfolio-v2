@@ -86,7 +86,7 @@ export default function AboutPage() {
                   {e.company}
                 </h3>
                 <p className="pt-1 font-mono text-[11px] tracking-[0.08em] text-faint">
-                  {e.role.toLowerCase()} · {e.period}
+                  {e.role.toLowerCase()} · <span className="whitespace-nowrap">{e.period}</span>
                 </p>
               </div>
               <p className="max-w-[60ch] text-[14.5px] leading-[1.8] text-muted text-pretty">
@@ -113,7 +113,7 @@ export default function AboutPage() {
                     in the row's flex, restoring the original layout. */}
                 <span className="flex items-baseline justify-between gap-x-6 sm:contents">
                   <span className="text-sm text-muted">{e.degree}</span>
-                  <span className="font-mono text-[11px] text-faint">
+                  <span className="font-mono text-[11px] text-faint whitespace-nowrap">
                     {e.period}
                   </span>
                 </span>

@@ -74,9 +74,9 @@ export default function Home() {
 
       <section>
         <Reveal>
-          <p className="max-w-[58ch] font-mono text-[12px] leading-relaxed tracking-[0.04em] text-faint text-pretty">
-            <span className="text-muted">now</span>
-            <span className="opacity-60"> · jun 2026</span> — {site.now}.
+          <p className="font-mono text-[12px] leading-relaxed tracking-[0.04em] text-faint text-pretty">
+            <span className="text-muted">now</span> — {site.now}
+            <span className="opacity-50"> · jun 2026</span>
           </p>
         </Reveal>
       </section>
