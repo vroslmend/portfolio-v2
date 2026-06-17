@@ -18,8 +18,7 @@ export default function PhotosPage() {
         </Reveal>
         <Reveal delay={0.12}>
           <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-            Shots I&apos;ve taken and liked, all on a Pixel 5. Mostly nature,
-            cars, and whatever looked good at the time.
+            Pictures pleasing to the eye. All shot on a Pixel 5.
           </p>
         </Reveal>
       </section>

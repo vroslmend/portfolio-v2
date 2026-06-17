@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function WorkPage() {
   const featured = projects.filter((p) => p.featured);
-  const smaller = projects.filter((p) => !p.featured);
+  const rest = projects.filter((p) => !p.featured);
 
   return (
     <div className="flex flex-col gap-20 pb-8">
@@ -27,10 +27,10 @@ export default function WorkPage() {
       <section className="flex flex-col gap-6">
         <Reveal>
           <h2 className="select-none font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
-            smaller things
+            more work
           </h2>
         </Reveal>
-        <WorkList projects={smaller} />
+        <WorkList projects={rest} />
       </section>
     </div>
   );
