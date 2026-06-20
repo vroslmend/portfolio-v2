@@ -577,22 +577,14 @@ body::after {
   transition-delay: 0.1s; /* follow the height, don't race it */
 }
 
-/* the tiny album thumbnail: identical bloom mechanics to .photo-img — muted
-   greyscale at rest, full colour when its row (.group/listening) is hovered.
-   will-change holds a persistent compositor layer so the filter transition
-   never flashes blur→sharp on the first hover. */
-.album-thumb {
-  filter: grayscale(1) contrast(1.02) brightness(0.96);
-  transition: filter 0.6s var(--ease-out-expo);
-  will-change: filter;
+/* the soundwave settles in a beat after the track text, as its own moment */
+.listening-panel .sound-wave {
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out-expo);
 }
-.group\/listening:hover .album-thumb {
-  filter: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .album-thumb {
-    transition: none;
-  }
+.listening-panel.is-open .sound-wave {
+  opacity: 1;
+  transition-delay: 0.24s;
 }
 
 /* ---- command menu ---- */

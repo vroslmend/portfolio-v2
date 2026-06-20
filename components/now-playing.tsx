@@ -9,13 +9,12 @@ import {
 } from "motion/react";
 import { EASE } from "@/lib/motion";
 import { Equalizer } from "@/components/equalizer";
+import {
+  useNowPlaying,
+  type NowPlayingData,
+} from "@/components/now-playing-provider";
 
-type NowPlaying = {
-  isPlaying: boolean;
-  title?: string;
-  artist?: string;
-  url?: string | null;
-};
+type NowPlaying = NowPlayingData;
 
 const PEEK_MS = 4000; // how long the one-time auto-peek stays open
 const CLOSE_MS = 1500; // delay before collapsing after the pointer leaves
@@ -145,32 +144,7 @@ function PeekLine({
 
 export function NowPlaying() {
   const reduced = useReducedMotion();
-  const [data, setData] = useState<NowPlaying | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      try {
-        const res = await fetch("/api/now-playing");
-        const json = (await res.json()) as NowPlaying;
-        if (active) setData(json);
-      } catch {
-        /* ignore — the line just stays hidden */
-      }
-    };
-
-    load();
-    const id = setInterval(load, 20_000);
-    const onVisible = () => {
-      if (document.visibilityState === "visible") load();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      active = false;
-      clearInterval(id);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, []);
+  const data = useNowPlaying();
 
   const playing = data?.isPlaying ? data : null;
   const trackKey = playing ? `${playing.title} ${playing.artist}` : "";
