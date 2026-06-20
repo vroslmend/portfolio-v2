@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Fragment } from "react";
-import { PriusTrigger } from "@/components/prius-trigger";
 import { Reveal } from "@/components/reveal";
+import { OffHours } from "@/components/off-hours";
 import { education, experience, site, toolbox } from "@/data/site";
 
 export const metadata: Metadata = {
@@ -59,19 +59,7 @@ export default function AboutPage() {
             </p>
           </div>
         </Reveal>
-        <Reveal delay={0.12}>
-          <div className="group grid gap-x-10 gap-y-2 border-y border-line py-6 transition-colors duration-500 hover:border-faint sm:grid-cols-[1fr_2fr]">
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-faint transition-colors duration-500 group-hover:text-muted">
-              off hours
-            </span>
-            <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-              Mostly video games with friends. Otherwise a lot of padel
-              I&apos;ve never gotten good at, some cycling, and pretending the
-              next new coffee place will be worth it. Forever defending the{" "}
-              <PriusTrigger /> as the best car ever.
-            </p>
-          </div>
-        </Reveal>
+        <OffHours />
       </section>
 
       <section className="flex flex-col gap-6">

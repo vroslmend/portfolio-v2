@@ -8,50 +8,16 @@ import {
   useReducedMotion,
 } from "motion/react";
 import { EASE } from "@/lib/motion";
+import { Equalizer } from "@/components/equalizer";
+import {
+  useNowPlaying,
+  type NowPlayingData,
+} from "@/components/now-playing-provider";
 
-type NowPlaying = {
-  isPlaying: boolean;
-  title?: string;
-  artist?: string;
-  url?: string | null;
-};
+type NowPlaying = NowPlayingData;
 
 const PEEK_MS = 4000; // how long the one-time auto-peek stays open
 const CLOSE_MS = 1500; // delay before collapsing after the pointer leaves
-
-const BARS = [
-  { duration: 0.9, delay: 0 },
-  { duration: 1.15, delay: 0.18 },
-  { duration: 0.8, delay: 0.36 },
-];
-
-function Equalizer() {
-  const reduced = useReducedMotion();
-  return (
-    <span aria-hidden className="flex h-3 shrink-0 items-end gap-0.5">
-      {BARS.map((bar, i) => (
-        <motion.span
-          key={i}
-          className="block h-3 w-0.5 origin-bottom bg-current"
-          initial={{ scaleY: 0.4 }}
-          animate={
-            reduced ? { scaleY: 0.6 } : { scaleY: [0.35, 1, 0.45, 0.85, 0.35] }
-          }
-          transition={
-            reduced
-              ? { duration: 0.3, ease: "easeOut" }
-              : {
-                  duration: bar.duration,
-                  delay: bar.delay,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }
-          }
-        />
-      ))}
-    </span>
-  );
-}
 
 /** The track title + artist, crossfading when the song changes. */
 function TrackText({
@@ -178,32 +144,7 @@ function PeekLine({
 
 export function NowPlaying() {
   const reduced = useReducedMotion();
-  const [data, setData] = useState<NowPlaying | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      try {
-        const res = await fetch("/api/now-playing");
-        const json = (await res.json()) as NowPlaying;
-        if (active) setData(json);
-      } catch {
-        /* ignore — the line just stays hidden */
-      }
-    };
-
-    load();
-    const id = setInterval(load, 20_000);
-    const onVisible = () => {
-      if (document.visibilityState === "visible") load();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      active = false;
-      clearInterval(id);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, []);
+  const data = useNowPlaying();
 
   const playing = data?.isPlaying ? data : null;
   const trackKey = playing ? `${playing.title} ${playing.artist}` : "";

@@ -11,10 +11,23 @@ const CACHE_HEADERS = {
 const TOKEN_URL = "https://accounts.spotify.com/api/token";
 const NOW_PLAYING_URL =
   "https://api.spotify.com/v1/me/player/currently-playing";
+const RECENTLY_PLAYED_URL =
+  "https://api.spotify.com/v1/me/player/recently-played?limit=1";
 
 // Spotify access tokens last ~1h. Cache it across warm invocations so we don't
 // burn a token refresh on every poll — the real perf lever for this endpoint.
 let cachedToken: { value: string; expiresAt: number } | null = null;
+
+type SpotifyImage = { url?: string; width?: number; height?: number };
+type SpotifyTrack =
+  | {
+      name?: string;
+      artists?: { name: string }[];
+      album?: { images?: SpotifyImage[] };
+      external_urls?: { spotify?: string };
+    }
+  | null
+  | undefined;
 
 async function getAccessToken(): Promise<string> {
   if (cachedToken && Date.now() < cachedToken.expiresAt) {
@@ -48,8 +61,42 @@ async function getAccessToken(): Promise<string> {
   return cachedToken.value;
 }
 
+// Spotify returns album images largest-first; the last is the smallest. The
+// About thumbnail is tiny, so grab the smallest to keep the payload light.
+function smallestImage(images?: SpotifyImage[]): string | null {
+  if (!images || images.length === 0) return null;
+  return images[images.length - 1]?.url ?? null;
+}
+
+// One shared builder so currently-playing and recently-played return the same
+// shape (the only difference is the isPlaying flag).
+function trackResponse(isPlaying: boolean, track: SpotifyTrack) {
+  return NextResponse.json(
+    {
+      isPlaying,
+      title: track?.name ?? null,
+      artist: (track?.artists ?? []).map((a) => a.name).join(", ") || null,
+      albumArt: smallestImage(track?.album?.images),
+      url: track?.external_urls?.spotify ?? null,
+    },
+    { headers: CACHE_HEADERS }
+  );
+}
+
 const notPlaying = () =>
   NextResponse.json({ isPlaying: false }, { headers: CACHE_HEADERS });
+
+async function fetchRecentlyPlayed(token: string) {
+  const res = await fetch(RECENTLY_PLAYED_URL, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  const data = (await res.json()) as { items?: { track?: SpotifyTrack }[] };
+  const track = data.items?.[0]?.track;
+  if (!track?.name) return null;
+  return trackResponse(false, track);
+}
 
 export async function GET() {
   if (!process.env.SPOTIFY_REFRESH_TOKEN) return notPlaying();
@@ -61,37 +108,28 @@ export async function GET() {
       cache: "no-store",
     });
 
-    // 204 = nothing playing right now
-    if (res.status === 204) return notPlaying();
     // token rejected: drop the cache so the next poll re-refreshes
     if (res.status === 401) {
       cachedToken = null;
       return notPlaying();
     }
-    if (!res.ok) return notPlaying();
 
-    const song = (await res.json()) as {
-      is_playing?: boolean;
-      item?: {
-        name?: string;
-        artists?: { name: string }[];
-        external_urls?: { spotify?: string };
-      } | null;
-    };
+    // actively playing a track → return it live
+    if (res.ok && res.status !== 204) {
+      const song = (await res.json()) as {
+        is_playing?: boolean;
+        item?: SpotifyTrack;
+      };
+      if (song?.is_playing && song.item?.name) {
+        return trackResponse(true, song.item);
+      }
+    }
 
-    if (!song?.is_playing || !song.item?.name) return notPlaying();
-
-    return NextResponse.json(
-      {
-        isPlaying: true,
-        title: song.item.name,
-        artist: (song.item.artists ?? []).map((a) => a.name).join(", "),
-        url: song.item.external_urls?.spotify ?? null,
-      },
-      { headers: CACHE_HEADERS }
-    );
+    // nothing live (204, paused, or no item) → fall back to the last track
+    const recent = await fetchRecentlyPlayed(token);
+    return recent ?? notPlaying();
   } catch {
-    // never leak internals; just fall back to the quiet footer
+    // never leak internals; just fall back to the quiet "not playing"
     return notPlaying();
   }
 }

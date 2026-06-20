@@ -550,6 +550,43 @@ body::after {
   transition: opacity 0.4s var(--ease-out-expo);
 }
 
+/* ---- about listening panel ----
+   Disclosure mechanics identical to .photo-extra (grid-rows 0fr→1fr), plus the
+   .photo-caption "rise as its own beat": the track line follows the height in
+   rather than racing it. The global reduced-motion rule zeroes both. */
+.listening-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.42s var(--ease-out-expo);
+}
+.listening-panel.is-open {
+  grid-template-rows: 1fr;
+}
+.listening-panel-inner {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.45s var(--ease-out-expo),
+    transform 0.45s var(--ease-out-expo);
+}
+.listening-panel.is-open .listening-panel-inner {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.1s; /* follow the height, don't race it */
+}
+
+/* the soundwave settles in a beat after the track text, as its own moment */
+.listening-panel .sound-wave {
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out-expo);
+}
+.listening-panel.is-open .sound-wave {
+  opacity: 1;
+  transition-delay: 0.24s;
+}
+
 /* ---- command menu ---- */
 [cmdk-input]:focus-visible {
   outline: none;
