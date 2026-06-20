@@ -550,6 +550,51 @@ body::after {
   transition: opacity 0.4s var(--ease-out-expo);
 }
 
+/* ---- about listening panel ----
+   Disclosure mechanics identical to .photo-extra (grid-rows 0fr→1fr), plus the
+   .photo-caption "rise as its own beat": the track line follows the height in
+   rather than racing it. The global reduced-motion rule zeroes both. */
+.listening-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.42s var(--ease-out-expo);
+}
+.listening-panel.is-open {
+  grid-template-rows: 1fr;
+}
+.listening-panel-inner {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.45s var(--ease-out-expo),
+    transform 0.45s var(--ease-out-expo);
+}
+.listening-panel.is-open .listening-panel-inner {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.1s; /* follow the height, don't race it */
+}
+
+/* the tiny album thumbnail: identical bloom mechanics to .photo-img — muted
+   greyscale at rest, full colour when its row (.group/listening) is hovered.
+   will-change holds a persistent compositor layer so the filter transition
+   never flashes blur→sharp on the first hover. */
+.album-thumb {
+  filter: grayscale(1) contrast(1.02) brightness(0.96);
+  transition: filter 0.6s var(--ease-out-expo);
+  will-change: filter;
+}
+.group\/listening:hover .album-thumb {
+  filter: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .album-thumb {
+    transition: none;
+  }
+}
+
 /* ---- command menu ---- */
 [cmdk-input]:focus-visible {
   outline: none;
