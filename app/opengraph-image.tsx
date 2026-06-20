@@ -57,7 +57,7 @@ export default function OpengraphImage() {
             color: "#686868",
           }}
         >
-          <div>multiplayer games · campus tools · ai products</div>
+          <div>web · ai · cloud</div>
           <div>github.com/vroslmend</div>
         </div>
       </div>
