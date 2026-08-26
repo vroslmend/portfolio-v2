@@ -145,7 +145,12 @@ export default function AboutPage() {
         <Reveal delay={0.08}>
           <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted">
             If you want the short version, here&apos;s my{" "}
-            <a href={site.links.resume} download="Ammar-Hassan_Resume.pdf" className="p-link">
+            <a
+              href={site.links.resume}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-link"
+            >
               resume
             </a>
             . You can also reach me at{" "}

@@ -61,7 +61,8 @@ export function Nav() {
             <Magnetic strength={0.2}>
               <a
                 href={site.links.resume}
-                download="Ammar-Hassan_Resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="u-link font-mono text-xs tracking-[0.08em] text-muted transition-colors duration-300 hover:text-fg"
               >
                 resume

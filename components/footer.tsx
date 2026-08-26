@@ -36,7 +36,8 @@ export function Footer() {
           <span className="sm:hidden">
             <a
               href={site.links.resume}
-              download="Ammar-Hassan_Resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
               className="u-link hover:text-fg"
             >
               resume

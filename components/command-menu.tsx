@@ -251,12 +251,15 @@ export function CommandMenu() {
                       <SwapText text={copied ? "copied ✓" : "copy email"} />
                     </Item>
                     <Item
-                      value="download resume"
+                      value="open resume"
+                      keywords={["download", "cv", "pdf"]}
                       onSelect={() =>
-                        run(() => window.open(site.links.resume, "_blank"))
+                        run(() =>
+                          window.open(site.links.resume, "_blank", "noopener")
+                        )
                       }
                     >
-                      download resume
+                      open resume
                     </Item>
                   </Group>
 
@@ -363,14 +366,17 @@ function Item({
   children,
   onSelect,
   value,
+  keywords,
 }: {
   children: React.ReactNode;
   onSelect: () => void;
   value: string;
+  keywords?: string[];
 }) {
   return (
     <Command.Item
       value={value}
+      keywords={keywords}
       onSelect={onSelect}
       className="group relative z-10 flex cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2.5 font-mono text-[13px] text-muted transition-colors duration-150 data-[selected=true]:text-fg"
     >
