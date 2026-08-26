@@ -253,7 +253,9 @@ export function BeyondTheEnd() {
     };
   }, [reduced, lift, hintOpacity, lenis]);
 
-  if (!API) return null;
+  // No counts means the backend is unset or unreachable. Hiding is the same
+  // thing the unset case already does, and beats rendering a confident zero.
+  if (!API || !counts) return null;
 
   // reduced motion: no gesture, no animation — show a static panel
   if (reduced) {
@@ -275,13 +277,13 @@ export function BeyondTheEnd() {
             <div className="flex items-baseline gap-3">
               <dt className="text-faint">visitors</dt>
               <dd className="tabular-nums text-fg">
-                {(counts?.visits ?? 0).toLocaleString()}
+                {counts.visits.toLocaleString()}
               </dd>
             </div>
             <div className="flex items-baseline gap-3">
               <dt className="text-faint">prius driven</dt>
               <dd className="tabular-nums text-fg">
-                {(counts?.prius ?? 0).toLocaleString()}×
+                {counts.prius.toLocaleString()}×
               </dd>
             </div>
           </dl>
