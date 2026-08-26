@@ -46,7 +46,7 @@ export const projects: Project[] = [
     tagline: "multiplayer card game",
     description:
       "An online multiplayer card game you can actually play with friends. I wrote the game server myself with Socket.IO, handling rooms, turns and reconnects, and learned a lot about keeping several players' screens in sync.",
-    stack: ["Next.js", "Node.js", "Socket.IO"],
+    stack: ["Next.js", "Node.js", "Socket.IO", "XState"],
     links: {
       live: "https://check-the-game.vercel.app",
       github: "https://github.com/vroslmend/check-the-card-game-v2",
@@ -116,6 +116,39 @@ export const projects: Project[] = [
     links: {
       github: "https://github.com/vroslmend/crawl4ai-documentation-crawler",
     },
+    featured: false,
+  },
+  {
+    slug: "chat-flashback",
+    name: "Chat Flashback",
+    year: "2026",
+    tagline: "years of group chat, read back",
+    description:
+      "Turns a Facebook Messenger export into yearly recaps, charts, and a local reader that lets you scroll the whole chat like a messaging app. Response times, reaction habits, who says what. Everything runs on your machine and nothing gets uploaded.",
+    stack: ["Python", "Matplotlib", "VADER"],
+    links: { github: "https://github.com/vroslmend/chat-flashback" },
+    featured: false,
+  },
+  {
+    slug: "zero2hundred",
+    name: "Zero to Hundred",
+    year: "2026",
+    tagline: "timed 0-100 runs from dash footage",
+    description:
+      "Mark the launch and 100 km/h frames in dashboard footage and it cuts a finished timed clip with a stopwatch overlay. The frame picker runs in the browser with full-resolution stepping, and the source video is never modified.",
+    stack: ["Python"],
+    links: { github: "https://github.com/vroslmend/zero2hundred" },
+    featured: false,
+  },
+  {
+    slug: "ai-studio-to-markdown",
+    name: "AI Studio to Markdown",
+    year: "2026",
+    tagline: "exports, minus the noise",
+    description:
+      "A zero-dependency CLI that turns Google AI Studio exports into clean markdown, stripping the config metadata and the huge base64 thought signatures they come packed with.",
+    stack: ["Python"],
+    links: { github: "https://github.com/vroslmend/ai-studio-to-markdown" },
     featured: false,
   },
   {
