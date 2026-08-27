@@ -14,7 +14,7 @@ import { BeyondTheEnd } from "@/components/beyond-the-end";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { NowPlayingProvider } from "@/components/now-playing-provider";
 import { PageEffects } from "@/components/page-effects";
-import { DitherBackground } from "@/components/dither-background";
+import { BackgroundTexture } from "@/components/background-texture";
 import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
@@ -82,7 +82,7 @@ export default function RootLayout({
           enableSystem={false}
           value={{ dark: "dark", light: "light" }}
         >
-          <DitherBackground />
+          <BackgroundTexture />
           <NowPlayingProvider>
             <SmoothScroll>
               <Nav />

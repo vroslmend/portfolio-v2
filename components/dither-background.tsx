@@ -3,7 +3,6 @@
 import { Dithering } from "@paper-design/shaders-react";
 import { useReducedMotion } from "motion/react";
 import { useTheme } from "next-themes";
-import { useEffect } from "react";
 
 /**
  * The deliberately more graphic alternative to the CSS film grain.
@@ -16,14 +15,6 @@ export function DitherBackground() {
   const { resolvedTheme } = useTheme();
   const reduceMotion = useReducedMotion();
   const light = resolvedTheme === "light";
-
-  useEffect(() => {
-    document.documentElement.dataset.texture = "dither";
-
-    return () => {
-      delete document.documentElement.dataset.texture;
-    };
-  }, []);
 
   return (
     <Dithering
