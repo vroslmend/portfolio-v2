@@ -21,6 +21,10 @@
      vs --panel #121212 was a 4/255 difference, which read as the same surface) */
   --drawer: #1c1c1c;
   --drawer-dim: rgba(0, 0, 0, 0.5);
+  /* grain: see the film-grain block below for why the blend differs per theme */
+  --grain-opacity: 0.14;
+  --grain-blend: plus-lighter;
+  --grain-invert: 0;
 }
 
 .light {
@@ -41,6 +45,9 @@
   --ground-sink: rgba(120, 112, 96, 0.1);
   --drawer: #faf9f6;
   --drawer-dim: rgba(26, 25, 21, 0.18);
+  --grain-opacity: 0.14;
+  --grain-blend: multiply;
+  --grain-invert: 1;
 }
 
 @theme inline {
@@ -103,25 +110,91 @@ html.theme-ready body {
   color: var(--bg);
 }
 
-/* ---- film grain ---- */
+/* ---- film grain ----
+   The tile is desaturated (fractalNoise is colour noise, which shows as faint
+   speckle once you push the opacity on a strictly monochrome site) and gamma-
+   crushed, so it is mostly black with a sparse spray of light. That shape is
+   what lets it blend rather than veil:
+
+   - dark:  plus-lighter. The black areas add nothing, so the blacks stay black
+            and only the specks add light. Grain in shadows, which is how film
+            actually behaves.
+   - light: the same tile inverted, multiplied. Mostly white adds nothing, the
+            specks take light away.
+
+   Alpha is forced to 1 (feFuncA) so the tile is a solid field rather than a
+   second layer of noise in the alpha channel. */
 body::after {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  /* Pin to the large viewport instead of inset:0 so the overlay never resizes
-     when Android Chrome's address bar collapses on the first scroll down —
-     that resize was mis-painting a translucent band across the bottom. */
-  height: 100vh;
-  height: 100lvh;
+  /* Oversized and centred so the shift below can never expose an edge. This
+     also removes the reason for the old 100lvh pin: the layer extends half a
+     viewport past every side, so Android Chrome collapsing its address bar
+     cannot uncover the bottom edge mid-scroll. */
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
   z-index: 100;
   pointer-events: none;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  filter: invert(var(--grain-invert));
+  /* color-interpolation-filters='sRGB' is load-bearing: SVG filters default to
+     linearRGB, so a gamma crush applied there is largely undone by the
+     conversion back to sRGB. Without it the tile's mean lands near 0.46
+     instead of 0.13 and the layer washes the page (#0e0e0e -> #222222) rather
+     than speckling it. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='gamma' exponent='3'/%3E%3CfeFuncG type='gamma' exponent='3'/%3E%3CfeFuncB type='gamma' exponent='3'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E");
+  /* Jumping the tile between fixed offsets is what separates "film" from
+     "dirty screen" — a frozen noise field is something the eye adapts to and
+     stops seeing within about a second. steps(1) holds each offset instead of
+     sliding between them, so it reads as frames rather than drift. */
+  animation: grain-shift 0.8s steps(1) infinite;
+  will-change: transform;
 }
-.light body::after {
-  opacity: 0.05;
+
+@keyframes grain-shift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  10% {
+    transform: translate(-2%, -3%);
+  }
+  20% {
+    transform: translate(-4%, 2%);
+  }
+  30% {
+    transform: translate(2%, -4%);
+  }
+  40% {
+    transform: translate(-2%, 5%);
+  }
+  50% {
+    transform: translate(-4%, 1%);
+  }
+  60% {
+    transform: translate(3%, 0);
+  }
+  70% {
+    transform: translate(0, 3%);
+  }
+  80% {
+    transform: translate(-3%, 1%);
+  }
+  90% {
+    transform: translate(2%, 2%);
+  }
+}
+
+/* the grain is the one thing on the page that is meant to be felt rather than
+   seen, so it is the first thing to go when someone asks for less motion */
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    animation: none;
+    transform: none;
+  }
 }
 
 /* ---- serif italic accent ---- */
