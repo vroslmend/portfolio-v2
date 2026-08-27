@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 type Film = "clean" | "fine" | "16mm" | "nocturne";
 type Typography = "geist" | "editorial" | "roman" | "hybrid";
-type TextMotion = "still" | "float" | "cursor" | "projector";
+type TextMotion = "still" | "drift" | "depth" | "gate";
 
 type LabState = {
   film: Film;
@@ -12,32 +12,32 @@ type LabState = {
   textMotion: TextMotion;
 };
 
-const STORAGE_KEY = "portfolio-design-lab-v2";
+const STORAGE_KEY = "portfolio-design-lab-v3";
 const DEFAULTS: LabState = {
   film: "fine",
-  typography: "editorial",
+  typography: "geist",
   textMotion: "still",
 };
 
 const FILMS: { value: Film; label: string; title: string }[] = [
-  { value: "clean", label: "clean", title: "Fine, restrained grain" },
-  { value: "fine", label: "fine", title: "The current balanced film texture" },
+  { value: "clean", label: "clean", title: "The lightest grain that still reads as film" },
+  { value: "fine", label: "fine", title: "Balanced 35mm grain" },
   { value: "16mm", label: "16mm", title: "Coarser grain with sparse exposure flicker" },
-  { value: "nocturne", label: "night", title: "Film grain with slow monochrome halation" },
+  { value: "nocturne", label: "night", title: "Fine grain under a slow monochrome halation" },
 ];
 
 const TYPES: { value: Typography; label: string; title: string }[] = [
-  { value: "geist", label: "geist", title: "Modern sans display type" },
-  { value: "editorial", label: "italic", title: "Newsreader italic throughout the display layer" },
-  { value: "roman", label: "roman", title: "Newsreader upright for quieter editorial luxury" },
-  { value: "hybrid", label: "hybrid", title: "Sans and serif contrast inside the name" },
+  { value: "geist", label: "geist", title: "Sans display type throughout" },
+  { value: "editorial", label: "italic", title: "Newsreader italic across the display layer" },
+  { value: "roman", label: "roman", title: "Newsreader upright, quieter than the italic" },
+  { value: "hybrid", label: "hybrid", title: "Sans name with a serif italic surname" },
 ];
 
 const MOTIONS: { value: TextMotion; label: string; title: string }[] = [
   { value: "still", label: "still", title: "Only the existing entrance and scroll motion" },
-  { value: "float", label: "float", title: "A very slow hero-only optical drift" },
-  { value: "cursor", label: "depth", title: "Restrained cursor parallax and a local highlight" },
-  { value: "projector", label: "projector", title: "Sparse film-gate jitter on the name" },
+  { value: "drift", label: "drift", title: "The opening plate floats, as if hand held" },
+  { value: "depth", label: "depth", title: "The plate answers the pointer and a key light follows it" },
+  { value: "gate", label: "gate", title: "Projector weave on the grain's frame cadence" },
 ];
 
 function isLabState(value: unknown): value is LabState {
@@ -84,6 +84,39 @@ export function BackgroundTexture() {
     }
   }, [hydrated, settings]);
 
+  // The key light is the only site-wide pointer effect, so it is the only
+  // listener: one rAF-coalesced write of two custom properties, and nothing at
+  // all on touch devices or under reduced motion.
+  useEffect(() => {
+    if (settings.textMotion !== "depth") return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const root = document.documentElement;
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+
+    function onMove(event: PointerEvent) {
+      x = event.clientX;
+      y = event.clientY;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        root.style.setProperty("--px", `${x}px`);
+        root.style.setProperty("--py", `${y}px`);
+      });
+    }
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      if (frame) cancelAnimationFrame(frame);
+      root.style.removeProperty("--px");
+      root.style.removeProperty("--py");
+    };
+  }, [settings.textMotion]);
+
   function update<K extends keyof LabState>(key: K, value: LabState[K]) {
     setSettings((current) => ({ ...current, [key]: value }));
   }
@@ -91,6 +124,7 @@ export function BackgroundTexture() {
   return (
     <>
       <div aria-hidden className="film-atmosphere" />
+      <div aria-hidden className="pointer-light" />
 
       <aside className="design-lab fixed right-4 bottom-4 z-[70] font-mono text-[10px] tracking-[0.06em]">
         {open && (
@@ -107,7 +141,7 @@ export function BackgroundTexture() {
             </div>
             <LabRow label="film" options={FILMS} value={settings.film} onChange={(value) => update("film", value)} />
             <LabRow label="type" options={TYPES} value={settings.typography} onChange={(value) => update("typography", value)} />
-            <LabRow label="text" options={MOTIONS} value={settings.textMotion} onChange={(value) => update("textMotion", value)} />
+            <LabRow label="motion" options={MOTIONS} value={settings.textMotion} onChange={(value) => update("textMotion", value)} />
             <p className="px-1 pt-2 leading-relaxed text-faint">
               Hover the name for its Urdu counterpart. Settings persist while you browse.
             </p>

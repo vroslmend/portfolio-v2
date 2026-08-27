@@ -48,6 +48,47 @@ const item = {
 
 type Counts = { visits: number; prius: number };
 
+// The refraction map. Green rises toward the leading edge, so feDisplacementMap
+// samples further down the backdrop there and the page appears to bend around
+// the rim; red stays neutral, so nothing shifts sideways. Chromium is the only
+// engine that runs an SVG filter inside backdrop-filter today — the @supports
+// guard in globals.css leaves every other engine on the plain blur, which is
+// why the bend is confined to a 26px strip rather than the whole pane.
+const GLASS_MAP =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='40' preserveAspectRatio='none'%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='rgb(128,255,128)'/%3E%3Cstop offset='0.45' stop-color='rgb(128,158,128)'/%3E%3Cstop offset='1' stop-color='rgb(128,128,128)'/%3E%3C/linearGradient%3E%3Crect width='4' height='40' fill='url(%23g)'/%3E%3C/svg%3E";
+
+function GlassFilter() {
+  return (
+    <svg aria-hidden focusable="false" className="pointer-events-none absolute h-0 w-0">
+      <filter
+        id="drawer-glass"
+        x="0"
+        y="0"
+        width="100%"
+        height="100%"
+        colorInterpolationFilters="sRGB"
+      >
+        <feImage
+          href={GLASS_MAP}
+          result="map"
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          preserveAspectRatio="none"
+        />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="map"
+          scale={26}
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
+    </svg>
+  );
+}
+
 // stable per-client random pick; SSR + hydration always see QUIPS[0]
 let clientQuip: string | null = null;
 const pickQuip = () =>
@@ -96,7 +137,6 @@ export function BeyondTheEnd() {
     const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
     panel.style.setProperty("--glass-x", `${(x * 100).toFixed(1)}%`);
-    panel.style.setProperty("--glass-y", `${(y * 100).toFixed(1)}%`);
     contentX.set((x - 0.5) * 5);
     contentY.set((y - 0.5) * 3.5);
   }
@@ -104,7 +144,6 @@ export function BeyondTheEnd() {
   function settleGlass() {
     const panel = panelRef.current;
     panel?.style.setProperty("--glass-x", "50%");
-    panel?.style.setProperty("--glass-y", "22%");
     contentX.set(0);
     contentY.set(0);
   }
@@ -291,15 +330,17 @@ export function BeyondTheEnd() {
     return (
       <section
         aria-hidden
-        className="panel-glass drawer-pane relative flex cursor-default select-none items-center justify-center overflow-hidden border-t border-line bg-drawer/75 px-6 backdrop-blur-2xl"
+        className="panel-glass drawer-pane relative flex cursor-default select-none items-center justify-center overflow-hidden border-t border-line px-6"
         style={{ height: PANEL }}
       >
+        <GlassFilter />
         <DrawerAtmosphere />
         <div
           aria-hidden
           className="panel-bloom pointer-events-none absolute inset-0"
         />
-        <div aria-hidden className="panel-refraction pointer-events-none absolute inset-0" />
+        <div aria-hidden className="glass-bevel" />
+        <div aria-hidden className="glass-sheen" />
         <div className="relative z-10 flex flex-col items-center gap-5">
           <span className="select-none font-mono text-[10px] uppercase tracking-[0.3em] text-faint">
             past the end
@@ -350,7 +391,7 @@ export function BeyondTheEnd() {
           aria-hidden
           onClick={() => closeRef.current()}
           style={{ opacity: dimOpacity, backgroundColor: "var(--drawer-dim)" }}
-          className={`fixed inset-0 z-80 cursor-default ${
+          className={`fixed inset-0 z-80 cursor-default backdrop-blur-[7px] ${
             revealed ? "" : "pointer-events-none"
           }`}
         />
@@ -362,15 +403,17 @@ export function BeyondTheEnd() {
         style={{ y, height: PANEL, display: panelShown ? undefined : "none" }}
         onPointerMove={(event) => moveGlass(event.clientX, event.clientY)}
         onPointerLeave={settleGlass}
-        className="panel-glass drawer-pane fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center overflow-hidden rounded-t-[18px] bg-drawer/75 px-6 backdrop-blur-2xl"
+        className="panel-glass drawer-pane fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center overflow-hidden rounded-t-[18px] px-6"
       >
+        <GlassFilter />
         <DrawerAtmosphere />
         <motion.div
           aria-hidden
           style={{ opacity: edgeOpacity }}
           className="panel-bloom pointer-events-none absolute inset-0"
         />
-        <div aria-hidden className="panel-refraction pointer-events-none absolute inset-0" />
+        <div aria-hidden className="glass-bevel" />
+        <div aria-hidden className="glass-sheen" />
         {/* The cast shadow lives on this hairline rather than on the panel so it
             can fade with edgeOpacity: a shadow on the panel itself projects up
             into the viewport while the panel is still parked off-screen, which
@@ -379,7 +422,7 @@ export function BeyondTheEnd() {
         <motion.div
           aria-hidden
           style={{ opacity: edgeOpacity }}
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-faint/50 to-transparent shadow-[0_-30px_70px_-8px_var(--shadow-dialog)]"
+          className="glass-rim pointer-events-none absolute inset-x-0 top-0 z-4 h-px shadow-[0_-30px_70px_-8px_var(--shadow-dialog)]"
         />
         <motion.div
           variants={container}

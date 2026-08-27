@@ -3,9 +3,9 @@
 import { useRef } from "react";
 
 /**
- * Supplies cursor position to the hero without putting pointer state through
- * React on every frame. The design-lab modes decide how (or whether) those
- * variables are used; readable copy never receives a perpetual animation.
+ * Supplies pointer position to the opening plate without putting that state
+ * through React on every frame. The design-lab mode decides how (or whether)
+ * the variables are used; readable copy never receives a perpetual animation.
  */
 export function HeroMotion({
   children,
@@ -24,8 +24,6 @@ export function HeroMotion({
     const y = Math.max(-1, Math.min(1, ((clientY - rect.top) / rect.height - 0.5) * 2));
     node.style.setProperty("--hero-x", `${(x * 4).toFixed(2)}px`);
     node.style.setProperty("--hero-y", `${(y * 3).toFixed(2)}px`);
-    node.style.setProperty("--hero-light-x", `${((x + 1) * 50).toFixed(1)}%`);
-    node.style.setProperty("--hero-light-y", `${((y + 1) * 50).toFixed(1)}%`);
   }
 
   function resetPosition() {
@@ -33,8 +31,6 @@ export function HeroMotion({
     if (!node) return;
     node.style.setProperty("--hero-x", "0px");
     node.style.setProperty("--hero-y", "0px");
-    node.style.setProperty("--hero-light-x", "50%");
-    node.style.setProperty("--hero-light-y", "50%");
   }
 
   return (
@@ -44,7 +40,6 @@ export function HeroMotion({
       onPointerMove={(event) => setPosition(event.clientX, event.clientY)}
       onPointerLeave={resetPosition}
     >
-      <span aria-hidden className="hero-lens" />
       {children}
     </section>
   );

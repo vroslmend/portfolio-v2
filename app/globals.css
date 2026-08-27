@@ -19,8 +19,8 @@
   --ground-sink: rgba(0, 0, 0, 0.32);
   /* the drawer sits on its own plane, a real step above the page (--bg #0e0e0e
      vs --panel #121212 was a 4/255 difference, which read as the same surface) */
-  --drawer: #1c1c1c;
-  --drawer-dim: rgba(0, 0, 0, 0.5);
+  --drawer: #171717;
+  --drawer-dim: rgba(0, 0, 0, 0.58);
   /* grain: see the film-grain block below for why the blend differs per theme */
   --grain-opacity: 0.14;
   --grain-blend: plus-lighter;
@@ -45,7 +45,7 @@
      the lift is white and the sink is a warm grey rather than black */
   --ground-lift: rgba(255, 255, 255, 0.5);
   --ground-sink: rgba(120, 112, 96, 0.1);
-  --drawer: #faf9f6;
+  --drawer: #f4f2ed;
   --drawer-dim: rgba(26, 25, 21, 0.18);
   --grain-opacity: 0.14;
   --grain-blend: multiply;
@@ -366,65 +366,82 @@ html[data-typography="hybrid"] .urdu-word-last {
   .display-title { font-size: 24px; }
 }
 
-/* ---- hero motion studies ---- */
+/* ---- display-layer motion studies ----
+   Every mode moves the whole opening plate (name, intro, meta) instead of one
+   word: a lone animated word reads as a glitch, a plate reads as a camera. Page
+   titles elsewhere get the same treatment, so the study is never confined to
+   the home hero, and reading copy is never perpetually animated. */
 .hero-motion {
   --hero-x: 0px;
   --hero-y: 0px;
-  --hero-light-x: 50%;
-  --hero-light-y: 50%;
   position: relative;
-  isolation: isolate;
-}
-.hero-motion > :not(.hero-lens) {
-  position: relative;
-  z-index: 1;
-}
-.hero-lens {
-  position: absolute;
-  inset: -4rem -6rem;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  background: radial-gradient(
-    circle 11rem at var(--hero-light-x) var(--hero-light-y),
-    rgba(255, 255, 255, 0.035),
-    transparent 72%
-  );
-  transition: opacity 0.6s var(--ease-out-expo);
-}
-.light .hero-lens {
-  background: radial-gradient(
-    circle 11rem at var(--hero-light-x) var(--hero-light-y),
-    rgba(255, 255, 255, 0.52),
-    transparent 72%
-  );
 }
 
-html[data-text-motion="float"] .hero-name {
-  animation: hero-float 12s ease-in-out infinite alternate;
+/* drift: a slow optical float, as if the plate were hand held */
+html[data-text-motion="drift"] .hero-motion,
+html[data-text-motion="drift"] .display-title {
+  animation: plate-drift 15s ease-in-out infinite alternate;
 }
-html[data-text-motion="cursor"] .hero-name {
+html[data-text-motion="drift"] .hero-name {
+  animation: plate-drift-lead 11s ease-in-out infinite alternate;
+}
+
+/* depth: the plate answers the pointer and the name rides a little further, so
+   the two separate instead of sliding as one flat sheet */
+html[data-text-motion="depth"] .hero-motion {
   transform: translate3d(var(--hero-x), var(--hero-y), 0);
-  transition: transform 0.8s var(--ease-out-expo);
+  transition: transform 0.9s var(--ease-out-expo);
+  will-change: transform;
 }
-html[data-text-motion="cursor"] .hero-lens {
+html[data-text-motion="depth"] .hero-name {
+  transform: translate3d(calc(var(--hero-x) * 0.85), calc(var(--hero-y) * 0.85), 0);
+  transition: transform 1.15s var(--ease-out-expo);
+}
+html[data-text-motion="depth"] .pointer-light {
   opacity: 1;
 }
-html[data-text-motion="projector"] .hero-name {
-  animation: projector-text 7.2s steps(1) infinite;
-  text-shadow: 0.02em 0 rgba(255, 255, 255, 0.035);
+
+/* gate: the projector weave, on the grain's own frame cadence */
+html[data-text-motion="gate"] .hero-motion,
+html[data-text-motion="gate"] .display-title {
+  animation: gate-weave 6.4s steps(1) infinite;
 }
 
-@keyframes hero-float {
-  0% { transform: translate3d(0, 0, 0); }
-  45% { transform: translate3d(0.7px, -1.4px, 0); }
-  100% { transform: translate3d(-0.5px, 0.8px, 0); }
+@keyframes plate-drift {
+  from { transform: translate3d(-0.9px, -1.5px, 0); }
+  to { transform: translate3d(0.9px, 1.1px, 0); }
 }
-@keyframes projector-text {
-  0%, 38%, 40%, 67%, 69%, 91%, 93%, 100% { transform: translate3d(0, 0, 0); opacity: 1; }
-  39% { transform: translate3d(-0.45px, 0.25px, 0); opacity: 0.97; }
-  68% { transform: translate3d(0.35px, -0.4px, 0); opacity: 0.985; }
-  92% { transform: translate3d(-0.25px, 0, 0); opacity: 0.975; }
+@keyframes plate-drift-lead {
+  from { transform: translate3d(0.8px, 0.9px, 0); }
+  to { transform: translate3d(-0.8px, -1.1px, 0); }
+}
+@keyframes gate-weave {
+  0%, 22%, 24%, 55%, 57%, 83%, 85%, 100% { transform: translate3d(0, 0, 0); }
+  23% { transform: translate3d(-0.4px, 0.3px, 0); }
+  56% { transform: translate3d(0.35px, -0.35px, 0); }
+  84% { transform: translate3d(0.25px, 0.2px, 0); }
+}
+
+/* One key light for the whole room. It follows the pointer across every page,
+   so depth belongs to the site rather than to a single heading. */
+.pointer-light {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 44rem;
+  height: 44rem;
+  margin: -22rem 0 0 -22rem;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03), transparent 66%);
+  transform: translate3d(var(--px, 50vw), var(--py, 40vh), 0);
+  transition:
+    opacity 0.8s var(--ease-out-expo),
+    transform 0.45s var(--ease-out-expo);
+}
+.light .pointer-light {
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.45), transparent 66%);
 }
 
 /* ---- serif italic accent ---- */
@@ -870,82 +887,119 @@ html[data-text-motion="projector"] .hero-name {
     inset 0 18px 36px -32px rgba(255, 255, 255, 0.24),
     0 -30px 90px -38px var(--shadow-dialog);
 }
+/* The pane reads as glass through four cues, none of which is "add white":
+   the page behind it is blurred and dropped by the scrim (depth), the leading
+   rim genuinely bends what is behind it through an SVG displacement map
+   (refraction, Chromium; every other engine keeps the plain blur and loses
+   nothing), a single slow sheen crosses the surface (light), and the tint is
+   smoked rather than frosted. */
 .drawer-pane {
   --glass-x: 50%;
-  --glass-y: 22%;
-  border-color: color-mix(in srgb, var(--glass-edge) 72%, transparent);
-  background-image:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 32%),
-    linear-gradient(105deg, transparent 18%, rgba(255, 255, 255, 0.018) 48%, transparent 72%);
-  background-blend-mode: screen;
+  background-color: color-mix(in srgb, var(--drawer) 62%, transparent);
+  backdrop-filter: blur(26px) saturate(112%) brightness(0.78);
+  -webkit-backdrop-filter: blur(26px) saturate(112%) brightness(0.78);
+  border-color: color-mix(in srgb, var(--glass-edge) 58%, transparent);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.026), transparent 26%);
 }
 .light .drawer-pane {
-  background-image:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.58), transparent 38%),
-    linear-gradient(105deg, transparent 18%, rgba(255, 255, 255, 0.2) 48%, transparent 72%);
-  background-blend-mode: normal;
+  background-color: color-mix(in srgb, var(--drawer) 76%, transparent);
+  backdrop-filter: blur(26px) saturate(104%) brightness(1.02);
+  -webkit-backdrop-filter: blur(26px) saturate(104%) brightness(1.02);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 30%);
 }
-.drawer-shader {
-  position: absolute !important;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0.9;
-  mix-blend-mode: screen;
-}
-.light .drawer-shader {
-  opacity: 0.72;
-  mix-blend-mode: multiply;
-}
-.panel-refraction {
+
+/* Refraction, confined to the leading edge, which is where real glass bends
+   most and a small enough surface that the Chromium-only path is a bonus
+   rather than a dependency. The mask fades the bend out into the body. */
+.glass-bevel {
+  position: absolute;
+  inset: 0 0 auto;
   z-index: 2;
+  height: 26px;
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.32) 58%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.32) 58%, transparent);
+}
+@supports (backdrop-filter: url("#drawer-glass")) {
+  .glass-bevel {
+    backdrop-filter: url(#drawer-glass);
+    -webkit-backdrop-filter: url(#drawer-glass);
+  }
+}
+
+/* One slow sheen, not a cursor spotlight. */
+.glass-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    104deg,
+    transparent 34%,
+    rgba(255, 255, 255, 0.028) 46%,
+    rgba(255, 255, 255, 0.01) 53%,
+    transparent 66%
+  );
+  background-size: 240% 100%;
+  animation: glass-sheen 19s ease-in-out infinite;
+}
+.light .glass-sheen {
+  background: linear-gradient(104deg, transparent 34%, rgba(255, 255, 255, 0.55) 47%, transparent 66%);
+  background-size: 240% 100%;
+  mix-blend-mode: soft-light;
+}
+@keyframes glass-sheen {
+  0%, 100% { background-position: 132% 0; }
+  50% { background-position: -32% 0; }
+}
+
+/* The rim is a hairline of light that brightens where the pointer meets it:
+   light catching a bevel, rather than a glow following the cursor. */
+.glass-rim {
   background:
-    radial-gradient(
-      circle 16rem at var(--glass-x) var(--glass-y),
-      rgba(255, 255, 255, 0.075),
-      rgba(255, 255, 255, 0.018) 36%,
-      transparent 72%
-    ),
+    radial-gradient(8rem 1px at var(--glass-x) 50%, var(--glass-edge), transparent),
     linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.025) 48%,
-      transparent 52%
+      color-mix(in srgb, var(--glass-edge) 45%, transparent) 24%,
+      color-mix(in srgb, var(--glass-edge) 45%, transparent) 76%,
+      transparent
     );
+}
+
+.drawer-shader {
+  position: absolute !important;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.5;
   mix-blend-mode: screen;
 }
-.light .panel-refraction {
-  background:
-    radial-gradient(
-      circle 16rem at var(--glass-x) var(--glass-y),
-      rgba(255, 255, 255, 0.7),
-      rgba(255, 255, 255, 0.16) 38%,
-      transparent 72%
-    ),
-    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28) 50%, transparent);
-  mix-blend-mode: soft-light;
+.light .drawer-shader {
+  opacity: 0.55;
+  mix-blend-mode: multiply;
 }
+
 .panel-bloom {
   z-index: 1;
   background:
-    radial-gradient(ellipse 26% 80% at 0% 50%, var(--bloom) 0%, transparent 72%),
-    radial-gradient(
-      ellipse 26% 80% at 100% 50%,
-      var(--bloom) 0%,
-      transparent 72%
-    );
+    radial-gradient(ellipse 26% 80% at 0% 50%, color-mix(in srgb, var(--bloom) 55%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 26% 80% at 100% 50%, color-mix(in srgb, var(--bloom) 55%, transparent) 0%, transparent 72%);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .film-atmosphere,
+  .hero-motion,
   .hero-name,
+  .display-title,
+  .glass-sheen,
   .design-lab-panel {
     animation: none !important;
     transform: none !important;
   }
-  .hero-lens {
+  .pointer-light {
     display: none;
   }
 }
