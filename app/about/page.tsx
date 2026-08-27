@@ -23,7 +23,7 @@ export default function AboutPage() {
     <div className="flex flex-col gap-20 pb-8">
       <section className="flex flex-col gap-7">
         <Reveal mask>
-          <h1 className="font-serif text-[22px] font-medium italic leading-[1.15] tracking-[-0.015em] text-fg sm:text-[24px]">
+          <h1 className="display-title text-fg">
             about me.
           </h1>
         </Reveal>

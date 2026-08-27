@@ -49,7 +49,9 @@ export function NameReveal({
         {letters.map((ch, i) => (
           <motion.span
             key={i}
-            className="inline-block"
+            className={`name-letter inline-block ${
+              i < text.indexOf(" ") ? "name-letter-first" : "name-letter-last"
+            }`}
             initial={{ y: "115%" }}
             animate={{ y: 0 }}
             transition={{
@@ -81,14 +83,14 @@ export function NameReveal({
         aria-hidden
         dir="rtl"
         lang="ur"
-        className="font-urdu pointer-events-none absolute inset-0 flex items-center justify-end gap-[0.3em] text-[0.94em] leading-none transition-[opacity,transform] duration-500 ease-out-expo"
+        className="urdu-name font-urdu pointer-events-none absolute inset-0 flex items-center justify-end gap-[0.3em] text-[0.94em] leading-none transition-[opacity,transform] duration-500 ease-out-expo"
         style={{
           opacity: hovered ? 1 : 0,
           transform: hovered ? "translateY(-0.15em)" : "translateY(0.18em)",
         }}
       >
-        <span>عمار</span>
-        <span>حسن</span>
+        <span className="urdu-word-first">عمار</span>
+        <span className="urdu-word-last">حسن</span>
       </span>
     </h1>
   );

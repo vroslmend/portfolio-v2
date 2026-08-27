@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Drift } from "@/components/drift";
+import { HeroMotion } from "@/components/hero-motion";
 import { NameReveal } from "@/components/name-reveal";
 import { Reveal } from "@/components/reveal";
 import { WorkList } from "@/components/work/work-list";
@@ -11,7 +12,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-24 pb-8">
       <Drift>
-        <section className="flex flex-col gap-7">
+        <HeroMotion className="flex flex-col gap-7">
           <Reveal mask>
             <p className="font-mono text-[12px] tracking-[0.12em] text-muted">
               hello, i&apos;m
@@ -20,7 +21,7 @@ export default function Home() {
           <NameReveal
             text="ammar hassan"
             delay={0.12}
-            className="font-serif text-[clamp(2.5rem,5vw,4rem)] font-medium italic leading-[1.02] tracking-[-0.045em] text-fg"
+            className="hero-name text-fg"
           />
           <Reveal delay={0.18}>
             <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
@@ -55,7 +56,7 @@ export default function Home() {
               <span className="text-faint"> · jun 2026</span>
             </p>
           </Reveal>
-        </section>
+        </HeroMotion>
       </Drift>
 
       <section className="flex flex-col gap-6">

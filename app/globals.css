@@ -25,6 +25,8 @@
   --grain-opacity: 0.14;
   --grain-blend: plus-lighter;
   --grain-invert: 0;
+  --grain-size: 220px;
+  --grain-speed: 0.8s;
 }
 
 .light {
@@ -140,6 +142,7 @@ body::after {
   opacity: var(--grain-opacity);
   mix-blend-mode: var(--grain-blend);
   filter: invert(var(--grain-invert));
+  background-size: var(--grain-size) var(--grain-size);
   /* color-interpolation-filters='sRGB' is load-bearing: SVG filters default to
      linearRGB, so a gamma crush applied there is largely undone by the
      conversion back to sRGB. Without it the tile's mean lands near 0.46
@@ -150,8 +153,76 @@ body::after {
      "dirty screen" — a frozen noise field is something the eye adapts to and
      stops seeing within about a second. steps(1) holds each offset instead of
      sliding between them, so it reads as frames rather than drift. */
-  animation: grain-shift 0.8s steps(1) infinite;
+  animation: grain-shift var(--grain-speed) steps(1) infinite;
   will-change: transform;
+}
+
+/* Four variations of one material, rather than four unrelated backgrounds. */
+html[data-film="clean"] {
+  --grain-opacity: 0.075;
+  --grain-size: 180px;
+  --grain-speed: 1.05s;
+}
+html[data-film="fine"] {
+  --grain-opacity: 0.14;
+  --grain-size: 220px;
+  --grain-speed: 0.8s;
+}
+html[data-film="16mm"] {
+  --grain-opacity: 0.2;
+  --grain-size: 310px;
+  --grain-speed: 0.52s;
+}
+html[data-film="nocturne"] {
+  --grain-opacity: 0.12;
+  --grain-size: 245px;
+  --grain-speed: 0.9s;
+}
+
+.film-atmosphere {
+  position: fixed;
+  inset: -8%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 48% 62% at 26% 12%, rgba(255, 255, 255, 0.035), transparent 72%),
+    radial-gradient(ellipse 62% 50% at 78% 76%, rgba(255, 255, 255, 0.018), transparent 74%);
+  transition: opacity 0.7s var(--ease-out-expo);
+}
+
+html[data-film="16mm"] .film-atmosphere {
+  opacity: 0.6;
+  animation: film-exposure 5.6s steps(1) infinite;
+}
+
+html[data-film="nocturne"] .film-atmosphere {
+  opacity: 1;
+  animation: film-halation 18s ease-in-out infinite alternate;
+}
+
+.light .film-atmosphere {
+  filter: invert(1);
+  opacity: 0;
+}
+.light[data-film="16mm"] .film-atmosphere {
+  opacity: 0.14;
+}
+.light[data-film="nocturne"] .film-atmosphere {
+  opacity: 0.2;
+}
+
+@keyframes film-exposure {
+  0%, 44%, 47%, 72%, 75%, 100% { filter: brightness(1); transform: translate3d(0, 0, 0); }
+  45% { filter: brightness(1.35); transform: translate3d(0.35px, -0.45px, 0); }
+  46% { filter: brightness(0.8); transform: translate3d(-0.4px, 0.25px, 0); }
+  73% { filter: brightness(1.2); transform: translate3d(0, -0.35px, 0); }
+  74% { filter: brightness(0.9); transform: translate3d(0.25px, 0, 0); }
+}
+
+@keyframes film-halation {
+  from { transform: translate3d(-1.5%, -1%, 0) scale(1); }
+  to { transform: translate3d(1.5%, 1%, 0) scale(1.035); }
 }
 
 @keyframes grain-shift {
@@ -214,8 +285,146 @@ footer {
   z-index: 1;
 }
 
-html[data-texture="dither"] body::after {
+/* ---- typography studies ---- */
+.hero-name {
+  font-family: var(--font-newsreader), serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.display-title {
+  font-family: var(--font-newsreader), serif;
+  font-size: 22px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+.urdu-name {
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+html[data-typography="geist"] .hero-name {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: clamp(2.55rem, 5.4vw, 4.35rem);
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: -0.06em;
+}
+html[data-typography="geist"] .display-title {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+
+html[data-typography="roman"] .hero-name {
+  font-size: clamp(2.65rem, 5.25vw, 4.25rem);
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: -0.052em;
+}
+html[data-typography="roman"] .display-title {
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+html[data-typography="hybrid"] .hero-name {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: clamp(2.5rem, 5.2vw, 4.2rem);
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: -0.055em;
+}
+html[data-typography="hybrid"] .hero-name .name-letter-last {
+  font-family: var(--font-newsreader), serif;
+  font-size: 1.04em;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+html[data-typography="hybrid"] .display-title {
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+html[data-typography="hybrid"] .urdu-word-first {
+  font-weight: 600;
+}
+html[data-typography="hybrid"] .urdu-word-last {
+  font-weight: 400;
+  opacity: 0.84;
+}
+
+@media (min-width: 640px) {
+  .display-title { font-size: 24px; }
+}
+
+/* ---- hero motion studies ---- */
+.hero-motion {
+  --hero-x: 0px;
+  --hero-y: 0px;
+  --hero-light-x: 50%;
+  --hero-light-y: 50%;
+  position: relative;
+  isolation: isolate;
+}
+.hero-motion > :not(.hero-lens) {
+  position: relative;
+  z-index: 1;
+}
+.hero-lens {
+  position: absolute;
+  inset: -4rem -6rem;
+  z-index: 0;
+  pointer-events: none;
   opacity: 0;
+  background: radial-gradient(
+    circle 11rem at var(--hero-light-x) var(--hero-light-y),
+    rgba(255, 255, 255, 0.035),
+    transparent 72%
+  );
+  transition: opacity 0.6s var(--ease-out-expo);
+}
+.light .hero-lens {
+  background: radial-gradient(
+    circle 11rem at var(--hero-light-x) var(--hero-light-y),
+    rgba(255, 255, 255, 0.52),
+    transparent 72%
+  );
+}
+
+html[data-text-motion="float"] .hero-name {
+  animation: hero-float 12s ease-in-out infinite alternate;
+}
+html[data-text-motion="cursor"] .hero-name {
+  transform: translate3d(var(--hero-x), var(--hero-y), 0);
+  transition: transform 0.8s var(--ease-out-expo);
+}
+html[data-text-motion="cursor"] .hero-lens {
+  opacity: 1;
+}
+html[data-text-motion="projector"] .hero-name {
+  animation: projector-text 7.2s steps(1) infinite;
+  text-shadow: 0.02em 0 rgba(255, 255, 255, 0.035);
+}
+
+@keyframes hero-float {
+  0% { transform: translate3d(0, 0, 0); }
+  45% { transform: translate3d(0.7px, -1.4px, 0); }
+  100% { transform: translate3d(-0.5px, 0.8px, 0); }
+}
+@keyframes projector-text {
+  0%, 38%, 40%, 67%, 69%, 91%, 93%, 100% { transform: translate3d(0, 0, 0); opacity: 1; }
+  39% { transform: translate3d(-0.45px, 0.25px, 0); opacity: 0.97; }
+  68% { transform: translate3d(0.35px, -0.4px, 0); opacity: 0.985; }
+  92% { transform: translate3d(-0.25px, 0, 0); opacity: 0.975; }
 }
 
 /* ---- serif italic accent ---- */
@@ -224,6 +433,15 @@ html[data-texture="dither"] body::after {
   font-style: italic;
   font-size: 1.06em;
   letter-spacing: 0.01em;
+}
+
+.design-lab-panel {
+  transform-origin: bottom right;
+  animation: lab-in 0.42s var(--ease-out-expo) both;
+}
+@keyframes lab-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ---- animated underline links ---- */
@@ -647,9 +865,70 @@ html[data-texture="dither"] body::after {
    panel. `panel-bloom` adds only a whisper of light pooled at the far left/right
    edges, fading out before the centered text so contrast stays clean. */
 .panel-glass {
-  box-shadow: inset 0 1px 0 0 var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-edge),
+    inset 0 18px 36px -32px rgba(255, 255, 255, 0.24),
+    0 -30px 90px -38px var(--shadow-dialog);
+}
+.drawer-pane {
+  --glass-x: 50%;
+  --glass-y: 22%;
+  border-color: color-mix(in srgb, var(--glass-edge) 72%, transparent);
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 32%),
+    linear-gradient(105deg, transparent 18%, rgba(255, 255, 255, 0.018) 48%, transparent 72%);
+  background-blend-mode: screen;
+}
+.light .drawer-pane {
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58), transparent 38%),
+    linear-gradient(105deg, transparent 18%, rgba(255, 255, 255, 0.2) 48%, transparent 72%);
+  background-blend-mode: normal;
+}
+.drawer-shader {
+  position: absolute !important;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.9;
+  mix-blend-mode: screen;
+}
+.light .drawer-shader {
+  opacity: 0.72;
+  mix-blend-mode: multiply;
+}
+.panel-refraction {
+  z-index: 2;
+  background:
+    radial-gradient(
+      circle 16rem at var(--glass-x) var(--glass-y),
+      rgba(255, 255, 255, 0.075),
+      rgba(255, 255, 255, 0.018) 36%,
+      transparent 72%
+    ),
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.025) 48%,
+      transparent 52%
+    );
+  mix-blend-mode: screen;
+}
+.light .panel-refraction {
+  background:
+    radial-gradient(
+      circle 16rem at var(--glass-x) var(--glass-y),
+      rgba(255, 255, 255, 0.7),
+      rgba(255, 255, 255, 0.16) 38%,
+      transparent 72%
+    ),
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28) 50%, transparent);
+  mix-blend-mode: soft-light;
 }
 .panel-bloom {
+  z-index: 1;
   background:
     radial-gradient(ellipse 26% 80% at 0% 50%, var(--bloom) 0%, transparent 72%),
     radial-gradient(
@@ -657,6 +936,18 @@ html[data-texture="dither"] body::after {
       var(--bloom) 0%,
       transparent 72%
     );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-atmosphere,
+  .hero-name,
+  .design-lab-panel {
+    animation: none !important;
+    transform: none !important;
+  }
+  .hero-lens {
+    display: none;
+  }
 }
 
 /* ---- shared hairlines ----

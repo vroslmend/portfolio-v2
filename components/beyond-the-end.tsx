@@ -12,6 +12,7 @@ import {
 } from "motion/react";
 import { useLenis } from "lenis/react";
 import { EASE } from "@/lib/motion";
+import { DrawerAtmosphere } from "@/components/drawer-atmosphere";
 
 const API = process.env.NEXT_PUBLIC_COUNTER_API_URL;
 const PANEL = 248; // panel height (px) and the height it rises to
@@ -84,6 +85,29 @@ export function BeyondTheEnd() {
   useMotionValueEvent(lift, "change", (v) => setPanelShown(v > 0.0005));
   // lets the click-off scrim and Escape reuse the gesture's own close logic
   const closeRef = useRef<() => void>(() => {});
+  const panelRef = useRef<HTMLElement>(null);
+  const contentX = useSpring(0, { stiffness: 110, damping: 24, mass: 0.45 });
+  const contentY = useSpring(0, { stiffness: 110, damping: 24, mass: 0.45 });
+
+  function moveGlass(clientX: number, clientY: number) {
+    const panel = panelRef.current;
+    if (!panel) return;
+    const rect = panel.getBoundingClientRect();
+    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+    panel.style.setProperty("--glass-x", `${(x * 100).toFixed(1)}%`);
+    panel.style.setProperty("--glass-y", `${(y * 100).toFixed(1)}%`);
+    contentX.set((x - 0.5) * 5);
+    contentY.set((y - 0.5) * 3.5);
+  }
+
+  function settleGlass() {
+    const panel = panelRef.current;
+    panel?.style.setProperty("--glass-x", "50%");
+    panel?.style.setProperty("--glass-y", "22%");
+    contentX.set(0);
+    contentY.set(0);
+  }
 
   // ----- counter data (runs for everyone, independent of the reveal) -----
   useEffect(() => {
@@ -267,13 +291,15 @@ export function BeyondTheEnd() {
     return (
       <section
         aria-hidden
-        className="panel-glass relative flex cursor-default select-none items-center justify-center border-t border-line bg-drawer/85 px-6 backdrop-blur-2xl"
+        className="panel-glass drawer-pane relative flex cursor-default select-none items-center justify-center overflow-hidden border-t border-line bg-drawer/75 px-6 backdrop-blur-2xl"
         style={{ height: PANEL }}
       >
+        <DrawerAtmosphere />
         <div
           aria-hidden
           className="panel-bloom pointer-events-none absolute inset-0"
         />
+        <div aria-hidden className="panel-refraction pointer-events-none absolute inset-0" />
         <div className="relative z-10 flex flex-col items-center gap-5">
           <span className="select-none font-mono text-[10px] uppercase tracking-[0.3em] text-faint">
             past the end
@@ -331,15 +357,20 @@ export function BeyondTheEnd() {
       )}
 
       <motion.section
+        ref={panelRef}
         aria-hidden
         style={{ y, height: PANEL, display: panelShown ? undefined : "none" }}
-        className="panel-glass fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center rounded-t-[14px] bg-drawer/85 px-6 backdrop-blur-2xl"
+        onPointerMove={(event) => moveGlass(event.clientX, event.clientY)}
+        onPointerLeave={settleGlass}
+        className="panel-glass drawer-pane fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center overflow-hidden rounded-t-[18px] bg-drawer/75 px-6 backdrop-blur-2xl"
       >
+        <DrawerAtmosphere />
         <motion.div
           aria-hidden
           style={{ opacity: edgeOpacity }}
           className="panel-bloom pointer-events-none absolute inset-0"
         />
+        <div aria-hidden className="panel-refraction pointer-events-none absolute inset-0" />
         {/* The cast shadow lives on this hairline rather than on the panel so it
             can fade with edgeOpacity: a shadow on the panel itself projects up
             into the viewport while the panel is still parked off-screen, which
@@ -354,6 +385,7 @@ export function BeyondTheEnd() {
           variants={container}
           initial="hidden"
           animate={revealed ? "show" : "hidden"}
+          style={{ x: contentX, y: contentY }}
           className="relative z-10 flex flex-col items-center gap-5"
         >
           <motion.span

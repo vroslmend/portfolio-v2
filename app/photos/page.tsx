@@ -14,7 +14,7 @@ export default function PhotosPage() {
     <div className="flex flex-col gap-10 pb-8">
       <section className="flex flex-col gap-5">
         <Reveal mask>
-          <h1 className="font-serif text-[22px] font-medium italic leading-[1.15] tracking-[-0.015em] text-fg sm:text-[24px]">
+          <h1 className="display-title text-fg">
             photos.
           </h1>
         </Reveal>

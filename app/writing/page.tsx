@@ -32,7 +32,7 @@ export default function WritingPage() {
   return (
     <div className="flex flex-col gap-12 pb-8">
       <Reveal mask>
-        <h1 className="font-serif text-[22px] font-medium italic leading-[1.15] tracking-[-0.015em] text-fg sm:text-[24px]">
+        <h1 className="display-title text-fg">
           occasional writing, hopefully.
         </h1>
       </Reveal>
