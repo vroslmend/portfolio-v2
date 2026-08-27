@@ -20,7 +20,7 @@ export default function Home() {
           <NameReveal
             text="ammar hassan"
             delay={0.12}
-            className="text-[38px] font-medium leading-[1.15] tracking-tight text-fg sm:text-[48px]"
+            className="text-[clamp(2.5rem,5vw,4rem)] font-medium leading-[1.02] tracking-[-0.045em] text-fg"
           />
           <Reveal delay={0.18}>
             <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
@@ -49,6 +49,12 @@ export default function Home() {
               .
             </p>
           </Reveal>
+          <Reveal delay={0.36}>
+            <p className="font-mono text-[12px] leading-relaxed tracking-[0.04em] text-muted text-pretty">
+              <span className="text-fg">now</span> — {site.now}
+              <span className="text-faint"> · jun 2026</span>
+            </p>
+          </Reveal>
         </section>
       </Drift>
 
@@ -70,15 +76,6 @@ export default function Home() {
           </div>
         </Reveal>
         <WorkList projects={featured} />
-      </section>
-
-      <section>
-        <Reveal>
-          <p className="font-mono text-[12px] leading-relaxed tracking-[0.04em] text-faint text-pretty">
-            <span className="text-muted">now</span> — {site.now}
-            <span className="opacity-50"> · jun 2026</span>
-          </p>
-        </Reveal>
       </section>
     </div>
   );
