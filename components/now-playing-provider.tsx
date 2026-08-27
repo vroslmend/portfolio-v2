@@ -46,18 +46,39 @@ export function NowPlayingProvider({
       }
     }
 
-    load();
-    const id = setInterval(load, POLL_MS);
-    const onVisible = () => {
-      if (document.visibilityState === "visible") load();
-    };
-    document.addEventListener("visibilitychange", onVisible);
+    // The interval only runs while the tab is visible. A backgrounded tab used
+    // to keep polling forever, which is 180 requests an hour against the route
+    // and Spotify for a widget nobody is looking at. Keep the stop, and don't
+    // collapse this back into a bare setInterval.
+    let timer: ReturnType<typeof setInterval> | undefined;
+
+    function start() {
+      timer ??= setInterval(load, POLL_MS);
+    }
+    function stop() {
+      clearInterval(timer);
+      timer = undefined;
+    }
+
+    function sync() {
+      if (document.visibilityState === "visible") {
+        load(); // whatever is on screen went stale while we were away
+        start();
+      } else {
+        stop();
+      }
+    }
+
+    // Read the state rather than assuming visible: a tab can be opened in the
+    // background, or restored from bfcache while still hidden.
+    sync();
+    document.addEventListener("visibilitychange", sync);
 
     return () => {
       active = false;
       controller.abort();
-      clearInterval(id);
-      document.removeEventListener("visibilitychange", onVisible);
+      stop();
+      document.removeEventListener("visibilitychange", sync);
     };
   }, []);
 
