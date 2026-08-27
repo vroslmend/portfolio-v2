@@ -12,6 +12,15 @@
   /* "past the end" frosted panel: a whisper of edge light + a specular top rim */
   --bloom: rgba(255, 255, 255, 0.03);
   --glass-edge: rgba(255, 255, 255, 0.1);
+  /* the ground: a light source behind the column, falling off to the edges and
+     sinking toward the footer, so the page reads as a lit surface rather than a
+     filled rectangle. Both are barely-there on purpose. */
+  --ground-lift: rgba(255, 255, 255, 0.026);
+  --ground-sink: rgba(0, 0, 0, 0.32);
+  /* the drawer sits on its own plane, a real step above the page (--bg #0e0e0e
+     vs --panel #121212 was a 4/255 difference, which read as the same surface) */
+  --drawer: #1c1c1c;
+  --drawer-dim: rgba(0, 0, 0, 0.5);
 }
 
 .light {
@@ -26,6 +35,12 @@
   /* white barely lifts the warm off-white panel, so keep these fairly strong */
   --bloom: rgba(255, 255, 255, 0.28);
   --glass-edge: rgba(255, 255, 255, 0.6);
+  /* light mode reads the other way round: paper is lit from above already, so
+     the lift is white and the sink is a warm grey rather than black */
+  --ground-lift: rgba(255, 255, 255, 0.5);
+  --ground-sink: rgba(120, 112, 96, 0.1);
+  --drawer: #faf9f6;
+  --drawer-dim: rgba(26, 25, 21, 0.18);
 }
 
 @theme inline {
@@ -36,6 +51,7 @@
   --color-line: var(--line);
   --color-surface: var(--surface);
   --color-panel: var(--panel);
+  --color-drawer: var(--drawer);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-newsreader);
@@ -51,7 +67,24 @@ html {
 }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  /* The ground. Two very wide, very faint ellipses pinned to the viewport: a
+     lift behind the column up top (the light source) and a sink at the bottom
+     (which also gives the drawer something darker to rise out of). Fixed
+     attachment so they stay put while the page scrolls under them. */
+  background-image:
+    radial-gradient(
+      ellipse 90% 55% at 50% -8%,
+      var(--ground-lift) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 130% 60% at 50% 112%,
+      var(--ground-sink) 0%,
+      transparent 68%
+    );
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--fg);
   font-family: var(--font-geist-sans), sans-serif;
   -webkit-font-smoothing: antialiased;

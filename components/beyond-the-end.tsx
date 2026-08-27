@@ -71,6 +71,11 @@ export function BeyondTheEnd() {
   // bottom, worst on mobile Chrome as the address bar resizes the viewport).
   // Fade them in with the reveal so nothing shows until the panel actually rises.
   const edgeOpacity = useTransform(lift, [0, 0.12], [0, 1]);
+  // The page dims behind the drawer. Without this the panel and the page sit at
+  // the same brightness, which is exactly what makes them read as one plane —
+  // occlusion is most of what says "this thing is in front". It leads slightly
+  // during the peek so a partial pull already feels like something lifting.
+  const dimOpacity = useTransform(lift, [0, 0.3, 1], [0, 0.22, 1]);
   // Mobile Chrome miscalculates a fixed + transformed element's position while
   // the address bar hides/shows on scroll, so an off-screen-via-translate panel
   // peeks above the toolbar mid-drag. visibility:hidden isn't enough (the
@@ -262,7 +267,7 @@ export function BeyondTheEnd() {
     return (
       <section
         aria-hidden
-        className="panel-glass relative flex cursor-default select-none items-center justify-center border-t border-line bg-panel/80 px-6 backdrop-blur-md"
+        className="panel-glass relative flex cursor-default select-none items-center justify-center border-t border-line bg-drawer/85 px-6 backdrop-blur-2xl"
         style={{ height: PANEL }}
       >
         <div
@@ -311,28 +316,39 @@ export function BeyondTheEnd() {
         </motion.span>
       </motion.div>
 
-      {revealed && (
-        <div
+      {/* Mounted for the whole gesture (not just once revealed) so the dim rides
+          the pull in and back out. It only catches the click-off once the drawer
+          has actually committed. */}
+      {panelShown && (
+        <motion.div
           aria-hidden
           onClick={() => closeRef.current()}
-          className="fixed inset-0 z-80 cursor-default"
+          style={{ opacity: dimOpacity, backgroundColor: "var(--drawer-dim)" }}
+          className={`fixed inset-0 z-80 cursor-default ${
+            revealed ? "" : "pointer-events-none"
+          }`}
         />
       )}
 
       <motion.section
         aria-hidden
         style={{ y, height: PANEL, display: panelShown ? undefined : "none" }}
-        className="panel-glass fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center bg-panel/80 px-6 backdrop-blur-md"
+        className="panel-glass fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center rounded-t-[14px] bg-drawer/85 px-6 backdrop-blur-2xl"
       >
         <motion.div
           aria-hidden
           style={{ opacity: edgeOpacity }}
           className="panel-bloom pointer-events-none absolute inset-0"
         />
+        {/* The cast shadow lives on this hairline rather than on the panel so it
+            can fade with edgeOpacity: a shadow on the panel itself projects up
+            into the viewport while the panel is still parked off-screen, which
+            is the translucent band the mobile-Chrome note above is about. Broad
+            and soft, because a drawer occludes the page over a wide falloff. */}
         <motion.div
           aria-hidden
           style={{ opacity: edgeOpacity }}
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-faint/50 to-transparent shadow-[0_-30px_60px_-30px_var(--shadow-dialog)]"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-faint/50 to-transparent shadow-[0_-30px_70px_-8px_var(--shadow-dialog)]"
         />
         <motion.div
           variants={container}
