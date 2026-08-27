@@ -17,7 +17,7 @@ export default function WorkPage() {
   return (
     <div className="flex flex-col gap-20 pb-8">
       <Reveal mask>
-        <h1 className="text-[15px] font-medium text-muted">
+        <h1 className="display-title text-fg">
           a selection of things i&apos;ve built over the last few years.
         </h1>
       </Reveal>
@@ -26,7 +26,7 @@ export default function WorkPage() {
 
       <section className="flex flex-col gap-6">
         <Reveal>
-          <h2 className="select-none font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+          <h2 className="select-none font-mono text-[12px] uppercase tracking-[0.18em] text-faint">
             more work
           </h2>
         </Reveal>

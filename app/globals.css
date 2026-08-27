@@ -12,6 +12,21 @@
   /* "past the end" frosted panel: a whisper of edge light + a specular top rim */
   --bloom: rgba(255, 255, 255, 0.03);
   --glass-edge: rgba(255, 255, 255, 0.1);
+  /* the ground: a light source behind the column, falling off to the edges and
+     sinking toward the footer, so the page reads as a lit surface rather than a
+     filled rectangle. Both are barely-there on purpose. */
+  --ground-lift: rgba(255, 255, 255, 0.026);
+  --ground-sink: rgba(0, 0, 0, 0.32);
+  /* the drawer sits on its own plane, a real step above the page (--bg #0e0e0e
+     vs --panel #121212 was a 4/255 difference, which read as the same surface) */
+  --drawer: #171717;
+  --drawer-dim: rgba(0, 0, 0, 0.58);
+  /* grain: see the film-grain block below for why the blend differs per theme */
+  --grain-opacity: 0.14;
+  --grain-blend: plus-lighter;
+  --grain-invert: 0;
+  --grain-size: 220px;
+  --grain-speed: 0.8s;
 }
 
 .light {
@@ -26,6 +41,15 @@
   /* white barely lifts the warm off-white panel, so keep these fairly strong */
   --bloom: rgba(255, 255, 255, 0.28);
   --glass-edge: rgba(255, 255, 255, 0.6);
+  /* light mode reads the other way round: paper is lit from above already, so
+     the lift is white and the sink is a warm grey rather than black */
+  --ground-lift: rgba(255, 255, 255, 0.5);
+  --ground-sink: rgba(120, 112, 96, 0.1);
+  --drawer: #f4f2ed;
+  --drawer-dim: rgba(26, 25, 21, 0.18);
+  --grain-opacity: 0.14;
+  --grain-blend: multiply;
+  --grain-invert: 1;
 }
 
 @theme inline {
@@ -36,6 +60,7 @@
   --color-line: var(--line);
   --color-surface: var(--surface);
   --color-panel: var(--panel);
+  --color-drawer: var(--drawer);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-newsreader);
@@ -51,7 +76,24 @@ html {
 }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  /* The ground. Two very wide, very faint ellipses pinned to the viewport: a
+     lift behind the column up top (the light source) and a sink at the bottom
+     (which also gives the drawer something darker to rise out of). Fixed
+     attachment so they stay put while the page scrolls under them. */
+  background-image:
+    radial-gradient(
+      ellipse 90% 55% at 50% -8%,
+      var(--ground-lift) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 130% 60% at 50% 112%,
+      var(--ground-sink) 0%,
+      transparent 68%
+    );
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--fg);
   font-family: var(--font-geist-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -70,25 +112,125 @@ html.theme-ready body {
   color: var(--bg);
 }
 
-/* ---- film grain ---- */
+/* ---- film grain ----
+   The tile is desaturated (fractalNoise is colour noise, which shows as faint
+   speckle once you push the opacity on a strictly monochrome site) and gamma-
+   crushed, so it is mostly black with a sparse spray of light. That shape is
+   what lets it blend rather than veil:
+
+   - dark:  plus-lighter. The black areas add nothing, so the blacks stay black
+            and only the specks add light. Grain in shadows, which is how film
+            actually behaves.
+   - light: the same tile inverted, multiplied. Mostly white adds nothing, the
+            specks take light away.
+
+   Alpha is forced to 1 (feFuncA) so the tile is a solid field rather than a
+   second layer of noise in the alpha channel. */
 body::after {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  /* Pin to the large viewport instead of inset:0 so the overlay never resizes
-     when Android Chrome's address bar collapses on the first scroll down —
-     that resize was mis-painting a translucent band across the bottom. */
-  height: 100vh;
-  height: 100lvh;
+  /* Oversized and centred so the shift below can never expose an edge. This
+     also removes the reason for the old 100lvh pin: the layer extends half a
+     viewport past every side, so Android Chrome collapsing its address bar
+     cannot uncover the bottom edge mid-scroll. */
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
   z-index: 100;
   pointer-events: none;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  filter: invert(var(--grain-invert));
+  background-size: var(--grain-size) var(--grain-size);
+  /* color-interpolation-filters='sRGB' is load-bearing: SVG filters default to
+     linearRGB, so a gamma crush applied there is largely undone by the
+     conversion back to sRGB. Without it the tile's mean lands near 0.46
+     instead of 0.13 and the layer washes the page (#0e0e0e -> #222222) rather
+     than speckling it. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='gamma' exponent='3'/%3E%3CfeFuncG type='gamma' exponent='3'/%3E%3CfeFuncB type='gamma' exponent='3'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E");
+  /* Jumping the tile between fixed offsets is what separates "film" from
+     "dirty screen" — a frozen noise field is something the eye adapts to and
+     stops seeing within about a second. steps(1) holds each offset instead of
+     sliding between them, so it reads as frames rather than drift. */
+  animation: grain-shift var(--grain-speed) steps(1) infinite;
+  will-change: transform;
 }
-.light body::after {
-  opacity: 0.05;
+
+/* Four variations of one material, rather than four unrelated backgrounds. */
+@keyframes grain-shift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  10% {
+    transform: translate(-2%, -3%);
+  }
+  20% {
+    transform: translate(-4%, 2%);
+  }
+  30% {
+    transform: translate(2%, -4%);
+  }
+  40% {
+    transform: translate(-2%, 5%);
+  }
+  50% {
+    transform: translate(-4%, 1%);
+  }
+  60% {
+    transform: translate(3%, 0);
+  }
+  70% {
+    transform: translate(0, 3%);
+  }
+  80% {
+    transform: translate(-3%, 1%);
+  }
+  90% {
+    transform: translate(2%, 2%);
+  }
+}
+
+/* the grain is the one thing on the page that is meant to be felt rather than
+   seen, so it is the first thing to go when someone asks for less motion */
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* ---- display type ----
+   One scale for the whole site: the home name peaks at 64px on a wide viewport
+   and page titles open at 22/24px. Geist throughout — the only serif on the
+   page is the `.accent-serif` word, which is what makes it register. */
+.hero-name {
+  font-size: clamp(2.55rem, 5.4vw, 4.35rem);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.06em;
+}
+
+.display-title {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+/* Nastaliq brings its own italic-like slant and needs no tracking of ours. It
+   is also set smaller than the Latin it replaces: at a matched em size its ink
+   runs far taller and deeper, which crowds whatever sits below the name. */
+.urdu-name {
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+@media (min-width: 640px) {
+  .display-title {
+    font-size: 24px;
+  }
 }
 
 /* ---- serif italic accent ---- */
@@ -520,16 +662,117 @@ body::after {
    panel. `panel-bloom` adds only a whisper of light pooled at the far left/right
    edges, fading out before the centered text so contrast stays clean. */
 .panel-glass {
-  box-shadow: inset 0 1px 0 0 var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-edge),
+    inset 0 18px 36px -32px rgba(255, 255, 255, 0.24),
+    0 -30px 90px -38px var(--shadow-dialog);
 }
-.panel-bloom {
+/* The pane reads as glass through four cues, none of which is "add white":
+   the page behind it is blurred and dropped by the scrim (depth), the leading
+   rim genuinely bends what is behind it through an SVG displacement map
+   (refraction, Chromium; every other engine keeps the plain blur and loses
+   nothing), a single slow sheen crosses the surface (light), and the tint is
+   smoked rather than frosted. */
+.drawer-pane {
+  --glass-x: 50%;
+  background-color: color-mix(in srgb, var(--drawer) 62%, transparent);
+  backdrop-filter: blur(26px) saturate(112%) brightness(0.78);
+  -webkit-backdrop-filter: blur(26px) saturate(112%) brightness(0.78);
+  border-color: color-mix(in srgb, var(--glass-edge) 58%, transparent);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.026), transparent 26%);
+}
+.light .drawer-pane {
+  background-color: color-mix(in srgb, var(--drawer) 76%, transparent);
+  backdrop-filter: blur(26px) saturate(104%) brightness(1.02);
+  -webkit-backdrop-filter: blur(26px) saturate(104%) brightness(1.02);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 30%);
+}
+
+/* Refraction, confined to the leading edge, which is where real glass bends
+   most and a small enough surface that the Chromium-only path is a bonus
+   rather than a dependency. The mask fades the bend out into the body. */
+.glass-bevel {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  height: 26px;
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.32) 58%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.32) 58%, transparent);
+}
+@supports (backdrop-filter: url("#drawer-glass")) {
+  .glass-bevel {
+    backdrop-filter: url(#drawer-glass);
+    -webkit-backdrop-filter: url(#drawer-glass);
+  }
+}
+
+/* One slow sheen, not a cursor spotlight. */
+.glass-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    104deg,
+    transparent 34%,
+    rgba(255, 255, 255, 0.028) 46%,
+    rgba(255, 255, 255, 0.01) 53%,
+    transparent 66%
+  );
+  background-size: 240% 100%;
+  animation: glass-sheen 19s ease-in-out infinite;
+}
+.light .glass-sheen {
+  background: linear-gradient(104deg, transparent 34%, rgba(255, 255, 255, 0.55) 47%, transparent 66%);
+  background-size: 240% 100%;
+  mix-blend-mode: soft-light;
+}
+@keyframes glass-sheen {
+  0%, 100% { background-position: 132% 0; }
+  50% { background-position: -32% 0; }
+}
+
+/* The rim is a hairline of light that brightens where the pointer meets it:
+   light catching a bevel, rather than a glow following the cursor. */
+.glass-rim {
   background:
-    radial-gradient(ellipse 26% 80% at 0% 50%, var(--bloom) 0%, transparent 72%),
-    radial-gradient(
-      ellipse 26% 80% at 100% 50%,
-      var(--bloom) 0%,
-      transparent 72%
+    radial-gradient(8rem 1px at var(--glass-x) 50%, var(--glass-edge), transparent),
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--glass-edge) 45%, transparent) 24%,
+      color-mix(in srgb, var(--glass-edge) 45%, transparent) 76%,
+      transparent
     );
+}
+
+.drawer-shader {
+  position: absolute !important;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: screen;
+}
+.light .drawer-shader {
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+}
+
+.panel-bloom {
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 26% 80% at 0% 50%, color-mix(in srgb, var(--bloom) 55%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 26% 80% at 100% 50%, color-mix(in srgb, var(--bloom) 55%, transparent) 0%, transparent 72%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-sheen {
+    animation: none !important;
+  }
 }
 
 /* ---- shared hairlines ----

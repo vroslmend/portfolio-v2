@@ -12,6 +12,14 @@ import {
 } from "motion/react";
 import { useLenis } from "lenis/react";
 import { EASE } from "@/lib/motion";
+import dynamic from "next/dynamic";
+
+// WebGL, for a panel most visitors never open: loading it with the page would
+// put the shader runtime in every route's first paint for nothing.
+const DrawerAtmosphere = dynamic(
+  () => import("@/components/drawer-atmosphere").then((m) => m.DrawerAtmosphere),
+  { ssr: false },
+);
 
 const API = process.env.NEXT_PUBLIC_COUNTER_API_URL;
 const PANEL = 248; // panel height (px) and the height it rises to
@@ -47,6 +55,47 @@ const item = {
 
 type Counts = { visits: number; prius: number };
 
+// The refraction map. Green rises toward the leading edge, so feDisplacementMap
+// samples further down the backdrop there and the page appears to bend around
+// the rim; red stays neutral, so nothing shifts sideways. Chromium is the only
+// engine that runs an SVG filter inside backdrop-filter today — the @supports
+// guard in globals.css leaves every other engine on the plain blur, which is
+// why the bend is confined to a 26px strip rather than the whole pane.
+const GLASS_MAP =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='40' preserveAspectRatio='none'%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='rgb(128,255,128)'/%3E%3Cstop offset='0.45' stop-color='rgb(128,158,128)'/%3E%3Cstop offset='1' stop-color='rgb(128,128,128)'/%3E%3C/linearGradient%3E%3Crect width='4' height='40' fill='url(%23g)'/%3E%3C/svg%3E";
+
+function GlassFilter() {
+  return (
+    <svg aria-hidden focusable="false" className="pointer-events-none absolute h-0 w-0">
+      <filter
+        id="drawer-glass"
+        x="0"
+        y="0"
+        width="100%"
+        height="100%"
+        colorInterpolationFilters="sRGB"
+      >
+        <feImage
+          href={GLASS_MAP}
+          result="map"
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          preserveAspectRatio="none"
+        />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="map"
+          scale={26}
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
+    </svg>
+  );
+}
+
 // stable per-client random pick; SSR + hydration always see QUIPS[0]
 let clientQuip: string | null = null;
 const pickQuip = () =>
@@ -71,6 +120,11 @@ export function BeyondTheEnd() {
   // bottom, worst on mobile Chrome as the address bar resizes the viewport).
   // Fade them in with the reveal so nothing shows until the panel actually rises.
   const edgeOpacity = useTransform(lift, [0, 0.12], [0, 1]);
+  // The page dims behind the drawer. Without this the panel and the page sit at
+  // the same brightness, which is exactly what makes them read as one plane —
+  // occlusion is most of what says "this thing is in front". It leads slightly
+  // during the peek so a partial pull already feels like something lifting.
+  const dimOpacity = useTransform(lift, [0, 0.3, 1], [0, 0.22, 1]);
   // Mobile Chrome miscalculates a fixed + transformed element's position while
   // the address bar hides/shows on scroll, so an off-screen-via-translate panel
   // peeks above the toolbar mid-drag. visibility:hidden isn't enough (the
@@ -79,6 +133,27 @@ export function BeyondTheEnd() {
   useMotionValueEvent(lift, "change", (v) => setPanelShown(v > 0.0005));
   // lets the click-off scrim and Escape reuse the gesture's own close logic
   const closeRef = useRef<() => void>(() => {});
+  const panelRef = useRef<HTMLElement>(null);
+  const contentX = useSpring(0, { stiffness: 110, damping: 24, mass: 0.45 });
+  const contentY = useSpring(0, { stiffness: 110, damping: 24, mass: 0.45 });
+
+  function moveGlass(clientX: number, clientY: number) {
+    const panel = panelRef.current;
+    if (!panel) return;
+    const rect = panel.getBoundingClientRect();
+    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+    panel.style.setProperty("--glass-x", `${(x * 100).toFixed(1)}%`);
+    contentX.set((x - 0.5) * 5);
+    contentY.set((y - 0.5) * 3.5);
+  }
+
+  function settleGlass() {
+    const panel = panelRef.current;
+    panel?.style.setProperty("--glass-x", "50%");
+    contentX.set(0);
+    contentY.set(0);
+  }
 
   // ----- counter data (runs for everyone, independent of the reveal) -----
   useEffect(() => {
@@ -262,13 +337,17 @@ export function BeyondTheEnd() {
     return (
       <section
         aria-hidden
-        className="panel-glass relative flex cursor-default select-none items-center justify-center border-t border-line bg-panel/80 px-6 backdrop-blur-md"
+        className="panel-glass drawer-pane relative flex cursor-default select-none items-center justify-center overflow-hidden border-t border-line px-6"
         style={{ height: PANEL }}
       >
+        <GlassFilter />
+        <DrawerAtmosphere />
         <div
           aria-hidden
           className="panel-bloom pointer-events-none absolute inset-0"
         />
+        <div aria-hidden className="glass-bevel" />
+        <div aria-hidden className="glass-sheen" />
         <div className="relative z-10 flex flex-col items-center gap-5">
           <span className="select-none font-mono text-[10px] uppercase tracking-[0.3em] text-faint">
             past the end
@@ -311,33 +390,52 @@ export function BeyondTheEnd() {
         </motion.span>
       </motion.div>
 
-      {revealed && (
-        <div
+      {/* Mounted for the whole gesture (not just once revealed) so the dim rides
+          the pull in and back out. It only catches the click-off once the drawer
+          has actually committed. */}
+      {panelShown && (
+        <motion.div
           aria-hidden
           onClick={() => closeRef.current()}
-          className="fixed inset-0 z-80 cursor-default"
+          style={{ opacity: dimOpacity, backgroundColor: "var(--drawer-dim)" }}
+          className={`fixed inset-0 z-80 cursor-default backdrop-blur-[7px] ${
+            revealed ? "" : "pointer-events-none"
+          }`}
         />
       )}
 
       <motion.section
+        ref={panelRef}
         aria-hidden
         style={{ y, height: PANEL, display: panelShown ? undefined : "none" }}
-        className="panel-glass fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center bg-panel/80 px-6 backdrop-blur-md"
+        onPointerMove={(event) => moveGlass(event.clientX, event.clientY)}
+        onPointerLeave={settleGlass}
+        className="panel-glass drawer-pane fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center overflow-hidden rounded-t-[18px] px-6"
       >
+        <GlassFilter />
+        <DrawerAtmosphere />
         <motion.div
           aria-hidden
           style={{ opacity: edgeOpacity }}
           className="panel-bloom pointer-events-none absolute inset-0"
         />
+        <div aria-hidden className="glass-bevel" />
+        <div aria-hidden className="glass-sheen" />
+        {/* The cast shadow lives on this hairline rather than on the panel so it
+            can fade with edgeOpacity: a shadow on the panel itself projects up
+            into the viewport while the panel is still parked off-screen, which
+            is the translucent band the mobile-Chrome note above is about. Broad
+            and soft, because a drawer occludes the page over a wide falloff. */}
         <motion.div
           aria-hidden
           style={{ opacity: edgeOpacity }}
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-faint/50 to-transparent shadow-[0_-30px_60px_-30px_var(--shadow-dialog)]"
+          className="glass-rim pointer-events-none absolute inset-x-0 top-0 z-4 h-px shadow-[0_-30px_70px_-8px_var(--shadow-dialog)]"
         />
         <motion.div
           variants={container}
           initial="hidden"
           animate={revealed ? "show" : "hidden"}
+          style={{ x: contentX, y: contentY }}
           className="relative z-10 flex flex-col items-center gap-5"
         >
           <motion.span
