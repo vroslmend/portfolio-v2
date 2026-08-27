@@ -197,6 +197,27 @@ body::after {
   }
 }
 
+/* ---- shader dither experiment ----
+   Paper Shaders supplies the Bayer thresholding and animated simplex field;
+   this layer only positions it in our stack. Main/footer are promoted above
+   the canvas so the effect textures the ground, never the type. */
+.dither-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+main,
+footer {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-texture="dither"] body::after {
+  opacity: 0;
+}
+
 /* ---- serif italic accent ---- */
 .accent-serif {
   font-family: var(--font-newsreader), serif;
