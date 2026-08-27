@@ -20,7 +20,7 @@ export default function Home() {
           <NameReveal
             text="ammar hassan"
             delay={0.12}
-            className="text-[clamp(2.5rem,5vw,4rem)] font-medium leading-[1.02] tracking-[-0.045em] text-fg"
+            className="font-serif text-[clamp(2.5rem,5vw,4rem)] font-medium italic leading-[1.02] tracking-[-0.045em] text-fg"
           />
           <Reveal delay={0.18}>
             <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
@@ -61,7 +61,7 @@ export default function Home() {
       <section className="flex flex-col gap-6">
         <Reveal>
           <div className="flex items-baseline justify-between">
-            <h2 className="select-none font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+            <h2 className="select-none font-mono text-[12px] uppercase tracking-[0.18em] text-faint">
               selected work
             </h2>
             <Link

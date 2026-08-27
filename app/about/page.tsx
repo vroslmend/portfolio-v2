@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="select-none font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
+    <h2 className="select-none font-mono text-[12px] uppercase tracking-[0.18em] text-faint">
       {children}
     </h2>
   );
@@ -23,7 +23,9 @@ export default function AboutPage() {
     <div className="flex flex-col gap-20 pb-8">
       <section className="flex flex-col gap-7">
         <Reveal mask>
-          <h1 className="text-[15px] font-medium text-muted">about me.</h1>
+          <h1 className="font-serif text-[22px] font-medium italic leading-[1.15] tracking-[-0.015em] text-fg sm:text-[24px]">
+            about me.
+          </h1>
         </Reveal>
         <Reveal delay={0.12}>
           <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
