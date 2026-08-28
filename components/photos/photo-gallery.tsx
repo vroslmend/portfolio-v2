@@ -95,6 +95,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     if (!doc.startViewTransition || reduced) {
       set(next);
       if (next !== null) setMode(stepping ? "cross" : "morph");
+      else setHero(null);
       setSettled(true);
       return;
     }
@@ -118,10 +119,9 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     // image on the first open flickers blur→full as the "odd one out".
     const root = document.documentElement;
     root.classList.add("photo-vt");
-    // View-transition snapshots sit above every normal z-index. On close, give
-    // the fixed header its own snapshot so it can ease back over a hero whose
-    // destination tile sits underneath it, rather than snapping above the tile
-    // only when the browser removes the transition layer on the final frame.
+    // On close, the transition copy fades into an identical underlay retained
+    // in the wall. That reveals the fixed header already present in the final
+    // root snapshot; no separately rasterized header snapshot is involved.
     root.classList.toggle("photo-vt-close", closing);
 
     const vt = doc.startViewTransition(() =>

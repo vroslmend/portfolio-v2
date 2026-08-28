@@ -437,31 +437,22 @@ body::after {
   z-index: 2;
 }
 
-/* A view-transition snapshot outranks every normal DOM z-index. When a photo
-   closes into a tile partially under the fixed header, keeping only the photo
-   snapshot would therefore leave it above the header until the final frame,
-   then snap it underneath. Give the header a close-only transition layer above
-   the hero and ease it back during the latter half of the return. The photo now
-   reads as passing under the header, while opening keeps its existing layering. */
-.photo-vt-close [data-photo-vt-header] {
-  view-transition-name: photo-header;
+/* Named transition elements sit above every normal z-index. Fade the closing
+   hero into the identical unnamed tile retained in the root snapshot, where the
+   final fixed header and its backdrop already have the right stacking. Outside
+   the header overlap the two images are identical, so only the natural under-
+   header occlusion becomes visible. */
+.photo-vt-close::view-transition-old(photo-hero),
+.photo-vt-close::view-transition-new(photo-hero) {
+  animation: photo-close-handoff 250ms cubic-bezier(0.7, 0, 0.84, 0) both;
 }
-.photo-vt-close::view-transition-old(photo-header),
-.photo-vt-close::view-transition-new(photo-header) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-.photo-vt-close::view-transition-group(photo-header) {
-  z-index: 3;
-  animation: photo-header-return 250ms var(--ease-out-expo) both;
-}
-@keyframes photo-header-return {
+@keyframes photo-close-handoff {
   0%,
-  38% {
-    opacity: 0;
+  62% {
+    opacity: 1;
   }
   100% {
-    opacity: 1;
+    opacity: 0;
   }
 }
 

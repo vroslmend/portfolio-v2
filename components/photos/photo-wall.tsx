@@ -44,6 +44,24 @@ function makeRender(
           warmPhoto(lightboxSrc(p));
         }}
       >
+        {/* Keep one identical, unnamed copy underneath the active hero. View
+            Transitions remove named elements from the root snapshot; this copy
+            stays in it, so the closing transition can dissolve into the real
+            tile under the real fixed header instead of swapping z-layers on
+            the final frame. It reuses the wall image's already-decoded URL. */}
+        {hero === index && (
+          <Image
+            src={p.src}
+            alt=""
+            aria-hidden
+            fill
+            sizes={sizes}
+            placeholder="blur"
+            blurDataURL={p.blurDataURL}
+            quality={75}
+            className="object-cover"
+          />
+        )}
         <Image
           src={p.src}
           alt={alt}
