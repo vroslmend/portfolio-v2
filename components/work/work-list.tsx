@@ -23,7 +23,7 @@ export function WorkList({ projects }: { projects: Project[] }) {
             <motion.div
               initial={reduced ? false : { opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-8% 0px" }}
+              viewport={{ once: true, margin: "0px" }}
               transition={{ duration: 0.7, ease: EASE, delay: i * 0.07 }}
             >
             <a
