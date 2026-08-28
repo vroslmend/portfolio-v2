@@ -8,8 +8,13 @@ import { useTheme } from "next-themes";
  * Density inside the pane, not light on top of it. The colours sit close to the
  * drawer's own tint so the shader varies the smoke rather than washing it out;
  * the panel's brightness comes from its rim and sheen instead.
+ *
+ * `animate` is off while the drawer is moving. speed 0 cancels the shader's rAF
+ * loop outright, so the pane costs one static texture during the open — which is
+ * exactly the moment a spring is animating the panel's transform and a phone has
+ * no frames to spare. The smoke starts once the drawer has settled.
  */
-export function DrawerAtmosphere() {
+export function DrawerAtmosphere({ animate = true }: { animate?: boolean }) {
   const { resolvedTheme } = useTheme();
   const reduced = useReducedMotion();
   const light = resolvedTheme === "light";
@@ -28,7 +33,7 @@ export function DrawerAtmosphere() {
       softness={0.92}
       intensity={0.2}
       noise={0.55}
-      speed={reduced ? 0 : 0.07}
+      speed={reduced || !animate ? 0 : 0.07}
       scale={1.25}
       minPixelRatio={1}
       maxPixelCount={1440 * 420}
