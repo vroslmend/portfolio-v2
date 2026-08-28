@@ -21,8 +21,7 @@ export function PhotoLightbox({
   photos,
   index,
   settled,
-  mode,
-  slot,
+  stepPhase,
   loading,
   onClose,
   onStep,
@@ -31,9 +30,7 @@ export function PhotoLightbox({
   photos: Photo[];
   index: number | null;
   settled: boolean;
-  mode: "morph" | "cross";
-  /** which of the two alternating `photo-cross-*` names to wear (see gallery) */
-  slot: number;
+  stepPhase: "idle" | "out" | "swap" | "in";
   loading: boolean;
   onClose: () => void;
   /** move by ±1 — relative, so a press mid-transition still counts (see gallery) */
@@ -47,12 +44,15 @@ export function PhotoLightbox({
   // stays mounted; collapsed again whenever the lightbox closes (index → null),
   // reset in render so it's clean on the next open without a setState-in-effect.
   const [details, setDetails] = useState(false);
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
   const [seen, setSeen] = useState(index);
   if (index !== seen) {
     setSeen(index);
     if (index === null) setDetails(false);
   }
   const photo = index === null ? null : photos[index];
+  const src = photo ? lightboxSrc(photo) : null;
+  const imageReady = src !== null && loadedSrc === src;
   const prev =
     index === null ? 0 : (index - 1 + photos.length) % photos.length;
   const next = index === null ? 0 : (index + 1) % photos.length;
@@ -225,24 +225,10 @@ export function PhotoLightbox({
               blurDataURL sits behind it as the background, so a photo that is
               still arriving shows its own blur at the right size instead of an
               empty box with a caption floating in the middle of it. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={lightboxSrc(photo)}
-            alt={photo.alt}
-            width={photo.width}
-            height={photo.height}
-            decoding="async"
-            onLoad={onLoaded}
-            onError={onLoaded}
-            // `photo-hero` (shared with the tile) for the open/close morph; an
-            // alternating non-shared name for steps, which puts the two frames
-            // in separate transition groups so one can leave before the next
-            // arrives rather than ghosting through it.
+          <div
+            className="photo-image-frame"
             style={{
-              viewTransitionName:
-                mode === "cross" && index !== null
-                  ? `photo-cross-${slot}`
-                  : "photo-hero",
+              viewTransitionName: "photo-hero",
               backgroundImage: `url("${photo.blurDataURL}")`,
               backgroundSize: "cover",
               backgroundPosition: "center",
@@ -252,8 +238,25 @@ export function PhotoLightbox({
               // the blur and the view-transition target never begin at 0×0.
               width: `min(1200px, 92vw, ${82 * (photo.width / photo.height)}dvh)`,
             }}
-            className="max-h-[82dvh] max-w-full rounded-sm object-contain"
-          />
+          >
+            {/* A key forces a fresh DOM image for every photo. The browser
+                cannot retain the old request over the new blur placeholder. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              key={src}
+              src={src ?? undefined}
+              alt={photo.alt}
+              width={photo.width}
+              height={photo.height}
+              decoding="async"
+              onLoad={() => {
+                setLoadedSrc(src);
+                onLoaded();
+              }}
+              onError={onLoaded}
+              className={`photo-lightbox-image photo-step-${stepPhase}${imageReady ? " is-ready" : ""}`}
+            />
+          </div>
           {/* Main caption: title + location · date, always directly under the
               image (centred). Constant height, in normal flow, so the image
               never shifts. The ⓘ toggle sits with it and flips to a close (×). */}

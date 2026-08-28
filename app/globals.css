@@ -417,8 +417,7 @@ body::after {
   mix-blend-mode: normal;
 }
 /* Open/close hold the hero opaque (no cross-fade to an empty frame): the morph
-   is a single decoded image scaling as one piece. Steps use the `photo-cross-*`
-   names instead, which keep the default cross-fade (a dissolve in place). */
+   is a single image frame scaling as one piece. */
 .photo-vt::view-transition-old(photo-hero),
 .photo-vt::view-transition-new(photo-hero) {
   animation: none;
@@ -427,13 +426,11 @@ body::after {
 /* Keep the photo above the dim during a transition. In the live DOM the <img>
    sits above the fixed scrim, but the view-transition groups capture in DOM
    order (scrim first), which would otherwise paint the dim over the photo.
-   Explicit z-index restores the stacking for both the morph and the steps. */
+   Explicit z-index restores the stacking for the morph. */
 .photo-vt::view-transition-group(photo-scrim) {
   z-index: 1;
 }
-.photo-vt::view-transition-group(photo-hero),
-.photo-vt::view-transition-group(photo-cross-0),
-.photo-vt::view-transition-group(photo-cross-1) {
+.photo-vt::view-transition-group(photo-hero) {
   z-index: 2;
 }
 
@@ -452,35 +449,6 @@ body::after {
     opacity: 1;
   }
   100% {
-    opacity: 0;
-  }
-}
-
-/* Stepping left/right hands one photo to the next instead of cross-fading
-   them. The two frames carry different names, so they are two independent
-   groups, and the browser's default for those is a simultaneous fade-out and
-   fade-in with normal blending: both photos on screen at once, at two
-   different sizes, ghosting through each other. (The plus-lighter blend that
-   makes a real cross-fade clean is only applied when one group holds both
-   frames.) Sequence them instead — the outgoing photo leaves, then the
-   incoming one arrives — so only ever one is visible. */
-.photo-vt-step::view-transition-old(photo-cross-0),
-.photo-vt-step::view-transition-old(photo-cross-1) {
-  animation: photo-step-out 120ms var(--ease-out-expo) both;
-}
-.photo-vt-step::view-transition-new(photo-cross-0),
-.photo-vt-step::view-transition-new(photo-cross-1) {
-  /* the delay matches the fade-out above: the new frame is held at opacity 0
-     (animation-fill-mode) until the old one is fully gone */
-  animation: photo-step-in 180ms var(--ease-out-expo) 120ms both;
-}
-@keyframes photo-step-out {
-  to {
-    opacity: 0;
-  }
-}
-@keyframes photo-step-in {
-  from {
     opacity: 0;
   }
 }
@@ -668,6 +636,38 @@ body::after {
   align-items: center;
   gap: 0.85rem;
 }
+/* The frame owns the open/close shared-element name and the incoming photo's
+   blur. The bitmap is a keyed child, so changing photos cannot leave the old
+   browser image request painted over this placeholder. */
+.photo-image-frame {
+  flex: none;
+  max-width: 100%;
+  max-height: 82dvh;
+  overflow: hidden;
+  border-radius: 0.125rem;
+}
+.photo-lightbox-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+}
+/* Sequenced local handoff: old bitmap -> blur, swap the keyed node and blur,
+   then new bitmap -> opaque. Full photos are never simultaneously painted. */
+.photo-lightbox-image.is-ready.photo-step-idle,
+.photo-lightbox-image.is-ready.photo-step-in {
+  opacity: 1;
+  transition: opacity 180ms var(--ease-out-expo);
+}
+.photo-lightbox-image.photo-step-out {
+  opacity: 0;
+  transition: opacity 110ms cubic-bezier(0.7, 0, 0.84, 0);
+}
+.photo-lightbox-image.photo-step-swap {
+  opacity: 0;
+  transition: none;
+}
 /* the main caption line + the ⓘ/× toggle, centred right under the image. Wraps
    as whole segments (title / location / date each stay on one line), so a tight
    width drops the date to its own centred line instead of breaking mid-phrase. */
@@ -749,7 +749,7 @@ body::after {
      right margin. It's absolute, so the centred image + caption never move; it
      expands about its own centre as the rows reveal. A gentle image max-width
      guarantees the rail clears the viewport edge on smaller desktops. */
-  .photo-stage > img {
+  .photo-image-frame {
     max-width: calc(100vw - 26rem);
   }
   .photo-extra {
