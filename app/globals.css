@@ -437,6 +437,34 @@ body::after {
   z-index: 2;
 }
 
+/* A view-transition snapshot outranks every normal DOM z-index. When a photo
+   closes into a tile partially under the fixed header, keeping only the photo
+   snapshot would therefore leave it above the header until the final frame,
+   then snap it underneath. Give the header a close-only transition layer above
+   the hero and ease it back during the latter half of the return. The photo now
+   reads as passing under the header, while opening keeps its existing layering. */
+.photo-vt-close [data-photo-vt-header] {
+  view-transition-name: photo-header;
+}
+.photo-vt-close::view-transition-old(photo-header),
+.photo-vt-close::view-transition-new(photo-header) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+.photo-vt-close::view-transition-group(photo-header) {
+  z-index: 3;
+  animation: photo-header-return 250ms var(--ease-out-expo) both;
+}
+@keyframes photo-header-return {
+  0%,
+  38% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 /* ---- project preview images ----
    Pulled most of the way toward monochrome so screenshots sit inside the
    theme instead of shouting over it. A trace of color survives. */

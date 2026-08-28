@@ -29,7 +29,10 @@ export function Nav() {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-line/60 bg-bg/75 backdrop-blur-md transition-colors duration-500">
+    <header
+      data-photo-vt-header
+      className="fixed inset-x-0 top-0 z-50 border-b border-line/60 bg-bg/75 backdrop-blur-md transition-colors duration-500"
+    >
       <nav className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6">
         <Magnetic strength={0.2}>
           <Link

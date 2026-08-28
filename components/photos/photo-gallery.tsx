@@ -118,6 +118,11 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     // image on the first open flickers blur→full as the "odd one out".
     const root = document.documentElement;
     root.classList.add("photo-vt");
+    // View-transition snapshots sit above every normal z-index. On close, give
+    // the fixed header its own snapshot so it can ease back over a hero whose
+    // destination tile sits underneath it, rather than snapping above the tile
+    // only when the browser removes the transition layer on the final frame.
+    root.classList.toggle("photo-vt-close", closing);
 
     const vt = doc.startViewTransition(() =>
       flushSync(() => {
@@ -129,7 +134,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     vtDone.current = vt.finished.catch(() => {});
     await vtDone.current;
 
-    root.classList.remove("photo-vt");
+    root.classList.remove("photo-vt", "photo-vt-close");
     if (opSeq.current === seq) {
       setSettled(true); // morph done: let the caption rise in
       // Now that the dialog is settled open, switch it to a cross name so the
