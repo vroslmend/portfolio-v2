@@ -69,19 +69,80 @@
 }
 
 html {
-  background: var(--bg);
+  /* the page's base colour, and the one that shows through wherever the
+     ground layer cannot reach (overscroll, address-bar collapse) */
+  background-color: var(--bg);
   /* stop the browser's native overscroll bounce from fighting the
      "past the end" reveal gesture */
   overscroll-behavior-y: none;
 }
 
 body {
+  /* no background here: the ground layer below is a negative-z fixed
+     pseudo-element, and a background on body would paint straight over it
+     (body's own background box comes after negative-z descendants). The base
+     colour lives on <html>, which also owns the theme cross-fade. */
+  color: var(--fg);
+  font-family: var(--font-geist-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- the ground ----
+   Two very wide, very faint ellipses pinned to the viewport: a lift behind the
+   column up top (the light source) and a sink at the bottom (which also gives
+   the drawer something darker to rise out of). Both are barely-there on
+   purpose.
+
+   This is a real fixed LAYER rather than `background-attachment: fixed` on
+   body, and that distinction is the whole point. Chrome paints an
+   attachment-fixed background into the scrolling contents with a compensating
+   offset recomputed per scroll; during an overscroll drag that offset is
+   stale, so the ellipses slide up with the content, uncover a band of
+   unpainted --bg along the bottom (lighter than the sink above it, so it reads
+   as a footer-shaped rectangle), and snap back in a single frame on release. A
+   positioned layer is pinned by the compositor and does none of that.
+
+   `100lvh` covers the other half: sized to the LARGE viewport, the layer stays
+   as tall as the visible area ever gets, so Android Chrome collapsing its
+   address bar cannot uncover the bottom edge either. Same failure the grain
+   layer below already guards against with its oversize — the geometry here is
+   load-bearing (the ellipses are placed in viewport percentages), so it gets
+   the lvh pin instead of a 200% box.
+
+   The top background layer is a dither, and it is why this layer is opaque
+   (background-color, not just the two ellipses over the page). Over #0e0e0e
+   the sink spans about five 8-bit levels across ~600px, and five levels
+   stretched that far quantise into visible ellipse arcs — worst on a phone
+   OLED, where near-black has no headroom.
+
+   The dither is mid-grey noise blended with `overlay`, NOT noise painted on
+   top. That distinction was measured: additive noise spends its whole budget
+   on a DC lift (it raised the mean a level and left a 616px flat run intact),
+   because it can only ever add. `overlay` against a backdrop below 0.5 works
+   out to `2 × backdrop × noise`, so it scales the ground up AND down around
+   its own value — mean-neutral by construction, and proportional, so it dithers
+   just as well on the light theme's #f4f3f0. The noise is contrast-compressed
+   to roughly ±10% (slope 0.5 about a 0.5 centre), which lands near ±1.5 levels:
+   about one quantisation step, enough to break the contour without becoming
+   texture. Blending happens inside this element, so it never touches the text
+   above it.
+
+   It is NOT the film grain: that tile is gamma-crushed to a sparse spray of
+   highlights on purpose, so it never touches the mid-ramp where banding
+   lives. */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh; /* fallback for engines without lvh */
+  height: 100lvh;
+  z-index: -1;
+  pointer-events: none;
   background-color: var(--bg);
-  /* The ground. Two very wide, very faint ellipses pinned to the viewport: a
-     lift behind the column up top (the light source) and a sink at the bottom
-     (which also gives the drawer something darker to rise out of). Fixed
-     attachment so they stay put while the page scrolls under them. */
   background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='d' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncG type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncB type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23d)'/%3E%3C/svg%3E"),
     radial-gradient(
       ellipse 90% 55% at 50% -8%,
       var(--ground-lift) 0%,
@@ -92,18 +153,23 @@ body {
       var(--ground-sink) 0%,
       transparent 68%
     );
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  color: var(--fg);
-  font-family: var(--font-geist-sans), sans-serif;
-  -webkit-font-smoothing: antialiased;
+  background-blend-mode: overlay, normal, normal;
+  background-repeat: repeat, no-repeat, no-repeat;
+  background-size:
+    140px 140px,
+    100% 100%,
+    100% 100%;
 }
 
 /* Cross-fade the background only after the page has mounted. The theme class
    lands a beat after the first paint, so with this transition always-on the
    initial settle fades in from the dark default and flashes black in light
    mode. `theme-ready` (set on mount) holds the fade back until after that. */
-html.theme-ready body {
+html.theme-ready,
+html.theme-ready body::before {
+  /* the ground layer is opaque and covers the viewport, so it has to fade with
+     <html> or it would snap the theme change while the base colour underneath
+     it cross-faded invisibly */
   transition: background-color 0.5s var(--ease-out-expo);
 }
 
@@ -304,6 +370,9 @@ footer {
   letter-spacing: -0.015em;
 }
 
+/* Nastaliq brings its own italic-like slant and needs no tracking of ours. It
+   is also set smaller than the Latin it replaces: at a matched em size its ink
+   runs far taller and deeper, which crowds whatever sits below the name. */
 .urdu-name {
   font-style: normal;
   letter-spacing: 0;

@@ -12,7 +12,14 @@ import {
 } from "motion/react";
 import { useLenis } from "lenis/react";
 import { EASE } from "@/lib/motion";
-import { DrawerAtmosphere } from "@/components/drawer-atmosphere";
+import dynamic from "next/dynamic";
+
+// WebGL, for a panel most visitors never open: loading it with the page would
+// put the shader runtime in every route's first paint for nothing.
+const DrawerAtmosphere = dynamic(
+  () => import("@/components/drawer-atmosphere").then((m) => m.DrawerAtmosphere),
+  { ssr: false },
+);
 
 const API = process.env.NEXT_PUBLIC_COUNTER_API_URL;
 const PANEL = 248; // panel height (px) and the height it rises to

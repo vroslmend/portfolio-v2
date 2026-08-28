@@ -21,7 +21,7 @@ export default function Home() {
           <NameReveal
             text="ammar hassan"
             delay={0.12}
-            className="hero-name text-fg"
+            className="hero-name mb-2 text-fg"
           />
           <Reveal delay={0.18}>
             <p className="max-w-[58ch] text-[19px] leading-[1.7] text-fg text-pretty">
@@ -50,7 +50,7 @@ export default function Home() {
               .
             </p>
           </Reveal>
-          <Reveal delay={0.36}>
+          <Reveal delay={0.36} className="mt-4">
             <p className="font-mono text-[12px] leading-relaxed tracking-[0.04em] text-muted text-pretty">
               <span className="text-fg">now</span> — {site.now}
               <span className="text-faint"> · jun 2026</span>

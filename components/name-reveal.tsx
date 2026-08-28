@@ -83,10 +83,10 @@ export function NameReveal({
         aria-hidden
         dir="rtl"
         lang="ur"
-        className="urdu-name font-urdu pointer-events-none absolute inset-0 flex items-center justify-end gap-[0.3em] text-[0.94em] leading-none transition-[opacity,transform] duration-500 ease-out-expo"
+        className="urdu-name font-urdu pointer-events-none absolute inset-0 flex items-center justify-end gap-[0.3em] text-[0.82em] leading-none transition-[opacity,transform] duration-500 ease-out-expo"
         style={{
           opacity: hovered ? 1 : 0,
-          transform: hovered ? "translateY(-0.15em)" : "translateY(0.18em)",
+          transform: hovered ? "translateY(-0.2em)" : "translateY(0.18em)",
         }}
       >
         <span className="urdu-word-first">عمار</span>
