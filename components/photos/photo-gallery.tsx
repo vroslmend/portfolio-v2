@@ -24,10 +24,19 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
   const [settled, setSettled] = useState(true);
   // How the dialog image is named for the next transition. "morph" shares
   // `photo-hero` with the tile (open/close grow-shrink). "cross" gives it a
-  // non-shared, alternating name so stepping between two different photos
-  // dissolves in place instead of morphing one box into the other (which, with
-  // differing aspect ratios, looked like an awkward vertical collapse).
+  // non-shared, alternating name, so the two frames of a step land in separate
+  // transition groups and the outgoing one can be handed over to the incoming
+  // one rather than morphing one box into the other (which, with differing
+  // aspect ratios, looked like an awkward vertical collapse).
   const [mode, setMode] = useState<"morph" | "cross">("morph");
+  // Which of the two alternating `photo-cross-*` names the dialog image wears.
+  // It has to flip on every step so the outgoing and incoming frames land in
+  // separate transition groups, which is what lets them be sequenced rather
+  // than cross-faded (see .photo-vt-step in globals.css). Driven by a toggle
+  // rather than `index % 2`: with an odd number of photos the parity repeats
+  // across the wrap (8 -> 0), which quietly turned that one step into a
+  // shared-name morph animating by completely different rules.
+  const [slot, setSlot] = useState(0);
   // True from the moment a move commits until that photo's <img> reports it has
   // arrived. Drives the quiet loading hint, so a wait never looks like frozen UI
   // — including on open, which previously showed no indicator at all.
@@ -39,6 +48,13 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
   // Serialize view transitions: starting one over a live one makes the browser
   // skip the first (a judder, worst in Firefox). Await the previous one first.
   const vtDone = useRef<Promise<void>>(Promise.resolve());
+  // Where the newest move is headed, which is not `expanded` while a transition
+  // is in flight: the browser takes its own beat to capture the old snapshot
+  // before the callback commits the state change. A relative press landing in
+  // that window used to be resolved against the still-rendered index, so it
+  // repeated the previous target and stepped a photo to itself — a dissolve
+  // that visibly went nowhere and ate the press.
+  const pending = useRef<number | null>(null);
 
   // Lock background scroll while the lightbox is open. A native showModal()
   // dialog does not stop the page scrolling behind it, and Lenis owns the
@@ -58,6 +74,16 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     setExpanded(next);
   }
 
+  // Arrows and swipes are relative, so they must count from the newest target
+  // rather than from what is currently painted (see `pending`). Presses during
+  // a transition then queue up properly: the serializer lets the last one win,
+  // and it lands on the right photo instead of re-running the previous step.
+  function step(delta: number) {
+    const base = pending.current ?? expanded;
+    if (base === null) return;
+    go((base + delta + photos.length) % photos.length);
+  }
+
   async function go(next: number | null) {
     const doc = document as Doc;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -67,6 +93,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     const stepping = expanded !== null && next !== null;
 
     const seq = ++opSeq.current;
+    pending.current = next;
     if (closing) setLoading(false); // a close cancels any pending step's spinner
 
     if (next !== null) {
@@ -123,10 +150,12 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     // in the wall. That reveals the fixed header already present in the final
     // root snapshot; no separately rasterized header snapshot is involved.
     root.classList.toggle("photo-vt-close", closing);
+    root.classList.toggle("photo-vt-step", stepping);
 
     const vt = doc.startViewTransition(() =>
       flushSync(() => {
         setMode(stepping ? "cross" : "morph");
+        if (stepping) setSlot((s) => 1 - s);
         set(next);
       }),
     );
@@ -134,11 +163,11 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     vtDone.current = vt.finished.catch(() => {});
     await vtDone.current;
 
-    root.classList.remove("photo-vt", "photo-vt-close");
+    root.classList.remove("photo-vt", "photo-vt-close", "photo-vt-step");
     if (opSeq.current === seq) {
       setSettled(true); // morph done: let the caption rise in
       // Now that the dialog is settled open, switch it to a cross name so the
-      // next left/right step dissolves cleanly between two different photos.
+      // next left/right step hands over cleanly between two different photos.
       if (next !== null) setMode("cross");
     }
     // Once fully closed, drop the name so no stray tile participates in an
@@ -162,9 +191,10 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
         index={expanded}
         settled={settled}
         mode={mode}
+        slot={slot}
         loading={loading}
         onClose={() => go(null)}
-        onNavigate={(i) => go(i)}
+        onStep={step}
         onLoaded={() => setLoading(false)}
       />
     </>

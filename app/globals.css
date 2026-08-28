@@ -456,6 +456,35 @@ body::after {
   }
 }
 
+/* Stepping left/right hands one photo to the next instead of cross-fading
+   them. The two frames carry different names, so they are two independent
+   groups, and the browser's default for those is a simultaneous fade-out and
+   fade-in with normal blending: both photos on screen at once, at two
+   different sizes, ghosting through each other. (The plus-lighter blend that
+   makes a real cross-fade clean is only applied when one group holds both
+   frames.) Sequence them instead — the outgoing photo leaves, then the
+   incoming one arrives — so only ever one is visible. */
+.photo-vt-step::view-transition-old(photo-cross-0),
+.photo-vt-step::view-transition-old(photo-cross-1) {
+  animation: photo-step-out 120ms var(--ease-out-expo) both;
+}
+.photo-vt-step::view-transition-new(photo-cross-0),
+.photo-vt-step::view-transition-new(photo-cross-1) {
+  /* the delay matches the fade-out above: the new frame is held at opacity 0
+     (animation-fill-mode) until the old one is fully gone */
+  animation: photo-step-in 180ms var(--ease-out-expo) 120ms both;
+}
+@keyframes photo-step-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes photo-step-in {
+  from {
+    opacity: 0;
+  }
+}
+
 /* ---- project preview images ----
    Pulled most of the way toward monochrome so screenshots sit inside the
    theme instead of shouting over it. A trace of color survives. */

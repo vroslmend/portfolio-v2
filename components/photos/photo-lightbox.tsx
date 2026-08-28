@@ -22,18 +22,22 @@ export function PhotoLightbox({
   index,
   settled,
   mode,
+  slot,
   loading,
   onClose,
-  onNavigate,
+  onStep,
   onLoaded,
 }: {
   photos: Photo[];
   index: number | null;
   settled: boolean;
   mode: "morph" | "cross";
+  /** which of the two alternating `photo-cross-*` names to wear (see gallery) */
+  slot: number;
   loading: boolean;
   onClose: () => void;
-  onNavigate: (index: number) => void;
+  /** move by ±1 — relative, so a press mid-transition still counts (see gallery) */
+  onStep: (delta: number) => void;
   /** the photo finished arriving (or failed) — clears the loading hint */
   onLoaded: () => void;
 }) {
@@ -71,14 +75,13 @@ export function PhotoLightbox({
   useEffect(() => {
     if (index === null) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === "ArrowRight") onNavigate((index! + 1) % photos.length);
-      else if (e.key === "ArrowLeft")
-        onNavigate((index! - 1 + photos.length) % photos.length);
+      if (e.key === "ArrowRight") onStep(1);
+      else if (e.key === "ArrowLeft") onStep(-1);
       else if (e.key === "i" || e.key === "I") setDetails((d) => !d);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [index, photos.length, onNavigate]);
+  }, [index, onStep]);
 
   // Decode the neighbours ahead of time so a left/right step never pays the
   // full-size decode on the morph frame. `warmPhoto` holds a strong reference in
@@ -140,7 +143,7 @@ export function PhotoLightbox({
         const dy = e.changedTouches[0].clientY - start.y;
         // a deliberate horizontal swipe (not a tap, not a vertical drag)
         if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
-        onNavigate(dx < 0 ? next : prev);
+        onStep(dx < 0 ? 1 : -1);
       }}
       className="photo-dialog"
     >
@@ -166,7 +169,7 @@ export function PhotoLightbox({
             type="button"
             className="photo-nav photo-nav--prev"
             aria-label="previous photo"
-            onClick={() => onNavigate(prev)}
+            onClick={() => onStep(-1)}
           >
             <svg
               viewBox="0 0 24 24"
@@ -184,7 +187,7 @@ export function PhotoLightbox({
             type="button"
             className="photo-nav photo-nav--next"
             aria-label="next photo"
-            onClick={() => onNavigate(next)}
+            onClick={() => onStep(1)}
           >
             <svg
               viewBox="0 0 24 24"
@@ -232,12 +235,13 @@ export function PhotoLightbox({
             onLoad={onLoaded}
             onError={onLoaded}
             // `photo-hero` (shared with the tile) for the open/close morph; an
-            // alternating non-shared name for steps so they dissolve in place
-            // rather than morphing one photo's box into the next.
+            // alternating non-shared name for steps, which puts the two frames
+            // in separate transition groups so one can leave before the next
+            // arrives rather than ghosting through it.
             style={{
               viewTransitionName:
                 mode === "cross" && index !== null
-                  ? `photo-cross-${index % 2}`
+                  ? `photo-cross-${slot}`
                   : "photo-hero",
               backgroundImage: `url("${photo.blurDataURL}")`,
               backgroundSize: "cover",
