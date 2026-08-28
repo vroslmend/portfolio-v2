@@ -7,10 +7,48 @@ import {
   PerlinNoise,
   Warp,
 } from "@paper-design/shaders-react";
+import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { useTheme } from "next-themes";
 
 export type ShaderGround = "field" | "warp" | "perlin" | "paper" | "rays";
+
+/**
+ * True while the page is scrolling, false once it has been still for a beat.
+ *
+ * Stutter is only ever noticed while scrolling — that is the moment the phone
+ * is already busy and the one where dropped frames are visible as judder.
+ * Setting speed to 0 cancels the shader's rAF loop outright (documented as
+ * costing nothing after the frame it stops on), so pausing here hands the whole
+ * frame budget back to the scroll and gives the movement back the instant you
+ * stop. You cannot watch a background drift while flinging the page anyway.
+ */
+function useScrolling(idleMs = 180) {
+  const [scrolling, setScrolling] = useState(false);
+  const active = useRef(false);
+
+  useEffect(() => {
+    let timer = 0;
+    function onScroll() {
+      if (!active.current) {
+        active.current = true;
+        setScrolling(true); // one render on start, one on stop — not per event
+      }
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        active.current = false;
+        setScrolling(false);
+      }, idleMs);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+    };
+  }, [idleMs]);
+
+  return scrolling;
+}
 
 /**
  * BENCH: every shader ground in one place, so appending another is one case
@@ -38,7 +76,11 @@ const MAX_PIXELS = 1920 * 1080 * 2; // ~4.1M: covers a DPR-3 phone, caps 4K
 export function GroundShader({ variant }: { variant: ShaderGround }) {
   const { resolvedTheme } = useTheme();
   const reduced = useReducedMotion();
+  const scrolling = useScrolling();
   const light = resolvedTheme === "light";
+  // one gate for every animated variant: still while scrolling, still under
+  // reduced motion, moving otherwise
+  const moving = !reduced && !scrolling;
 
   const common = {
     "aria-hidden": true as const,
@@ -65,7 +107,7 @@ export function GroundShader({ variant }: { variant: ShaderGround }) {
         noise={0.9}
         // was 0.04, which was slow enough to read as static. Still well under
         // "look at me", but the page is now visibly alive if you rest on it.
-        speed={reduced ? 0 : 0.16}
+        speed={moving ? 0.16 : 0}
         scale={2.4}
         rotation={18}
       />
@@ -88,9 +130,9 @@ export function GroundShader({ variant }: { variant: ShaderGround }) {
         softness={1}
         distortion={0.28}
         swirl={0.6}
-        swirlIterations={8}
+        swirlIterations={3}
         proportion={0.5}
-        speed={reduced ? 0 : 0.12}
+        speed={moving ? 0.12 : 0}
         scale={1.7}
         rotation={24}
       />
@@ -110,7 +152,7 @@ export function GroundShader({ variant }: { variant: ShaderGround }) {
         lacunarity={1.8}
         proportion={0.5}
         softness={0.9}
-        speed={reduced ? 0 : 0.14}
+        speed={moving ? 0.14 : 0}
         scale={1.5}
       />
     );
@@ -160,7 +202,7 @@ export function GroundShader({ variant }: { variant: ShaderGround }) {
       spotty={0.72}
       intensity={light ? 0.55 : 0.45}
       bloom={0.6}
-      speed={reduced ? 0 : 0.05}
+      speed={moving ? 0.05 : 0}
       scale={1.6}
     />
   );

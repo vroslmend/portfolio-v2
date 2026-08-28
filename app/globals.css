@@ -273,20 +273,42 @@ html[data-ground="vignette"] body::before {
   z-index: -1;
   pointer-events: none;
   opacity: 0;
-  mix-blend-mode: overlay;
+  /* OPAQUE, and no mix-blend-mode. This is the whole performance fix.
+
+     `mix-blend-mode` has to read the page backdrop, so the compositor cannot
+     cache the layer: it re-blends a full-viewport surface every frame, and it
+     was stacking on top of the film grain's own plus-lighter for two
+     full-screen blends. That is nearly free on a desktop GPU and expensive on
+     a phone, which is why a pure-CSS option had any cost at all.
+
+     `background-blend-mode` is a different thing despite the name — it resolves
+     while the element rasterises its own backgrounds, needs no backdrop, and
+     the result is cached as one static texture. Nothing behind this layer but
+     flat --bg, so it can simply be opaque and BE the ground rather than tinting
+     what is under it. Per frame it then costs one cached texture composite.
+
+     This is how main's body::before already works. The bench made it expensive
+     by reaching for mix-blend-mode to get an opacity knob. */
+  background-color: var(--bg);
   background-repeat: repeat, no-repeat;
   background-size:
     160px 160px,
     100% 100%;
-  background-blend-mode: soft-light, normal;
+  /* full-range noise over the ramp, `overlay` against a near-black backdrop
+     working out to 2 x backdrop x noise — a wide multiplicative swing, which is
+     what gives haze its heavy grain rather than the polite ±1.5 levels of the
+     shipped dither. The ramp is now in real ground colours (not the mid-grey
+     the old overlay version needed) because this layer paints the ground
+     outright instead of tinting it. */
+  background-blend-mode: overlay, normal;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='hz' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23hz)'/%3E%3C/svg%3E"),
     linear-gradient(
       180deg,
-      #b0b0b0 0%,
-      #808080 42%,
-      #808080 58%,
-      #505050 100%
+      var(--g-lift2) 0%,
+      transparent 38%,
+      transparent 60%,
+      var(--g-sink2) 100%
     );
 }
 html[data-ground="haze"] .ground-haze {
@@ -363,6 +385,21 @@ html[data-ground-attach="scroll"] .ground-dither {
   position: absolute;
   height: 100%;
 }
+/* The dither only exists to rescue a smooth gradient ramp. The field grounds
+   carry their own per-pixel variation, so over those it buys nothing and costs
+   a full-viewport mix-blend-mode every frame — the same cost that was making
+   the CSS haze stutter. Drop the layer entirely rather than leave it blending
+   for no reason. */
+html[data-ground="off"] .ground-dither,
+html[data-ground="haze"] .ground-dither,
+html[data-ground="field"] .ground-dither,
+html[data-ground="warp"] .ground-dither,
+html[data-ground="perlin"] .ground-dither,
+html[data-ground="paper"] .ground-dither,
+html[data-ground="rays"] .ground-dither {
+  display: none;
+}
+
 html[data-ground-dither="off"] { --g-dither: 0; }
 html[data-ground-dither="low"] { --g-dither: 0.5; }
 html[data-ground-dither="on"] { --g-dither: 1; }
