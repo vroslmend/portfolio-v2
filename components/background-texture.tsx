@@ -1,11 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
+// Loaded only while the matching ground is selected, so picking a CSS option
+// never pulls the WebGL runtime into the page at all. The whole question this
+// bench exists to answer is whether a shader earns its cost, and it cannot
+// answer that honestly if the cost is paid either way.
+const GroundField = dynamic(
+  () => import("@/components/ground-field").then((m) => m.GroundField),
+  { ssr: false },
+);
+const GroundRays = dynamic(
+  () => import("@/components/ground-rays").then((m) => m.GroundRays),
+  { ssr: false },
+);
 
 type Film = "clean" | "fine" | "16mm" | "nocturne";
 type Typography = "geist" | "editorial" | "roman" | "hybrid";
 type TextMotion = "still" | "drift" | "depth" | "gate";
-type Ground = "off" | "arcs" | "ramp" | "vignette";
+type Ground = "off" | "haze" | "field" | "rays" | "arcs";
 type GroundAmount = "quarter" | "half" | "1x" | "2x";
 type GroundDither = "off" | "low" | "on" | "high";
 type GroundAttach = "fixed" | "scroll";
@@ -20,7 +34,7 @@ type LabState = {
   groundAttach: GroundAttach;
 };
 
-const STORAGE_KEY = "portfolio-design-lab-v4";
+const STORAGE_KEY = "portfolio-design-lab-v5";
 // The defaults reproduce what is on main today, so the lab always opens on the
 // control and every switch is a comparison against the shipped page.
 const DEFAULTS: LabState = {
@@ -54,11 +68,16 @@ const MOTIONS: { value: TextMotion; label: string; title: string }[] = [
   { value: "gate", label: "gate", title: "Projector weave on the grain's frame cadence" },
 ];
 
+// off and arcs are the two controls (nothing, and what ships). The three in
+// between are fields rather than shapes: their luminance varies per pixel, so
+// there is no smooth ramp to band and no edge to read as a blob. All three also
+// survive `attach: scroll` without stretching, which no gradient shape can.
 const GROUNDS: { value: Ground; label: string; title: string }[] = [
   { value: "off", label: "off", title: "Flat --bg. The film grain is the only texture on the page" },
-  { value: "arcs", label: "arcs", title: "Shipped: two ellipses, a lift at the top and a sink at the bottom" },
-  { value: "ramp", label: "ramp", title: "One edge-to-edge vertical ramp. No centre and no rim, so there is no shape to notice" },
-  { value: "vignette", label: "vign", title: "Darkening at the frame edges only, like a lens. Leaves the middle alone" },
+  { value: "haze", label: "haze", title: "CSS. Light expressed as grain density instead of as a gradient — no WebGL, and far more dither headroom than the shipped ground has" },
+  { value: "field", label: "field", title: "Shader. A grainy field pooled toward the frame edges, drifting very slowly. Banding is impossible by construction" },
+  { value: "rays", label: "rays", title: "Shader. Traces of light from a source off the top-left corner, no glow in the frame" },
+  { value: "arcs", label: "arcs", title: "Shipped, kept as the control. The two ellipses — and the one option here that stretches under attach: scroll" },
 ];
 
 const GROUND_AMOUNTS: { value: GroundAmount; label: string; title: string }[] = [
@@ -196,6 +215,11 @@ export function BackgroundTexture() {
           bench gets an opacity knob on it. Same overlay blend, same result at
           the "on" setting. */}
       <div aria-hidden className="ground-dither" />
+      {/* CSS haze is always in the DOM (it costs nothing when data-ground is
+          not "haze"); the shaders mount only while selected. */}
+      <div aria-hidden className="ground-haze" />
+      {settings.ground === "field" && <GroundField />}
+      {settings.ground === "rays" && <GroundRays />}
 
       <aside className="design-lab fixed right-4 bottom-4 z-[70] font-mono text-[10px] tracking-[0.06em]">
         {open && (

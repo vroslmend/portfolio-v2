@@ -191,8 +191,13 @@ body::before {
     );
 }
 
-/* shape */
-html[data-ground="off"] body::before {
+/* shape — body::before carries the gradient shapes only. Every field option
+   clears it and paints on its own layer instead, so they are never stacked on
+   top of the thing they are meant to replace. */
+html[data-ground="off"] body::before,
+html[data-ground="haze"] body::before,
+html[data-ground="field"] body::before,
+html[data-ground="rays"] body::before {
   background-image: none;
 }
 html[data-ground="arcs"] body::before {
@@ -208,25 +213,84 @@ html[data-ground="arcs"] body::before {
       transparent 68%
     );
 }
-/* A linear ramp spans the full width, so it has no centre and no rim. There is
-   no boundary to trace, which is the whole reason to try it. */
-html[data-ground="ramp"] body::before {
-  background-image: linear-gradient(
-    180deg,
-    var(--g-lift2) 0%,
-    transparent 34%,
-    transparent 60%,
-    var(--g-sink2) 100%
-  );
+/* ramp and vignette lived here and were both rejected on sight, along with
+   arcs: any bounded gradient has a centre and a falloff, which is a shape, and
+   a shape in the background reads as someone having put a blob there. They are
+   in the history if the comparison is ever wanted again. What replaces them
+   below are FIELDS, not shapes.
+
+   The move is structural rather than cosmetic. Banding comes from a smooth
+   luminance ramp quantising into 8-bit steps, and on #0e0e0e there are only
+   about five steps to spend. A field whose luminance varies per pixel has no
+   smooth ramp to quantise — the texture is its own dither, with far more
+   amplitude than the ±1.5 levels the shipped overlay dither can manage. The
+   same property removes the edge that reads as a blob, and removes the aspect
+   ratio that stretched under `attach: scroll`. One change, three symptoms. */
+
+/* ---- haze: light as grain density, no WebGL ----
+   Two background layers on one element. The vertical ramp biases the noise
+   (soft-light), then the whole thing goes onto the page with `overlay`, so a
+   value above mid-grey lifts and below mid-grey sinks — and every one of those
+   values arrives carrying full-amplitude noise, which is what keeps the ramp
+   from ever resolving into a band.
+
+   The ramp runs #b0b0b0 to #505050 rather than white to black: overlay works
+   out to 2 x backdrop x source, so pure white would double the page's
+   luminance. At the 1x amount (opacity 0.5) this lands near a 5 level swing,
+   which is the shipped ground's swing — deliberately, so the comparison is
+   about how it looks and not about how strong it is. */
+.ground-haze {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100lvh;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: overlay;
+  background-repeat: repeat, no-repeat;
+  background-size:
+    160px 160px,
+    100% 100%;
+  background-blend-mode: soft-light, normal;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='hz' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23hz)'/%3E%3C/svg%3E"),
+    linear-gradient(
+      180deg,
+      #b0b0b0 0%,
+      #808080 42%,
+      #808080 58%,
+      #505050 100%
+    );
 }
-/* Edges only. Reads as a lens rather than as a light behind the column, and it
-   leaves the middle of the screen — where the type lives — completely alone. */
-html[data-ground="vignette"] body::before {
-  background-image: radial-gradient(
-    ellipse 76% 66% at 50% 50%,
-    transparent 44%,
-    var(--g-sink2) 100%
-  );
+html[data-ground="haze"] .ground-haze {
+  opacity: var(--g-amt, 0.5);
+}
+
+/* ---- shader grounds ----
+   Both are authored so that the 1x amount is full strength, hence the doubling
+   (opacity clamps at 1, so 2x reads the same as 1x here — tune the shader's own
+   colours if it needs to go louder). `fit="none"` on the components means the
+   pattern fills at 1:1 and never maps an aspect ratio onto the canvas, so
+   stretching this to document height under `attach: scroll` distorts nothing. */
+.ground-shader {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  z-index: -1;
+  pointer-events: none;
+  opacity: calc(var(--g-amt, 0.5) * 2);
+}
+html[data-ground-attach="scroll"] .ground-shader,
+html[data-ground-attach="scroll"] .ground-haze {
+  position: absolute !important;
+  height: 100%;
 }
 
 /* amount — 1x is main */
