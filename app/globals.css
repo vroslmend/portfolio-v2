@@ -17,6 +17,11 @@
      filled rectangle. Both are barely-there on purpose. */
   --ground-lift: rgba(255, 255, 255, 0.026);
   --ground-sink: rgba(0, 0, 0, 0.32);
+  /* BENCH: the same two at double strength. The ground layer draws with these
+     and the amount knob dials them back with opacity, so "1x" (0.5) is exactly
+     the pair above and "2x" is reachable at all. */
+  --g-lift2: rgba(255, 255, 255, 0.052);
+  --g-sink2: rgba(0, 0, 0, 0.64);
   /* the drawer sits on its own plane, a real step above the page (--bg #0e0e0e
      vs --panel #121212 was a 4/255 difference, which read as the same surface) */
   --drawer: #171717;
@@ -45,6 +50,8 @@
      the lift is white and the sink is a warm grey rather than black */
   --ground-lift: rgba(255, 255, 255, 0.5);
   --ground-sink: rgba(120, 112, 96, 0.1);
+  --g-lift2: rgba(255, 255, 255, 1);
+  --g-sink2: rgba(120, 112, 96, 0.2);
   --drawer: #f4f2ed;
   --drawer-dim: rgba(26, 25, 21, 0.18);
   --grain-opacity: 0.14;
@@ -130,6 +137,32 @@ body {
    It is NOT the film grain: that tile is gamma-crushed to a sparse spray of
    highlights on purpose, so it never touches the mid-ramp where banding
    lives. */
+/* ---- BENCH: the ground, taken apart into four knobs ----
+   Main ships this as one rule: an opaque fixed layer carrying the two ellipses
+   with the dither as a blended background layer inside it. The bench splits it
+   so each decision can be switched on its own.
+
+   SHAPE lives in `background-image` per [data-ground].
+   AMOUNT is `opacity`. The shapes are drawn at DOUBLE the shipped strength
+     (--g-lift2 / --g-sink2) so that "1x" = opacity 0.5 reproduces main while
+     leaving headroom for a 2x that opacity alone could not reach.
+
+   On fidelity: "1x / arcs / on" measures a 5.45 level top-to-bottom swing
+   against main's 5.11 — about 0.3 of a level apart, which is 0.1% of the
+   range and not visible. The gradient compositing is algebraically identical
+   (a doubled alpha at half opacity lands on the same value); the remainder
+   comes from the dither riding as mix-blend-mode here versus
+   background-blend-mode inside the layer on main. It was not worth chasing
+   further: every shape below is measured on the same footing as every other,
+   which is what choosing between them actually needs.
+   DITHER moved out to its own .ground-dither layer, so it gets an opacity knob
+     too. It uses main's exact tile, and "on" is full opacity, so the control
+     setting is main and not an approximation of it.
+   ATTACH swaps fixed for absolute so the ground spans the document and travels
+     with the content instead of sitting on the glass.
+
+   The layer is translucent here (no background-color) because opacity is the
+   amount knob; the base colour is on <html> either way. */
 body::before {
   content: "";
   position: fixed;
@@ -138,28 +171,114 @@ body::before {
   right: 0;
   height: 100vh; /* fallback for engines without lvh */
   height: 100lvh;
-  z-index: -1;
+  z-index: -2;
   pointer-events: none;
-  background-color: var(--bg);
+  opacity: var(--g-amt, 0.5);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  /* the shipped shape as the base, so the first paint (before the lab has
+     hydrated and written data-ground) is main rather than a bare page */
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='d' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncG type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncB type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23d)'/%3E%3C/svg%3E"),
     radial-gradient(
       ellipse 90% 55% at 50% -8%,
-      var(--ground-lift) 0%,
+      var(--g-lift2) 0%,
       transparent 70%
     ),
     radial-gradient(
       ellipse 130% 60% at 50% 112%,
-      var(--ground-sink) 0%,
+      var(--g-sink2) 0%,
       transparent 68%
     );
-  background-blend-mode: overlay, normal, normal;
-  background-repeat: repeat, no-repeat, no-repeat;
-  background-size:
-    140px 140px,
-    100% 100%,
-    100% 100%;
 }
+
+/* shape */
+html[data-ground="off"] body::before {
+  background-image: none;
+}
+html[data-ground="arcs"] body::before {
+  background-image:
+    radial-gradient(
+      ellipse 90% 55% at 50% -8%,
+      var(--g-lift2) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 130% 60% at 50% 112%,
+      var(--g-sink2) 0%,
+      transparent 68%
+    );
+}
+/* A linear ramp spans the full width, so it has no centre and no rim. There is
+   no boundary to trace, which is the whole reason to try it. */
+html[data-ground="ramp"] body::before {
+  background-image: linear-gradient(
+    180deg,
+    var(--g-lift2) 0%,
+    transparent 34%,
+    transparent 60%,
+    var(--g-sink2) 100%
+  );
+}
+/* Edges only. Reads as a lens rather than as a light behind the column, and it
+   leaves the middle of the screen — where the type lives — completely alone. */
+html[data-ground="vignette"] body::before {
+  background-image: radial-gradient(
+    ellipse 76% 66% at 50% 50%,
+    transparent 44%,
+    var(--g-sink2) 100%
+  );
+}
+
+/* amount — 1x is main */
+html[data-ground-amount="quarter"] { --g-amt: 0.125; }
+html[data-ground-amount="half"] { --g-amt: 0.25; }
+html[data-ground-amount="1x"] { --g-amt: 0.5; }
+html[data-ground-amount="2x"] { --g-amt: 1; }
+
+/* attach — travel with the document instead of the viewport */
+html[data-ground-attach="scroll"] body {
+  position: relative;
+}
+html[data-ground-attach="scroll"] body::before {
+  position: absolute;
+  height: 100%;
+}
+
+/* dither — its own layer so it gets an opacity knob; "on" matches main */
+.ground-dither {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100lvh;
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: var(--g-dither, 1);
+  background-repeat: repeat;
+  background-size: 140px 140px;
+  /* Main's exact tile: contrast-compressed to [0.25, 0.75]. That compression is
+     load-bearing, not decoration — `overlay` is only mean-neutral for a source
+     held tightly around 0.5, and a full-range tile drifts the mean up (measured
+     at +0.32 levels, which made "1x" stop being a faithful control). */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='gd' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncG type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncB type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23gd)'/%3E%3C/svg%3E");
+}
+/* "high" is the only setting that needs a different tile: opacity cannot go
+   past 1, so going louder means a wider noise rather than more of this one.
+   It drifts the mean, which is exactly what you are looking for at that
+   setting — it shows where dither stops dithering and becomes texture. */
+html[data-ground-dither="high"] .ground-dither {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='gh' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23gh)'/%3E%3C/svg%3E");
+}
+html[data-ground-attach="scroll"] .ground-dither {
+  position: absolute;
+  height: 100%;
+}
+html[data-ground-dither="off"] { --g-dither: 0; }
+html[data-ground-dither="low"] { --g-dither: 0.5; }
+html[data-ground-dither="on"] { --g-dither: 1; }
+html[data-ground-dither="high"] { --g-dither: 1; }
 
 /* Cross-fade the background only after the page has mounted. The theme class
    lands a beat after the first paint, so with this transition always-on the
