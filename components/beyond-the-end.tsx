@@ -12,22 +12,7 @@ import {
 } from "motion/react";
 import { useLenis } from "lenis/react";
 import { EASE } from "@/lib/motion";
-import dynamic from "next/dynamic";
-
-// WebGL, for a panel most visitors never open: loading it with the page would
-// put the shader runtime in every route's first paint for nothing.
-//
-// The lazy import alone was not achieving that. The panel stays in the tree at
-// display:none, so this mounted as soon as the counts arrived — every visitor
-// with a working counter fetched the runtime and stood up a 0x0 canvas whether
-// or not they ever pulled the drawer, and the canvas then had to resize from
-// 0x0 to full size during the open animation, on every open. It is now mounted
-// only while the panel is actually shown, with the chunk warmed on approach to
-// the bottom of the page so the gesture never waits on the network.
-const DrawerAtmosphere = dynamic(
-  () => import("@/components/drawer-atmosphere").then((m) => m.DrawerAtmosphere),
-  { ssr: false },
-);
+import { DrawerAtmosphere } from "@/components/drawer-atmosphere";
 
 const API = process.env.NEXT_PUBLIC_COUNTER_API_URL;
 const PANEL = 248; // panel height (px) and the height it rises to
@@ -139,47 +124,6 @@ export function BeyondTheEnd() {
   // composited transform layer still gets mispainted), so we drop it from the
   // DOM with display:none until the gesture actually starts lifting it.
   useMotionValueEvent(lift, "change", (v) => setPanelShown(v > 0.0005));
-  // The atmosphere shader only drifts once the drawer has stopped moving. The
-  // open is a spring on a transform with the pane's own compositing on top, so
-  // running a WebGL loop through it is the one place a phone visibly drops
-  // frames. `revealed` flips at commit; the spring needs a beat after that to
-  // settle, hence the delay.
-  const [settled, setSettled] = useState(false);
-  // reset in render on the close edge (same pattern as the photo lightbox), so
-  // the effect only ever schedules and never sets state synchronously
-  const [wasRevealed, setWasRevealed] = useState(revealed);
-  if (revealed !== wasRevealed) {
-    setWasRevealed(revealed);
-    if (!revealed) setSettled(false);
-  }
-  useEffect(() => {
-    if (!revealed) return;
-    const id = setTimeout(() => setSettled(true), 520);
-    return () => clearTimeout(id);
-  }, [revealed]);
-  // Warm the shader chunk once the reader is actually near the bottom, so the
-  // gesture never pays a network round trip mid-pull. Importing the module is
-  // not mounting it: no canvas, no GL context, no render loop — those still
-  // wait for the panel to be shown. Anyone who never reaches the end never
-  // downloads it, which is what the dynamic import was for in the first place.
-  useEffect(() => {
-    if (!API) return;
-    let done = false;
-    function check() {
-      if (done) return;
-      const left =
-        document.documentElement.scrollHeight -
-        window.scrollY -
-        window.innerHeight;
-      if (left > 600) return;
-      done = true;
-      window.removeEventListener("scroll", check);
-      void import("@/components/drawer-atmosphere");
-    }
-    window.addEventListener("scroll", check, { passive: true });
-    check();
-    return () => window.removeEventListener("scroll", check);
-  }, []);
   // lets the click-off scrim and Escape reuse the gesture's own close logic
   const closeRef = useRef<() => void>(() => {});
   const panelRef = useRef<HTMLElement>(null);
@@ -462,10 +406,7 @@ export function BeyondTheEnd() {
         className="panel-glass drawer-pane fixed inset-x-0 bottom-0 z-90 flex cursor-default select-none flex-col items-center justify-center overflow-hidden rounded-t-[18px] px-6"
       >
         <GlassFilter />
-        {/* mounted only while the panel is up: no canvas and no GL context for
-            the visitors who never pull it open, and no 0x0 canvas having to
-            resize to full size mid-animation on every open */}
-        {panelShown && <DrawerAtmosphere animate={settled} />}
+        <DrawerAtmosphere />
         <motion.div
           aria-hidden
           style={{ opacity: edgeOpacity }}
