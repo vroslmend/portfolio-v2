@@ -12,11 +12,12 @@
   /* "past the end" frosted panel: a whisper of edge light + a specular top rim */
   --bloom: rgba(255, 255, 255, 0.03);
   --glass-edge: rgba(255, 255, 255, 0.1);
-  /* the ground: a light source behind the column, falling off to the edges and
-     sinking toward the footer, so the page reads as a lit surface rather than a
-     filled rectangle. Both are barely-there on purpose. */
-  --ground-lift: rgba(255, 255, 255, 0.026);
-  --ground-sink: rgba(0, 0, 0, 0.32);
+  /* the ground: light high on the page falling away toward the footer, so the
+     page reads as a lit surface rather than a filled rectangle. Drawn at double
+     strength because the ground layer is composited at 0.5 — see the note on
+     body::before for why that halving is part of the recipe rather than a knob. */
+  --ground-lift: rgba(255, 255, 255, 0.052);
+  --ground-sink: rgba(0, 0, 0, 0.64);
   /* the drawer sits on its own plane, a real step above the page (--bg #0e0e0e
      vs --panel #121212 was a 4/255 difference, which read as the same surface) */
   --drawer: #171717;
@@ -43,8 +44,8 @@
   --glass-edge: rgba(255, 255, 255, 0.6);
   /* light mode reads the other way round: paper is lit from above already, so
      the lift is white and the sink is a warm grey rather than black */
-  --ground-lift: rgba(255, 255, 255, 0.5);
-  --ground-sink: rgba(120, 112, 96, 0.1);
+  --ground-lift: rgba(255, 255, 255, 1);
+  --ground-sink: rgba(120, 112, 96, 0.2);
   --drawer: #f4f2ed;
   --drawer-dim: rgba(26, 25, 21, 0.18);
   --grain-opacity: 0.14;
@@ -88,48 +89,48 @@ body {
 }
 
 /* ---- the ground ----
-   Two very wide, very faint ellipses pinned to the viewport: a lift behind the
-   column up top (the light source) and a sink at the bottom (which also gives
-   the drawer something darker to rise out of). Both are barely-there on
-   purpose.
+   Light high on the page falling away toward the footer, drawn as a textured
+   FIELD rather than as gradient shapes.
 
-   This is a real fixed LAYER rather than `background-attachment: fixed` on
-   body, and that distinction is the whole point. Chrome paints an
-   attachment-fixed background into the scrolling contents with a compensating
-   offset recomputed per scroll; during an overscroll drag that offset is
-   stale, so the ellipses slide up with the content, uncover a band of
-   unpainted --bg along the bottom (lighter than the sink above it, so it reads
-   as a footer-shaped rectangle), and snap back in a single frame on release. A
-   positioned layer is pinned by the compositor and does none of that.
+   That distinction is the whole design. Two ellipses used to do this job and
+   were replaced because a bounded gradient necessarily has a centre and a
+   falloff — which is a shape, and a shape in the background reads as a blob
+   someone dropped there. It also banded badly: over #0e0e0e the ramp had about
+   five 8-bit levels to spend, and five levels stretched over ~600px quantise
+   into visible arcs, worst on a phone OLED where near-black has no headroom.
+   Both problems are the same problem, and a field has neither: luminance varies
+   per pixel, so there is no edge to read and no smooth ramp to quantise. The
+   noise IS the dither, with far more amplitude than any overlay dither could
+   add to a gradient.
 
-   `100lvh` covers the other half: sized to the LARGE viewport, the layer stays
-   as tall as the visible area ever gets, so Android Chrome collapsing its
-   address bar cannot uncover the bottom edge either. Same failure the grain
-   layer below already guards against with its oversize — the geometry here is
-   load-bearing (the ellipses are placed in viewport percentages), so it gets
-   the lvh pin instead of a 200% box.
+   MECHANICS. A full-range noise tile blended over the ramp with `overlay`,
+   which against a near-black backdrop works out to 2 x backdrop x noise — a
+   wide multiplicative swing, which is what gives this its grain. The layer is
+   OPAQUE and paints the ground outright rather than tinting the page, and this
+   is load-bearing for performance: `background-blend-mode` resolves while the
+   element rasterises its own backgrounds, needs no page backdrop, and caches as
+   one static texture, so a scroll costs one cached composite. A `mix-blend-mode`
+   would instead have to re-read the page backdrop every frame, and stacked on
+   the film grain's own plus-lighter that measurably stutters on a phone. The
+   earlier version of this did exactly that and was the slower for it; nothing
+   sits behind this layer but flat --bg, so tinting the page was never needed.
 
-   The top background layer is a dither, and it is why this layer is opaque
-   (background-color, not just the two ellipses over the page). Over #0e0e0e
-   the sink spans about five 8-bit levels across ~600px, and five levels
-   stretched that far quantise into visible ellipse arcs — worst on a phone
-   OLED, where near-black has no headroom.
+   The 0.5 opacity is part of the recipe, not a knob: it scales the ramp and the
+   grain together, and the tokens above are doubled to compensate. Changing one
+   without the other changes the texture, not just the strength.
 
-   The dither is mid-grey noise blended with `overlay`, NOT noise painted on
-   top. That distinction was measured: additive noise spends its whole budget
-   on a DC lift (it raised the mean a level and left a 616px flat run intact),
-   because it can only ever add. `overlay` against a backdrop below 0.5 works
-   out to `2 × backdrop × noise`, so it scales the ground up AND down around
-   its own value — mean-neutral by construction, and proportional, so it dithers
-   just as well on the light theme's #f4f3f0. The noise is contrast-compressed
-   to roughly ±10% (slope 0.5 about a 0.5 centre), which lands near ±1.5 levels:
-   about one quantisation step, enough to break the contour without becoming
-   texture. Blending happens inside this element, so it never touches the text
-   above it.
+   A real fixed LAYER rather than `background-attachment: fixed` on body: Chrome
+   paints an attachment-fixed background into the scrolling contents with an
+   offset recomputed per scroll, and during an overscroll drag that offset goes
+   stale — the ground slid with the content, uncovered a band of unpainted --bg
+   along the bottom, and snapped back in one frame on release. `100lvh` covers
+   the rest: sized to the LARGE viewport, the layer stays as tall as the visible
+   area ever gets, so Android Chrome collapsing its address bar cannot uncover
+   the bottom edge either.
 
-   It is NOT the film grain: that tile is gamma-crushed to a sparse spray of
-   highlights on purpose, so it never touches the mid-ramp where banding
-   lives. */
+   NOT the film grain, which is a separate layer below. That tile is
+   gamma-crushed to a sparse spray of highlights on purpose, so it never touches
+   the mid-tones where banding lives. */
 body::before {
   content: "";
   position: fixed;
@@ -140,24 +141,21 @@ body::before {
   height: 100lvh;
   z-index: -1;
   pointer-events: none;
+  opacity: 0.5; /* see above: part of the recipe, paired with the 2x tokens */
   background-color: var(--bg);
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='d' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncG type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncB type='linear' slope='0.5' intercept='0.25'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23d)'/%3E%3C/svg%3E"),
-    radial-gradient(
-      ellipse 90% 55% at 50% -8%,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E"),
+    linear-gradient(
+      180deg,
       var(--ground-lift) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      ellipse 130% 60% at 50% 112%,
-      var(--ground-sink) 0%,
-      transparent 68%
+      transparent 38%,
+      transparent 60%,
+      var(--ground-sink) 100%
     );
-  background-blend-mode: overlay, normal, normal;
-  background-repeat: repeat, no-repeat, no-repeat;
+  background-blend-mode: overlay, normal;
+  background-repeat: repeat, no-repeat;
   background-size:
-    140px 140px,
-    100% 100%,
+    160px 160px,
     100% 100%;
 }
 
