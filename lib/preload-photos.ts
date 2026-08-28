@@ -96,9 +96,13 @@ export function lightboxSrc(
 ): string {
   if (typeof window === "undefined") return photo.src;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  // mirrors the CSS: max-height 82dvh, and never wider than the viewport
+  // Mirrors the CSS: max-height 82dvh, max-width 1200px / 92vw.
   const boxH = window.innerHeight * 0.82;
-  const boxW = Math.min(window.innerWidth * 0.94, boxH * (photo.width / photo.height));
+  const boxW = Math.min(
+    1200,
+    window.innerWidth * 0.92,
+    boxH * (photo.width / photo.height),
+  );
   const want = Math.ceil(boxW * dpr);
   const w = WIDTHS.find((s) => s >= want) ?? WIDTHS[WIDTHS.length - 1];
   return `/_next/image?url=${encodeURIComponent(photo.src)}&w=${w}&q=${quality}`;

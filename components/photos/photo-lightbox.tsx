@@ -151,9 +151,9 @@ export function PhotoLightbox({
               (the native ::backdrop is top-layer and can't be transitioned) */}
           <div className="photo-scrim" aria-hidden="true" />
 
-          {/* quiet loading hint while the next full-res photo is still decoding
-              on a cold cache; the current photo stays put underneath until it's
-              ready. Hidden by default; .is-loading fades it in (see globals). */}
+          {/* quiet loading hint while the optimized photo is still arriving on
+              a cold cache. Its blur placeholder is already visible underneath.
+              Hidden by default; .is-loading fades it in (see globals). */}
           <div
             className={`photo-spinner${loading ? " is-loading" : ""}`}
             role="status"
@@ -243,8 +243,12 @@ export function PhotoLightbox({
               backgroundSize: "cover",
               backgroundPosition: "center",
               aspectRatio: `${photo.width} / ${photo.height}`,
+              // `aspect-ratio` cannot reserve space while both CSS dimensions
+              // are auto. Give the image its final responsive width up front so
+              // the blur and the view-transition target never begin at 0×0.
+              width: `min(1200px, 92vw, ${82 * (photo.width / photo.height)}dvh)`,
             }}
-            className="max-h-[82dvh] w-auto max-w-full rounded-sm object-contain"
+            className="max-h-[82dvh] max-w-full rounded-sm object-contain"
           />
           {/* Main caption: title + location · date, always directly under the
               image (centred). Constant height, in normal flow, so the image

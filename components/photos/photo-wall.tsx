@@ -9,6 +9,7 @@ import {
 } from "react-photo-album";
 import "react-photo-album/masonry.css";
 import { EASE } from "@/lib/motion";
+import { lightboxSrc, warmPhoto } from "@/lib/preload-photos";
 import type { Photo } from "@/data/photos";
 
 function makeRender(
@@ -36,11 +37,11 @@ function makeRender(
         animate={reduced ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: EASE, delay: 0.08 + delay }}
         onPointerEnter={() => {
-          // Decode the full-size image on hover/touch-contact so opening lands
+          // Warm the exact lightbox URL on hover/touch-contact so opening lands
           // on a decoded image with no first-paint hang (mainly a Firefox win).
-          const img = new window.Image();
-          img.src = p.src;
-          img.decode().catch(() => {});
+          // This must not point at p.src: touch browsers can fire pointerenter as
+          // part of a tap, which would decode the oversized raw file as well.
+          warmPhoto(lightboxSrc(p));
         }}
       >
         <Image
