@@ -9,6 +9,7 @@ import {
 } from "react-photo-album";
 import "react-photo-album/masonry.css";
 import { EASE } from "@/lib/motion";
+import { lightboxSrc, warmPhoto } from "@/lib/preload-photos";
 import type { Photo } from "@/data/photos";
 
 function makeRender(
@@ -36,13 +37,31 @@ function makeRender(
         animate={reduced ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: EASE, delay: 0.08 + delay }}
         onPointerEnter={() => {
-          // Decode the full-size image on hover/touch-contact so opening lands
+          // Warm the exact lightbox URL on hover/touch-contact so opening lands
           // on a decoded image with no first-paint hang (mainly a Firefox win).
-          const img = new window.Image();
-          img.src = p.src;
-          img.decode().catch(() => {});
+          // This must not point at p.src: touch browsers can fire pointerenter as
+          // part of a tap, which would decode the oversized raw file as well.
+          warmPhoto(lightboxSrc(p));
         }}
       >
+        {/* Keep one identical, unnamed copy underneath the active hero. View
+            Transitions remove named elements from the root snapshot; this copy
+            stays in it, so the closing transition can dissolve into the real
+            tile under the real fixed header instead of swapping z-layers on
+            the final frame. It reuses the wall image's already-decoded URL. */}
+        {hero === index && (
+          <Image
+            src={p.src}
+            alt=""
+            aria-hidden
+            fill
+            sizes={sizes}
+            placeholder="blur"
+            blurDataURL={p.blurDataURL}
+            quality={75}
+            className="object-cover"
+          />
+        )}
         <Image
           src={p.src}
           alt={alt}

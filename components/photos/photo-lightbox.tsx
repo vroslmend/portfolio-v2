@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { warmPhoto } from "@/lib/preload-photos";
+import { lightboxSrc, warmPhoto } from "@/lib/preload-photos";
 import type { Photo } from "@/data/photos";
 
 const MONTHS = [
@@ -25,6 +25,7 @@ export function PhotoLightbox({
   loading,
   onClose,
   onNavigate,
+  onLoaded,
 }: {
   photos: Photo[];
   index: number | null;
@@ -33,6 +34,8 @@ export function PhotoLightbox({
   loading: boolean;
   onClose: () => void;
   onNavigate: (index: number) => void;
+  /** the photo finished arriving (or failed) — clears the loading hint */
+  onLoaded: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -83,8 +86,8 @@ export function PhotoLightbox({
   // (a detached Image() can be), and the decoded frame stays warm for the step.
   useEffect(() => {
     if (index === null) return;
-    warmPhoto(photos[next].src);
-    warmPhoto(photos[prev].src);
+    warmPhoto(lightboxSrc(photos[next]));
+    warmPhoto(lightboxSrc(photos[prev]));
   }, [index, prev, next, photos]);
 
   const displayDate = photo ? formatDate(photo.date) : undefined;
@@ -148,9 +151,9 @@ export function PhotoLightbox({
               (the native ::backdrop is top-layer and can't be transitioned) */}
           <div className="photo-scrim" aria-hidden="true" />
 
-          {/* quiet loading hint while the next full-res photo is still decoding
-              on a cold cache; the current photo stays put underneath until it's
-              ready. Hidden by default; .is-loading fades it in (see globals). */}
+          {/* quiet loading hint while the optimized photo is still arriving on
+              a cold cache. Its blur placeholder is already visible underneath.
+              Hidden by default; .is-loading fades it in (see globals). */}
           <div
             className={`photo-spinner${loading ? " is-loading" : ""}`}
             role="status"
@@ -203,18 +206,31 @@ export function PhotoLightbox({
               desktop (room beside a full-height image). See .photo-stage /
               .photo-meta in globals.css. */}
           <figure className="photo-stage relative m-0">
-          {/* a plain <img> of the full static webp (not next/image): the
-              gallery decodes this exact URL before the morph so the image's
-              dimensions are known when the transition snapshots it. Without it
-              Firefox measures the not-yet-loaded image as tiny and the open
-              morph animates to a ~50px image before popping to full size. */}
+          {/* A plain <img> rather than next/image, but pointed at the optimiser
+              rather than at the raw file: the gallery warms this exact URL
+              before the morph so the image's dimensions are known when the
+              transition snapshots it, and next/image's own srcset would make
+              "this exact URL" unknowable. Without the match Firefox measures a
+              not-yet-loaded image as tiny and animates to a ~50px box before
+              popping to full size.
+
+              The raw file is a 2400px long edge — about four times the pixels a
+              phone can show, decoded in full and then thrown away. lightboxSrc
+              asks for the box it actually occupies at quality 90, which is
+              sharper than the old file at 82 and a quarter of the decode.
+
+              blurDataURL sits behind it as the background, so a photo that is
+              still arriving shows its own blur at the right size instead of an
+              empty box with a caption floating in the middle of it. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={photo.src}
+            src={lightboxSrc(photo)}
             alt={photo.alt}
             width={photo.width}
             height={photo.height}
             decoding="async"
+            onLoad={onLoaded}
+            onError={onLoaded}
             // `photo-hero` (shared with the tile) for the open/close morph; an
             // alternating non-shared name for steps so they dissolve in place
             // rather than morphing one photo's box into the next.
@@ -223,8 +239,16 @@ export function PhotoLightbox({
                 mode === "cross" && index !== null
                   ? `photo-cross-${index % 2}`
                   : "photo-hero",
+              backgroundImage: `url("${photo.blurDataURL}")`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              aspectRatio: `${photo.width} / ${photo.height}`,
+              // `aspect-ratio` cannot reserve space while both CSS dimensions
+              // are auto. Give the image its final responsive width up front so
+              // the blur and the view-transition target never begin at 0×0.
+              width: `min(1200px, 92vw, ${82 * (photo.width / photo.height)}dvh)`,
             }}
-            className="max-h-[82dvh] w-auto rounded-sm object-contain"
+            className="max-h-[82dvh] max-w-full rounded-sm object-contain"
           />
           {/* Main caption: title + location · date, always directly under the
               image (centred). Constant height, in normal flow, so the image
