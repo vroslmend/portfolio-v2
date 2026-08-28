@@ -24,7 +24,7 @@ export function Reveal({
   // Observe the (never-clipped) wrapper: the masked child itself is fully
   // clipped while hidden, so IntersectionObserver would never see it.
   const maskRef = useRef<HTMLDivElement>(null);
-  const maskInView = useInView(maskRef, { once, margin: "-10% 0px" });
+  const maskInView = useInView(maskRef, { once, margin: "0px" });
 
   if (reduced) {
     return <div className={className}>{children}</div>;
@@ -49,7 +49,7 @@ export function Reveal({
       className={className}
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once, margin: "-10% 0px" }}
+      viewport={{ once, margin: "0px" }}
       transition={{ duration: 0.8, ease: EASE, delay }}
     >
       {children}
