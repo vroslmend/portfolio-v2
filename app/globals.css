@@ -859,19 +859,58 @@ body::after {
     );
 }
 
-.drawer-shader {
-  position: absolute !important;
+.drawer-atmosphere {
+  position: absolute;
   inset: 0;
   z-index: 1;
-  width: 100%;
-  height: 100%;
+  overflow: hidden;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.58;
   mix-blend-mode: screen;
 }
-.light .drawer-shader {
-  opacity: 0.55;
+.drawer-atmosphere__veil {
+  position: absolute;
+  inset: -42% -16%;
+  transform: translate3d(0, 0, 0) scale(1.04);
+  transform-origin: center;
+  will-change: transform;
+}
+.drawer-atmosphere__veil--near {
+  background:
+    radial-gradient(ellipse 28% 54% at 12% 36%, rgba(255, 255, 255, 0.08), transparent 72%),
+    radial-gradient(ellipse 22% 46% at 84% 68%, rgba(184, 184, 178, 0.055), transparent 74%),
+    radial-gradient(ellipse 18% 30% at 57% 22%, rgba(255, 255, 255, 0.026), transparent 78%);
+  animation: drawer-smoke-near 24s 650ms ease-in-out infinite alternate both;
+}
+.drawer-atmosphere__veil--far {
+  background:
+    radial-gradient(ellipse 34% 46% at 76% 28%, rgba(255, 255, 255, 0.036), transparent 74%),
+    radial-gradient(ellipse 30% 60% at 30% 74%, rgba(132, 132, 128, 0.04), transparent 76%);
+  animation: drawer-smoke-far 31s 650ms ease-in-out infinite alternate both;
+}
+.light .drawer-atmosphere {
+  opacity: 0.5;
   mix-blend-mode: multiply;
+}
+.light .drawer-atmosphere__veil--near {
+  background:
+    radial-gradient(ellipse 28% 54% at 12% 36%, rgba(91, 87, 79, 0.16), transparent 72%),
+    radial-gradient(ellipse 22% 46% at 84% 68%, rgba(116, 111, 100, 0.11), transparent 74%),
+    radial-gradient(ellipse 18% 30% at 57% 22%, rgba(74, 70, 64, 0.07), transparent 78%);
+}
+.light .drawer-atmosphere__veil--far {
+  background:
+    radial-gradient(ellipse 34% 46% at 76% 28%, rgba(91, 86, 76, 0.09), transparent 74%),
+    radial-gradient(ellipse 30% 60% at 30% 74%, rgba(119, 113, 100, 0.12), transparent 76%);
+}
+
+@keyframes drawer-smoke-near {
+  from { transform: translate3d(-2.4%, 1.5%, 0) scale(1.04); }
+  to { transform: translate3d(2.8%, -1.8%, 0) scale(1.09); }
+}
+@keyframes drawer-smoke-far {
+  from { transform: translate3d(2.2%, -1.2%, 0) scale(1.08); }
+  to { transform: translate3d(-2.6%, 1.6%, 0) scale(1.03); }
 }
 
 .panel-bloom {
@@ -882,7 +921,8 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .glass-sheen {
+  .glass-sheen,
+  .drawer-atmosphere__veil {
     animation: none !important;
   }
 }
