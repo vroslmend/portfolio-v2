@@ -5,16 +5,13 @@ import { flushSync } from "react-dom";
 import { useLenis } from "lenis/react";
 import { PhotoWall } from "@/components/photos/photo-wall";
 import { PhotoLightbox } from "@/components/photos/photo-lightbox";
-import { preloadPhoto } from "@/lib/preload-photos";
+import { lightboxSrc, preloadPhoto, warmPhoto } from "@/lib/preload-photos";
 import type { Photo } from "@/data/photos";
 
 type ViewTransition = { finished: Promise<void> };
 type Doc = Document & {
   startViewTransition?: (cb: () => void) => ViewTransition;
 };
-
-type Connection = { saveData?: boolean; effectiveType?: string };
-type RIC = (cb: () => void, opts?: { timeout: number }) => number;
 
 export function PhotoGallery({ photos }: { photos: Photo[] }) {
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -31,8 +28,9 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
   // dissolves in place instead of morphing one box into the other (which, with
   // differing aspect ratios, looked like an awkward vertical collapse).
   const [mode, setMode] = useState<"morph" | "cross">("morph");
-  // True while we're waiting for a destination image to decode before a step;
-  // drives the quiet loading hint so the wait never looks like a frozen UI.
+  // True from the moment a move commits until that photo's <img> reports it has
+  // arrived. Drives the quiet loading hint, so a wait never looks like frozen UI
+  // — including on open, which previously showed no indicator at all.
   const [loading, setLoading] = useState(false);
   // Each go() takes the next ticket; a later press/close bumps it so an earlier
   // op that is still awaiting its decode bails instead of swapping in late (the
@@ -71,27 +69,26 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     const seq = ++opSeq.current;
     if (closing) setLoading(false); // a close cancels any pending step's spinner
 
-    // Decode the destination BEFORE anything visible changes. The old code
-    // started the transition (which swapped the caption) and only then waited up
-    // to 500ms for a decode, so on a cold cache the title changed while the
-    // picture stayed put.
-    if (stepping) {
-      // Stepping: hold the current photo (and its caption) until the next is
-      // fully ready, with a quiet spinner over the wait. The timeout is only a
-      // safety valve for a request that hangs open forever — a genuine load
-      // error rejects decode() promptly, so an honest-but-slow image (poor
-      // connection) still resolves on its real decode and the caption flips only
-      // when the picture is actually there. Long, so slow links never flip early.
+    if (next !== null) {
+      // The spinner is armed for every move, not just steps. Its CSS fade-in is
+      // delayed, so an already-decoded photo clears `loading` on the img's own
+      // load event long before the ring can appear; only a real wait shows one.
       setLoading(true);
-      await preloadPhoto(photos[next!].src, 30000);
-      if (opSeq.current !== seq) return; // a newer press/close took over
-      setLoading(false);
+    }
+
+    if (stepping) {
+      // Deliberately NOT awaited. Stepping used to block on decode with a 30s
+      // ceiling, so on a cold cache the arrows appeared dead — the press was
+      // queued behind a decode, which is also why it stalled on a fast
+      // connection. Now the step commits immediately and the photo streams in
+      // behind its own blur placeholder.
+      warmPhoto(lightboxSrc(photos[next!]));
     } else if (next !== null) {
-      // Opening: keep it snappy — a short budget gives the morph real dimensions
-      // (Firefox otherwise measures the unloaded image as tiny), then the image
-      // fills in after the dialog is up rather than blocking the open on a cold
-      // full-size download.
-      await preloadPhoto(photos[next].src, 600);
+      // Opening still takes a short budget: the morph wants real dimensions, and
+      // Firefox otherwise measures a not-yet-loaded image as tiny and animates
+      // to a ~50px box before popping to full size. Short enough that a cold
+      // cache never holds the dialog shut.
+      await preloadPhoto(lightboxSrc(photos[next]), 400);
       if (opSeq.current !== seq) return;
     }
 
@@ -145,32 +142,12 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     if (next === null) setHero(null);
   }
 
-  // Idle-prefetch every full-resolution photo a moment after the wall mounts, so
-  // stepping through the lightbox is instant from the first open — but ONLY on a
-  // fast link. On a constrained connection bulk-loading 9 full images saturates
-  // the pipe and starves the one photo the user is actually waiting on (which
-  // defeats the wait-for-decode in go()). There the targeted neighbour-warm plus
-  // wait-for-decode cover stepping without hogging bandwidth. Also honours the
-  // data-saver hint. The lightbox stays correct on every link regardless.
-  useEffect(() => {
-    const conn = (navigator as { connection?: Connection }).connection;
-    if (conn?.saveData) return;
-    if (conn?.effectiveType && conn.effectiveType !== "4g") return;
-    const run = () => {
-      for (const p of photos) void preloadPhoto(p.src).catch(() => {});
-    };
-    const ric = (window as unknown as { requestIdleCallback?: RIC })
-      .requestIdleCallback;
-    if (ric) {
-      const id = ric(run, { timeout: 3000 });
-      return () =>
-        (
-          window as unknown as { cancelIdleCallback?: (id: number) => void }
-        ).cancelIdleCallback?.(id);
-    }
-    const t = window.setTimeout(run, 1500);
-    return () => window.clearTimeout(t);
-  }, [photos]);
+  // NOTE: there used to be an idle prefetch of every full-resolution photo here.
+  // It was the cause of the slowness rather than a cure for it: nine 4.3 MP
+  // images held as decoded bitmaps is ~148 MB resident, which on a phone means
+  // memory pressure, eviction, and a decode queue that navigation then waited
+  // on. The targeted neighbour warm above, against a correctly-sized URL and a
+  // bounded cache, covers stepping without any of that.
 
   return (
     <>
@@ -183,6 +160,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
         loading={loading}
         onClose={() => go(null)}
         onNavigate={(i) => go(i)}
+        onLoaded={() => setLoading(false)}
       />
     </>
   );
