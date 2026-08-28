@@ -197,6 +197,9 @@ body::before {
 html[data-ground="off"] body::before,
 html[data-ground="haze"] body::before,
 html[data-ground="field"] body::before,
+html[data-ground="warp"] body::before,
+html[data-ground="perlin"] body::before,
+html[data-ground="paper"] body::before,
 html[data-ground="rays"] body::before {
   background-image: none;
 }
@@ -213,11 +216,32 @@ html[data-ground="arcs"] body::before {
       transparent 68%
     );
 }
-/* ramp and vignette lived here and were both rejected on sight, along with
-   arcs: any bounded gradient has a centre and a falloff, which is a shape, and
-   a shape in the background reads as someone having put a blob there. They are
-   in the history if the comparison is ever wanted again. What replaces them
-   below are FIELDS, not shapes.
+/* ramp and vignette were both rejected on sight, along with arcs: any bounded
+   gradient has a centre and a falloff, which is a shape, and a shape in the
+   background reads as someone having put a blob there. They stay switchable
+   anyway — the bench is a test suite, and a rejected study is only useful if
+   the next comparison can still see it. What follows them are FIELDS.
+
+   A linear ramp spans the full width, so it has no centre and no rim. */
+html[data-ground="ramp"] body::before {
+  background-image: linear-gradient(
+    180deg,
+    var(--g-lift2) 0%,
+    transparent 34%,
+    transparent 60%,
+    var(--g-sink2) 100%
+  );
+}
+/* Edges only, like a lens. Leaves the middle of the screen alone. */
+html[data-ground="vignette"] body::before {
+  background-image: radial-gradient(
+    ellipse 76% 66% at 50% 50%,
+    transparent 44%,
+    var(--g-sink2) 100%
+  );
+}
+
+/* ---- fields ----
 
    The move is structural rather than cosmetic. Banding comes from a smooth
    luminance ramp quantising into 8-bit steps, and on #0e0e0e there are only

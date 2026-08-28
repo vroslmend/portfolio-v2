@@ -3,23 +3,38 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
-// Loaded only while the matching ground is selected, so picking a CSS option
-// never pulls the WebGL runtime into the page at all. The whole question this
-// bench exists to answer is whether a shader earns its cost, and it cannot
-// answer that honestly if the cost is paid either way.
-const GroundField = dynamic(
-  () => import("@/components/ground-field").then((m) => m.GroundField),
-  { ssr: false },
-);
-const GroundRays = dynamic(
-  () => import("@/components/ground-rays").then((m) => m.GroundRays),
+import type { ShaderGround } from "@/components/ground-shaders";
+
+// Loaded only while a shader ground is selected, so picking off/haze/arcs never
+// pulls the WebGL runtime into the page at all. The whole question this bench
+// exists to answer is whether a shader earns its cost, and it cannot answer
+// that honestly if the cost is paid either way.
+const GroundShader = dynamic(
+  () => import("@/components/ground-shaders").then((m) => m.GroundShader),
   { ssr: false },
 );
 
 type Film = "clean" | "fine" | "16mm" | "nocturne";
 type Typography = "geist" | "editorial" | "roman" | "hybrid";
 type TextMotion = "still" | "drift" | "depth" | "gate";
-type Ground = "off" | "haze" | "field" | "rays" | "arcs";
+// Nothing is ever removed from here. The bench is a test suite, so a rejected
+// study stays switchable rather than becoming something to rebuild later —
+// ramp and vignette are back for that reason.
+type Ground =
+  | "off"
+  | "haze"
+  | "field"
+  | "warp"
+  | "perlin"
+  | "paper"
+  | "rays"
+  | "arcs"
+  | "ramp"
+  | "vignette";
+
+const SHADER_GROUNDS = ["field", "warp", "perlin", "paper", "rays"] as const;
+const isShaderGround = (g: Ground): g is ShaderGround =>
+  (SHADER_GROUNDS as readonly string[]).includes(g);
 type GroundAmount = "quarter" | "half" | "1x" | "2x";
 type GroundDither = "off" | "low" | "on" | "high";
 type GroundAttach = "fixed" | "scroll";
@@ -74,10 +89,15 @@ const MOTIONS: { value: TextMotion; label: string; title: string }[] = [
 // survive `attach: scroll` without stretching, which no gradient shape can.
 const GROUNDS: { value: Ground; label: string; title: string }[] = [
   { value: "off", label: "off", title: "Flat --bg. The film grain is the only texture on the page" },
-  { value: "haze", label: "haze", title: "CSS. Light expressed as grain density instead of as a gradient — no WebGL, and far more dither headroom than the shipped ground has" },
-  { value: "field", label: "field", title: "Shader. A grainy field pooled toward the frame edges, drifting very slowly. Banding is impossible by construction" },
-  { value: "rays", label: "rays", title: "Shader. Traces of light from a source off the top-left corner, no glow in the frame" },
-  { value: "arcs", label: "arcs", title: "Shipped, kept as the control. The two ellipses — and the one option here that stretches under attach: scroll" },
+  { value: "haze", label: "haze", title: "CSS. Light as grain density instead of as a gradient — no WebGL at all, and far more dither headroom than the shipped ground" },
+  { value: "field", label: "field", title: "GrainGradient wave. Grainy field with a slow drift. Banding impossible by construction" },
+  { value: "warp", label: "warp", title: "Warp on an edge base. Smoky, swirled field with no repeating geometry left in it" },
+  { value: "perlin", label: "perlin", title: "Perlin noise, few octaves. A soft moving cloud rather than a detailed noise field" },
+  { value: "paper", label: "paper", title: "Paper texture: fibre, folds and crumple. A surface rather than a light, and static — the cheapest shader here" },
+  { value: "rays", label: "rays", title: "God rays from off the top-left corner. Rejected as too much, kept for the record" },
+  { value: "arcs", label: "arcs", title: "Shipped, kept as the control. Stretches under attach: scroll, as all three gradient shapes do" },
+  { value: "ramp", label: "ramp", title: "Rejected. Edge-to-edge vertical gradient, no centre or rim, but still a gradient" },
+  { value: "vignette", label: "vign", title: "Rejected. Darkening at the frame edges only, like a lens" },
 ];
 
 const GROUND_AMOUNTS: { value: GroundAmount; label: string; title: string }[] = [
@@ -218,8 +238,9 @@ export function BackgroundTexture() {
       {/* CSS haze is always in the DOM (it costs nothing when data-ground is
           not "haze"); the shaders mount only while selected. */}
       <div aria-hidden className="ground-haze" />
-      {settings.ground === "field" && <GroundField />}
-      {settings.ground === "rays" && <GroundRays />}
+      {isShaderGround(settings.ground) && (
+        <GroundShader key={settings.ground} variant={settings.ground} />
+      )}
 
       <aside className="design-lab fixed right-4 bottom-4 z-[70] font-mono text-[10px] tracking-[0.06em]">
         {open && (
@@ -271,11 +292,17 @@ function LabRow<T extends string>({ label, options, value, onChange }: {
   return (
     <div className="border-t border-line py-2.5 first:border-t-0">
       <span className="mb-1.5 block px-1 uppercase tracking-[0.18em] text-faint">{label}</span>
-      {/* column count follows the option count, so a two-way study (attach)
-          reads as two halves rather than two buttons and two holes */}
+      {/* Up to five across sit on one line; past that the row wraps instead of
+          shrinking the buttons into unreadable slivers. That matters because
+          the ground row only ever grows — studies are appended, never removed. */}
       <div
         className="grid gap-1"
-        style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+        style={{
+          gridTemplateColumns:
+            options.length <= 5
+              ? `repeat(${options.length}, minmax(0, 1fr))`
+              : "repeat(auto-fit, minmax(3.1rem, 1fr))",
+        }}
         role="group"
         aria-label={label}
       >
