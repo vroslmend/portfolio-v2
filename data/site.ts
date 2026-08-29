@@ -74,7 +74,7 @@ export const projects: Project[] = [
     year: "2025",
     tagline: "lap-time analysis",
     description:
-      "Lap-time analysis for go-karting sessions with my friends. It scrapes our results from the track's website, then uses Pandas and NumPy to chart fastest laps, consistency and how everyone stacks up.",
+      "The Python analysis behind a collaborative karting dashboard. I worked primarily on cleaning RaceFacer leaderboard snapshots and comparing times, distributions and rankings with Pandas and NumPy; Farhan led the later dashboard and application work.",
     stack: ["Python", "Pandas", "NumPy"],
     links: {
       live: "https://karting-dashboard.vercel.app/",
