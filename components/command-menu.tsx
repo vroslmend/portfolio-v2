@@ -15,6 +15,8 @@ import { EASE } from "@/lib/motion";
 import { PixelPrius } from "@/components/pixel-prius";
 import { site } from "@/data/site";
 
+const KITTY_ENABLED = Boolean(process.env.NEXT_PUBLIC_KITTY_API_URL);
+
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -39,11 +41,22 @@ export function CommandMenu() {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setSearch("");
-        setOpen((o) => !o);
+        setOpen((current) => {
+          const next = !current;
+          if (next) {
+            window.dispatchEvent(
+              new CustomEvent("close-kitty", { detail: { restoreFocus: false } }),
+            );
+          }
+          return next;
+        });
       }
       if (e.key === "Escape") setOpen(false);
     }
     function onOpenEvent() {
+      window.dispatchEvent(
+        new CustomEvent("close-kitty", { detail: { restoreFocus: false } }),
+      );
       setSearch("");
       setOpen(true);
     }
@@ -237,6 +250,21 @@ export function CommandMenu() {
                   </Group>
 
                   <Group heading="actions">
+                    {KITTY_ENABLED && (
+                      <Item
+                        value="ask kitty"
+                        keywords={["assistant", "site agent", "projects"]}
+                        onSelect={() => {
+                          setOpen(false);
+                          window.setTimeout(
+                            () => window.dispatchEvent(new Event("open-kitty")),
+                            360,
+                          );
+                        }}
+                      >
+                        ask kitty
+                      </Item>
+                    )}
                     <Item
                       value="toggle theme"
                       onSelect={() =>
