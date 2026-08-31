@@ -14,6 +14,7 @@ import { BeyondTheEnd } from "@/components/beyond-the-end";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { NowPlayingProvider } from "@/components/now-playing-provider";
 import { PageEffects } from "@/components/page-effects";
+import { KittyProvider } from "@/components/kitty/kitty-provider";
 import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
@@ -83,16 +84,16 @@ export default function RootLayout({
         >
           <NowPlayingProvider>
             <SmoothScroll>
-              <Nav />
-              <main className="mx-auto min-h-[calc(100vh-160px)] w-full max-w-3xl px-6 pt-36">
-                {children}
-              </main>
-              <Footer />
-              <BeyondTheEnd />
-              {/* inside SmoothScroll so it can reach the Lenis context and pause
-                  page scroll while open (it's a fixed overlay, unaffected by the
-                  root-mode Lenis, which transforms nothing) */}
-              <CommandMenu />
+              <KittyProvider>
+                <Nav />
+                <main className="mx-auto min-h-[calc(100vh-160px)] w-full max-w-3xl px-6 pt-36">
+                  {children}
+                </main>
+                <Footer />
+                <BeyondTheEnd />
+                {/* inside SmoothScroll so overlays can pause Lenis while open */}
+                <CommandMenu />
+              </KittyProvider>
             </SmoothScroll>
           </NowPlayingProvider>
           <PageEffects />

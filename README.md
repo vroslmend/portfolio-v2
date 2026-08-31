@@ -20,6 +20,8 @@ Dark by default, and monochrome at heart. Greys on near-black in the dark theme,
 
 There's a photos page as well, a wall of shots I've taken on a Pixel 5 that open fullscreen with a quiet morph and show how each one was taken.
 
+Near the work list, a small cat opens a conversation with kitty, an on-site agent that answers questions about my projects and writing. Its LangGraph backend lives in [kitty-agent](https://github.com/vroslmend/kitty-agent).
+
 Down in the footer, a little equalizer shows whatever I'm playing on Spotify at the time, and stays quiet when I'm not. Scroll past the very bottom and a live visitor and Prius counter slides up. It's served by a small AWS backend that lives in its own repo, [cloud-visitor-counter](https://github.com/vroslmend/cloud-visitor-counter).
 
 Content lives in [`data/site.ts`](data/site.ts). Pages are in [`app/`](app), components in [`components/`](components).
@@ -33,6 +35,11 @@ npm run dev
 
 That runs everything. A few optional variables switch on extra pieces:
 
+- `NEXT_PUBLIC_KITTY_API_URL` points at the kitty backend. Leave it unset and kitty stays hidden.
 - `NEXT_PUBLIC_COUNTER_API_URL` points at the visitor counter backend. Leave it unset and the counter panel just stays hidden.
 - `NEXT_PUBLIC_SITE_URL` sets the canonical origin used in metadata. It falls back to the Vercel domain, then localhost.
 - `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` and `SPOTIFY_REFRESH_TOKEN` power the now-playing widget. Leave them unset and the footer just stays quiet.
+
+## Credits
+
+“Cat” icons by [inmyheart](https://thenounproject.com/icon/match/cat-8273692/), from [Noun Project](https://thenounproject.com/browse/icons/term/cat/) (CC BY 3.0).

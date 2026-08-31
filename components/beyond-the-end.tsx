@@ -126,6 +126,7 @@ export function BeyondTheEnd() {
   useMotionValueEvent(lift, "change", (v) => setPanelShown(v > 0.0005));
   // lets the click-off scrim and Escape reuse the gesture's own close logic
   const closeRef = useRef<() => void>(() => {});
+  const kittyOpen = useRef(false);
   const panelRef = useRef<HTMLElement>(null);
   const contentX = useSpring(0, { stiffness: 110, damping: 24, mass: 0.45 });
   const contentY = useSpring(0, { stiffness: 110, damping: 24, mass: 0.45 });
@@ -147,6 +148,19 @@ export function BeyondTheEnd() {
     contentX.set(0);
     contentY.set(0);
   }
+
+  useEffect(() => {
+    function onKittyChange(event: Event) {
+      const open = Boolean((event as CustomEvent<{ open?: boolean }>).detail?.open);
+      kittyOpen.current = open;
+      if (open) {
+        hintOpacity.set(0);
+        closeRef.current();
+      }
+    }
+    window.addEventListener("kitty-open-change", onKittyChange);
+    return () => window.removeEventListener("kitty-open-change", onKittyChange);
+  }, [hintOpacity]);
 
   // ----- counter data (runs for everyone, independent of the reveal) -----
   useEffect(() => {
@@ -247,6 +261,9 @@ export function BeyondTheEnd() {
         return;
       }
       if (pull >= commit) {
+        window.dispatchEvent(
+          new CustomEvent("close-kitty", { detail: { restoreFocus: false } }),
+        );
         open = true; // crossed the commit point -> snap the rest of the way
         pull = commit;
         lift.set(1);
@@ -268,6 +285,7 @@ export function BeyondTheEnd() {
     }
 
     function onWheel(e: WheelEvent) {
+      if (kittyOpen.current) return;
       if (!engaged && !(atBottom() && e.deltaY > 0)) return;
       engage();
       e.preventDefault();
@@ -280,6 +298,10 @@ export function BeyondTheEnd() {
     }
 
     function onScroll() {
+      if (kittyOpen.current) {
+        hintOpacity.set(0);
+        return;
+      }
       if (!engaged) hintOpacity.set(atBottom() ? 1 : 0);
     }
 
@@ -288,6 +310,7 @@ export function BeyondTheEnd() {
       touchY = e.touches[0].clientY;
     }
     function onTouchMove(e: TouchEvent) {
+      if (kittyOpen.current) return;
       const dy = touchY - e.touches[0].clientY; // dragging up is positive
       if (!engaged && !(atBottom() && dy > 0)) return;
       engage();
