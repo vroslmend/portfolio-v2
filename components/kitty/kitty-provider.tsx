@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -640,7 +641,9 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                     }}
                   >
                     <div className="kitty-inner">
-                      <AnimatePresence initial={false} mode="wait">
+                      {/* popLayout, not wait: the empty state must not hold the
+                          panel blank while the first turn waits its turn to enter */}
+                      <AnimatePresence initial={false} mode="popLayout">
                         {messages.length === 0 ? (
                           <KittyEmpty
                             key="empty"
@@ -716,13 +719,18 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                                         </motion.button>
                                       ) : null}
                                     </article>
-                                    {showScene ? (
-                                      <KittyScene
-                                        id={scenePose}
-                                        status={busy ? liveStatus : ""}
-                                        compact
-                                      />
-                                    ) : null}
+                                    {/* the vignette follows the newest visitor row, so
+                                        it needs an exit where it leaves, not a cut */}
+                                    <AnimatePresence initial={false}>
+                                      {showScene ? (
+                                        <KittyScene
+                                          key="scene"
+                                          id={scenePose}
+                                          status={busy ? liveStatus : ""}
+                                          compact
+                                        />
+                                      ) : null}
+                                    </AnimatePresence>
                                   </motion.div>
                                 );
                               })}
@@ -824,7 +832,8 @@ function KittyScene({
       className={`kitty-scene${compact ? " is-compact" : ""}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: displayedId ? 1 : 0 }}
-      transition={{ duration: reduced ? 0 : 0.28, ease: EASE }}
+      exit={reduced ? undefined : { opacity: 0 }}
+      transition={{ duration: reduced ? 0 : 0.32, ease: EASE }}
       aria-hidden="true"
     >
       <AnimatePresence initial={false} mode="sync">
@@ -832,10 +841,10 @@ function KittyScene({
           <motion.span
             key={displayedId}
             className="kitty-scene-pose"
-            initial={reduced ? false : { opacity: 0, y: 3 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduced ? undefined : { opacity: 0, y: -2 }}
-            transition={{ duration: reduced ? 0 : 0.24, ease: EASE }}
+            initial={reduced ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduced ? undefined : { opacity: 0 }}
+            transition={{ duration: reduced ? 0 : 0.32, ease: EASE }}
           >
             <KittyArt id={displayedId} />
           </motion.span>
@@ -908,11 +917,15 @@ const SUGGESTIONS = [
   "show me the backend-heavy work",
 ];
 
-function KittyEmpty({ onAsk }: { onAsk: (question: string) => void }) {
+const KittyEmpty = forwardRef<
+  HTMLDivElement,
+  { onAsk: (question: string) => void }
+>(function KittyEmpty({ onAsk }, ref) {
   const reduced = useReducedMotion();
 
   return (
     <motion.div
+      ref={ref}
       className="kitty-empty"
       variants={CHAT_SEQUENCE}
       initial={reduced ? false : "hidden"}
@@ -943,7 +956,7 @@ function KittyEmpty({ onAsk }: { onAsk: (question: string) => void }) {
       </motion.div>
     </motion.div>
   );
-}
+});
 
 function KittyOptions({
   options,
