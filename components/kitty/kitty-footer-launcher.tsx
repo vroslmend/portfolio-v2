@@ -19,6 +19,7 @@ type DiscoveryClue =
   | "resting";
 
 const EXIT_EASE = [0.7, 0, 0.84, 0] as const;
+const KNOCK_EASE = [0.65, 0, 0.35, 1] as const;
 
 const DIALOGUES = [
   "ask me about the work.",
@@ -98,7 +99,7 @@ export function KittyFooterLauncher() {
 
     const delay = (() => {
       if (clue === "waiting") return randomBetween(1200, 1800);
-      if (clue === "rustling") return 650;
+      if (clue === "rustling") return 800;
       if (clue === "quiet") return randomBetween(900, 1150);
       if (clue === "peeking") return 2300;
       return randomBetween(7000, 10000);
@@ -200,11 +201,11 @@ export function KittyFooterLauncher() {
     !revealed && artReady && (clue === "peeking" || interacting);
   const knocking = clueActive && !interacting && clue === "rustling";
   const knockTransition = {
-    duration: reduced ? 0 : 0.18,
-    times: [0, 0.35, 1],
+    duration: reduced ? 0 : 0.26,
+    times: [0, 0.28, 1],
     repeat: reduced ? 0 : 1,
-    repeatDelay: reduced ? 0 : 0.28,
-    ease: EASE,
+    repeatDelay: reduced ? 0 : 0.26,
+    ease: KNOCK_EASE,
   };
   const awake =
     revealed && (interacting || (eyesOpen && (idle || !settled)));
@@ -253,17 +254,17 @@ export function KittyFooterLauncher() {
         className="kitty-footer-disturbance"
         aria-hidden="true"
         initial={false}
-        animate={{ opacity: knocking ? 1 : 0 }}
-        transition={{ duration: 0 }}
+        animate={knocking ? { opacity: [0, 1, 0] } : { opacity: 0 }}
+        transition={knockTransition}
       >
         <motion.i
           animate={
             knocking
               ? {
                   y: [0, -4, 0],
-                  scaleX: [0.82, 1, 0.82],
+                  scaleX: [1, 0.88, 1],
                 }
-              : { y: 0, scaleX: 0.82 }
+              : { y: 0, scaleX: 1 }
           }
           transition={knockTransition}
         />
@@ -278,9 +279,9 @@ export function KittyFooterLauncher() {
         animate={
           knocking
             ? {
-                opacity: [0, 1, 0],
-                scale: [0.82, 1.05, 0.9],
-                y: [2, -1, 0],
+                opacity: [0, 0.88, 0],
+                scale: [0.9, 1, 1.05],
+                y: [1, -1, -2],
               }
             : { opacity: 0, scale: 0.9, y: 1 }
         }
