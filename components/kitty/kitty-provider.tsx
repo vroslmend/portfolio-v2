@@ -892,8 +892,11 @@ function KittyMessageText({
     const trailing = match[3]?.match(/[.,!?;:]+$/)?.[0] ?? "";
     const url = trailing ? rawUrl.slice(0, -trailing.length) : rawUrl;
     const label = match[1] ?? url;
+    // A path with an extension is a file in public/, not a route. The rest of
+    // the site opens those in a tab, so /resume.pdf belongs on the anchor.
+    const isRoute = url.startsWith("/") && !/\.[a-z0-9]+$/i.test(url);
     parts.push(
-      url.startsWith("/") ? (
+      isRoute ? (
         <Link key={`${index}-${url}`} href={url} onClick={onNavigate}>
           {label}
         </Link>
