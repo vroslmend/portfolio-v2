@@ -12,6 +12,7 @@ import {
   useSpring,
 } from "motion/react";
 import { EASE } from "@/lib/motion";
+import { kittyArtSrc } from "@/lib/kitty-art";
 import { PixelPrius } from "@/components/pixel-prius";
 import { site } from "@/data/site";
 
@@ -31,8 +32,8 @@ export function CommandMenu() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const hlTop = useSpring(0, { stiffness: 620, damping: 46, mass: 0.7 });
-  const hlHeight = useSpring(0, { stiffness: 620, damping: 46, mass: 0.7 });
+  const hlTop = useSpring(0, { stiffness: 480, damping: 40, mass: 0.72 });
+  const hlHeight = useSpring(0, { stiffness: 480, damping: 40, mass: 0.72 });
   const hlOpacity = useMotionValue(0);
   const placed = useRef(false);
 
@@ -217,6 +218,13 @@ export function CommandMenu() {
                     className="pointer-events-none absolute inset-x-2 z-0 rounded-md bg-surface"
                     style={{ top: hlTop, height: hlHeight, opacity: hlOpacity }}
                   />
+                  <motion.span
+                    aria-hidden
+                    className="pointer-events-none absolute right-5 z-20 flex items-center text-faint"
+                    style={{ top: hlTop, height: hlHeight, opacity: hlOpacity }}
+                  >
+                    ↵
+                  </motion.span>
 
                   <Command.Empty className="px-3 py-6 text-center font-mono text-xs text-faint">
                     nothing found.
@@ -262,7 +270,7 @@ export function CommandMenu() {
                           );
                         }}
                       >
-                        ask kitty
+                        <KittyCommandLabel />
                       </Item>
                     )}
                     <Item
@@ -406,16 +414,33 @@ function Item({
       value={value}
       keywords={keywords}
       onSelect={onSelect}
-      className="group relative z-10 flex cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2.5 font-mono text-[13px] text-muted transition-colors duration-150 data-[selected=true]:text-fg"
+      className="group relative z-10 flex cursor-pointer items-center rounded-md py-2.5 pr-10 pl-3 font-mono text-[13px] text-muted transition-colors duration-200 data-[selected=true]:text-fg"
     >
-      <span className="min-w-0 truncate">{children}</span>
+      <span className="min-w-0">{children}</span>
+    </Command.Item>
+  );
+}
+
+function KittyCommandLabel() {
+  return (
+    <span className="relative inline-flex items-center">
+      ask kitty
       <span
         aria-hidden
-        className="shrink-0 -translate-x-1 text-faint opacity-0 transition-[opacity,transform] duration-200 ease-out group-data-[selected=true]:translate-x-0 group-data-[selected=true]:opacity-100"
+        className="pointer-events-none absolute left-full ml-2.5 block h-[17px] w-6 translate-y-1 scale-95 opacity-0 transition-[opacity,transform] duration-300 ease-out-expo group-data-[selected=true]:translate-y-0 group-data-[selected=true]:scale-100 group-data-[selected=true]:opacity-75"
       >
-        ↵
+        <svg
+          viewBox="20 5 70 48"
+          className="block h-full w-full overflow-hidden dark:invert"
+        >
+          <image
+            href={kittyArtSrc("8317982")}
+            width="100"
+            height="100"
+          />
+        </svg>
       </span>
-    </Command.Item>
+    </span>
   );
 }
 
