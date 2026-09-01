@@ -105,6 +105,7 @@ export function BeyondTheEnd() {
   const reduced = useReducedMotion();
   const lenis = useLenis();
   const [counts, setCounts] = useState<Counts | null>(null);
+  const drawerAvailable = Boolean(API && counts);
   const [revealed, setRevealed] = useState(false);
   // kept out of the DOM entirely while resting (see below)
   const [panelShown, setPanelShown] = useState(false);
@@ -238,7 +239,10 @@ export function BeyondTheEnd() {
 
   // ----- the bottom-sheet snap gesture -----
   useEffect(() => {
-    if (reduced || !API) return;
+    // The URL alone does not make the drawer available. If the request fails,
+    // there is no panel to reveal, so installing the gesture here would still
+    // stop Lenis and consume wheel/touch input behind an invisible surface.
+    if (reduced || !drawerAvailable) return;
     let pull = 0; // accumulated overscroll (px)
     let open = false; // committed-open state
     let engaged = false;
@@ -362,7 +366,7 @@ export function BeyondTheEnd() {
       reportPastEndPriority(false);
       lenis?.start(); // never leave Lenis paused
     };
-  }, [reduced, lift, hintOpacity, lenis, reportPastEndPriority]);
+  }, [drawerAvailable, reduced, lift, hintOpacity, lenis, reportPastEndPriority]);
 
   // No counts means the backend is unset or unreachable. Hiding is the same
   // thing the unset case already does, and beats rendering a confident zero.
