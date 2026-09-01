@@ -607,6 +607,9 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                   <div
                     ref={scroll}
                     className="kitty-scroll"
+                    // Lenis preventDefaults wheel and touch even while stopped,
+                    // so without this the transcript never scrolls.
+                    data-lenis-prevent
                     onScroll={(event) => {
                       const element = event.currentTarget;
                       stickToBottom.current =
