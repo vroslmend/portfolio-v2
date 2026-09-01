@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import {
   Geist,
@@ -64,6 +64,14 @@ export const metadata: Metadata = {
       "Software engineer in Lahore building for the web. Multiplayer games, campus tools, and a few things with AI inside.",
   },
   robots: { index: true, follow: true },
+};
+
+// Keeps the keyboard from covering fixed bottom UI. Safari ignores it, which is
+// why KittyProvider also watches visualViewport.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({

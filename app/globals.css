@@ -1210,6 +1210,7 @@ body::after {
 .kitty-overlay {
   position: fixed;
   inset: 0;
+  bottom: var(--kitty-keyboard, 0px);
   z-index: 80;
   pointer-events: none;
 }
@@ -1230,6 +1231,7 @@ body::after {
   z-index: 1;
   display: flex;
   height: min(650px, 84dvh);
+  max-height: 100%;
   flex-direction: column;
   overflow: hidden;
   border-top: 1px solid var(--faint);

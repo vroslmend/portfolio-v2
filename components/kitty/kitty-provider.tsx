@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -16,6 +17,7 @@ import {
   type Variants,
 } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useLenis } from "lenis/react";
 import { EASE } from "@/lib/motion";
 import {
@@ -140,6 +142,13 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     void preloadAllKittyArt();
   }, [enabled]);
 
+  // Vercel and Neon both scale to zero and their cold starts stack, so the
+  // visitor reads the page while the service wakes rather than after asking.
+  useEffect(() => {
+    if (!enabled) return;
+    void fetch(`${API}/health`, { cache: "no-store" }).catch(() => {});
+  }, [enabled]);
+
   useEffect(() => {
     if (!enabled) return;
     const frame = requestAnimationFrame(() => {
@@ -259,6 +268,24 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     lenis?.stop();
     return () => lenis?.start();
   }, [lenis, open, wide]);
+
+  // dvh tracks browser chrome, not the keyboard, so the sheet needs the real inset.
+  useEffect(() => {
+    const view = window.visualViewport;
+    if (!open || wide || !view) return;
+    const track = () => {
+      const inset = Math.max(0, window.innerHeight - view.height - view.offsetTop);
+      document.documentElement.style.setProperty("--kitty-keyboard", `${inset}px`);
+    };
+    track();
+    view.addEventListener("resize", track);
+    view.addEventListener("scroll", track);
+    return () => {
+      view.removeEventListener("resize", track);
+      view.removeEventListener("scroll", track);
+      document.documentElement.style.removeProperty("--kitty-keyboard");
+    };
+  }, [open, wide]);
 
   useEffect(() => {
     if (!open) return;
@@ -539,6 +566,10 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
 
   const busy = phase === "working" || phase === "streaming";
   const rateLimited = rateLimitedUntil !== null;
+  // The sheet covers the page it just sent them to; focus belongs to the route.
+  const closeOnNavigate = useCallback(() => {
+    if (!wide) closeKitty(false);
+  }, [closeKitty, wide]);
   const latestKitty = [...messages].reverse().find((message) => message.role === "kitty");
   const latestUser = [...messages].reverse().find((message) => message.role === "user");
   const latestPose: KittyArtId =
@@ -607,6 +638,9 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                   <div
                     ref={scroll}
                     className="kitty-scroll"
+                    // Lenis preventDefaults wheel and touch even while stopped,
+                    // so without this the transcript never scrolls.
+                    data-lenis-prevent
                     onScroll={(event) => {
                       const element = event.currentTarget;
                       stickToBottom.current =
@@ -614,7 +648,9 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                     }}
                   >
                     <div className="kitty-inner">
-                      <AnimatePresence initial={false} mode="wait">
+                      {/* popLayout, not wait: the empty state must not hold the
+                          panel blank while the first turn waits its turn to enter */}
+                      <AnimatePresence initial={false} mode="popLayout">
                         {messages.length === 0 ? (
                           <KittyEmpty
                             key="empty"
@@ -653,7 +689,10 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                                   >
                                     <article className={`kitty-turn kitty-${message.role}`}>
                                       <span className="kitty-turn-label">{message.role}</span>
-                                      <KittyMessageText text={message.text} />
+                                      <KittyMessageText
+                                        text={message.text}
+                                        onNavigate={closeOnNavigate}
+                                      />
                                       {message.kind === "question" &&
                                       message.options?.length ? (
                                         <KittyOptions
@@ -687,13 +726,18 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                                         </motion.button>
                                       ) : null}
                                     </article>
-                                    {showScene ? (
-                                      <KittyScene
-                                        id={scenePose}
-                                        status={busy ? liveStatus : ""}
-                                        compact
-                                      />
-                                    ) : null}
+                                    {/* the vignette follows the newest visitor row, so
+                                        it needs an exit where it leaves, not a cut */}
+                                    <AnimatePresence initial={false}>
+                                      {showScene ? (
+                                        <KittyScene
+                                          key="scene"
+                                          id={scenePose}
+                                          status={busy ? liveStatus : ""}
+                                          compact
+                                        />
+                                      ) : null}
+                                    </AnimatePresence>
                                   </motion.div>
                                 );
                               })}
@@ -795,7 +839,8 @@ function KittyScene({
       className={`kitty-scene${compact ? " is-compact" : ""}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: displayedId ? 1 : 0 }}
-      transition={{ duration: reduced ? 0 : 0.28, ease: EASE }}
+      exit={reduced ? undefined : { opacity: 0 }}
+      transition={{ duration: reduced ? 0 : 0.32, ease: EASE }}
       aria-hidden="true"
     >
       <AnimatePresence initial={false} mode="sync">
@@ -803,10 +848,10 @@ function KittyScene({
           <motion.span
             key={displayedId}
             className="kitty-scene-pose"
-            initial={reduced ? false : { opacity: 0, y: 3 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduced ? undefined : { opacity: 0, y: -2 }}
-            transition={{ duration: reduced ? 0 : 0.24, ease: EASE }}
+            initial={reduced ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduced ? undefined : { opacity: 0 }}
+            transition={{ duration: reduced ? 0 : 0.32, ease: EASE }}
           >
             <KittyArt id={displayedId} />
           </motion.span>
@@ -831,9 +876,17 @@ function KittyScene({
   );
 }
 
-const LINK_PATTERN = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s]+)/g;
+// (?!\/) keeps protocol-relative //host out of the site-path branch.
+const LINK_PATTERN =
+  /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/(?!\/)[^\s)]*)\)|(https?:\/\/[^\s]+)/g;
 
-function KittyMessageText({ text }: { text: string }) {
+function KittyMessageText({
+  text,
+  onNavigate,
+}: {
+  text: string;
+  onNavigate: () => void;
+}) {
   const parts: React.ReactNode[] = [];
   let cursor = 0;
 
@@ -845,10 +898,20 @@ function KittyMessageText({ text }: { text: string }) {
     if (!rawUrl) continue;
     const trailing = match[3]?.match(/[.,!?;:]+$/)?.[0] ?? "";
     const url = trailing ? rawUrl.slice(0, -trailing.length) : rawUrl;
+    const label = match[1] ?? url;
+    // A path with an extension is a file in public/, not a route. The rest of
+    // the site opens those in a tab, so /resume.pdf belongs on the anchor.
+    const isRoute = url.startsWith("/") && !/\.[a-z0-9]+$/i.test(url);
     parts.push(
-      <a key={`${index}-${url}`} href={url} target="_blank" rel="noreferrer">
-        {match[1] ?? url}
-      </a>,
+      isRoute ? (
+        <Link key={`${index}-${url}`} href={url} onClick={onNavigate}>
+          {label}
+        </Link>
+      ) : (
+        <a key={`${index}-${url}`} href={url} target="_blank" rel="noreferrer">
+          {label}
+        </a>
+      ),
     );
     if (trailing) parts.push(trailing);
     cursor = index + match[0].length;
@@ -864,11 +927,15 @@ const SUGGESTIONS = [
   "show me the backend-heavy work",
 ];
 
-function KittyEmpty({ onAsk }: { onAsk: (question: string) => void }) {
+const KittyEmpty = forwardRef<
+  HTMLDivElement,
+  { onAsk: (question: string) => void }
+>(function KittyEmpty({ onAsk }, ref) {
   const reduced = useReducedMotion();
 
   return (
     <motion.div
+      ref={ref}
       className="kitty-empty"
       variants={CHAT_SEQUENCE}
       initial={reduced ? false : "hidden"}
@@ -899,7 +966,7 @@ function KittyEmpty({ onAsk }: { onAsk: (question: string) => void }) {
       </motion.div>
     </motion.div>
   );
-}
+});
 
 function KittyOptions({
   options,
