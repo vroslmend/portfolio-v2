@@ -64,7 +64,7 @@ function StaticLine({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 6 }}
       transition={{ duration: 0.45, ease: EASE }}
-      className="group absolute inset-x-0 bottom-full mb-4 flex select-none items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] text-faint"
+      className="footer-now-playing group absolute inset-x-0 bottom-full mb-4 flex select-none items-center gap-2.5 font-mono text-[11px] tracking-[0.12em] text-faint"
     >
       <span className="shrink-0">listening to</span>
       <span className="flex min-w-0 items-center gap-2.5 text-muted transition-colors duration-300 group-hover:text-fg">
@@ -121,7 +121,7 @@ function PeekLine({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 6 }}
       transition={{ duration: 0.45, ease: EASE }}
-      className="group absolute bottom-full left-0 mb-4 flex w-fit max-w-full select-none items-center font-mono text-[11px] tracking-[0.12em] text-faint"
+      className="footer-now-playing group absolute bottom-full left-0 mb-4 flex w-fit max-w-full select-none items-center font-mono text-[11px] tracking-[0.12em] text-faint"
     >
       {/* only "listening to" collapses; the bars + song stay visible */}
       <motion.span

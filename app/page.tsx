@@ -3,7 +3,6 @@ import { Drift } from "@/components/drift";
 import { NameReveal } from "@/components/name-reveal";
 import { Reveal } from "@/components/reveal";
 import { WorkList } from "@/components/work/work-list";
-import { KittyInlineLauncher } from "@/components/kitty/kitty-inline-launcher";
 import { projects, site } from "@/data/site";
 
 export default function Home() {
@@ -77,7 +76,6 @@ export default function Home() {
           </div>
         </Reveal>
         <WorkList projects={featured} />
-        <KittyInlineLauncher />
       </section>
     </div>
   );

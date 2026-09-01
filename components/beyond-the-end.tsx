@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   animate,
   motion,
@@ -127,6 +133,7 @@ export function BeyondTheEnd() {
   // lets the click-off scrim and Escape reuse the gesture's own close logic
   const closeRef = useRef<() => void>(() => {});
   const kittyOpen = useRef(false);
+  const pastEndPriority = useRef(false);
   const panelRef = useRef<HTMLElement>(null);
   const contentX = useSpring(0, { stiffness: 110, damping: 24, mass: 0.45 });
   const contentY = useSpring(0, { stiffness: 110, damping: 24, mass: 0.45 });
@@ -149,6 +156,14 @@ export function BeyondTheEnd() {
     contentY.set(0);
   }
 
+  const reportPastEndPriority = useCallback((active: boolean) => {
+    if (pastEndPriority.current === active) return;
+    pastEndPriority.current = active;
+    window.dispatchEvent(
+      new CustomEvent("past-end-priority", { detail: { active } }),
+    );
+  }, []);
+
   useEffect(() => {
     function onKittyChange(event: Event) {
       const open = Boolean((event as CustomEvent<{ open?: boolean }>).detail?.open);
@@ -156,11 +171,12 @@ export function BeyondTheEnd() {
       if (open) {
         hintOpacity.set(0);
         closeRef.current();
+        reportPastEndPriority(false);
       }
     }
     window.addEventListener("kitty-open-change", onKittyChange);
     return () => window.removeEventListener("kitty-open-change", onKittyChange);
-  }, [hintOpacity]);
+  }, [hintOpacity, reportPastEndPriority]);
 
   // ----- counter data (runs for everyone, independent of the reveal) -----
   useEffect(() => {
@@ -237,6 +253,7 @@ export function BeyondTheEnd() {
         engaged = true;
         lenis?.stop(); // freeze the viewport at the bottom while pulling
         hintOpacity.set(0);
+        reportPastEndPriority(true);
       }
     }
     function release() {
@@ -246,6 +263,7 @@ export function BeyondTheEnd() {
       lift.set(0);
       setRevealed(false);
       lenis?.start();
+      reportPastEndPriority(false);
     }
     // expose close so a click off the panel / Escape can dismiss it too
     closeRef.current = release;
@@ -300,6 +318,7 @@ export function BeyondTheEnd() {
     function onScroll() {
       if (kittyOpen.current) {
         hintOpacity.set(0);
+        reportPastEndPriority(false);
         return;
       }
       if (!engaged) hintOpacity.set(atBottom() ? 1 : 0);
@@ -340,9 +359,10 @@ export function BeyondTheEnd() {
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("keydown", onKey);
+      reportPastEndPriority(false);
       lenis?.start(); // never leave Lenis paused
     };
-  }, [reduced, lift, hintOpacity, lenis]);
+  }, [reduced, lift, hintOpacity, lenis, reportPastEndPriority]);
 
   // No counts means the backend is unset or unreachable. Hiding is the same
   // thing the unset case already does, and beats rendering a confident zero.
