@@ -142,6 +142,13 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     void preloadAllKittyArt();
   }, [enabled]);
 
+  // Vercel and Neon both scale to zero and their cold starts stack, so the
+  // visitor reads the page while the service wakes rather than after asking.
+  useEffect(() => {
+    if (!enabled) return;
+    void fetch(`${API}/health`, { cache: "no-store" }).catch(() => {});
+  }, [enabled]);
+
   useEffect(() => {
     if (!enabled) return;
     const frame = requestAnimationFrame(() => {
