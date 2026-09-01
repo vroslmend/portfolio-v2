@@ -266,7 +266,12 @@ export function CommandMenu() {
                         onSelect={() => {
                           setOpen(false);
                           window.setTimeout(
-                            () => window.dispatchEvent(new Event("open-kitty")),
+                            () =>
+                              window.dispatchEvent(
+                                new CustomEvent("open-kitty", {
+                                  detail: { focusInput: true },
+                                }),
+                              ),
                             360,
                           );
                         }}

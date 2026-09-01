@@ -1238,6 +1238,9 @@ body::after {
   color: var(--fg);
   pointer-events: auto;
 }
+.kitty-panel:focus {
+  outline: none;
+}
 .kitty-head {
   display: grid;
   min-height: 58px;
@@ -1545,6 +1548,12 @@ body::after {
 .kitty-compose button:disabled {
   cursor: default;
   opacity: 0.38;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .kitty-compose input {
+    font-size: 16px;
+  }
 }
 
 @media (min-width: 1400px) {
