@@ -240,14 +240,14 @@ export function KittyFooterLauncher() {
       onMouseEnter={() => setInteracting(true)}
       onMouseLeave={(event) => {
         setInteracting(event.currentTarget.matches(":focus-visible"));
-        if (!revealed) setClue("resting");
+        if (!revealed) setClue("waiting");
       }}
       onFocus={(event) =>
         setInteracting(event.currentTarget.matches(":focus-visible"))
       }
       onBlur={() => {
         setInteracting(false);
-        if (!revealed) setClue("resting");
+        if (!revealed) setClue("waiting");
       }}
     >
       <motion.span
