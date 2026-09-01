@@ -1074,6 +1074,23 @@ body::after {
   background: var(--faint);
   transform-origin: center;
 }
+.kitty-footer-impact {
+  position: absolute;
+  top: 26px;
+  right: 0;
+  z-index: 5;
+  width: 56px;
+  height: 22px;
+  overflow: visible;
+  color: var(--faint);
+  pointer-events: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+.kitty-footer-impact path {
+  vector-effect: non-scaling-stroke;
+}
 .kitty-footer-mask,
 .kitty-footer-mark {
   position: absolute;
@@ -1098,6 +1115,7 @@ body::after {
   height: 100%;
 }
 .kitty-footer-face {
+  transform-origin: 50% 82%;
   transition: transform 0.5s var(--ease-out-expo);
 }
 .kitty-footer-eyes {
@@ -1106,7 +1124,7 @@ body::after {
 }
 .kitty-footer-launcher[data-discovered="true"]:hover .kitty-footer-face,
 .kitty-footer-launcher[data-discovered="true"]:focus-visible .kitty-footer-face {
-  transform: translateY(-2px);
+  transform: translateY(-2px) rotate(1deg);
 }
 .kitty-footer-edge {
   position: absolute;
@@ -1215,6 +1233,30 @@ body::after {
   font-style: italic;
   letter-spacing: 0.01em;
   text-transform: none;
+}
+.kitty-title-link {
+  cursor: pointer;
+}
+.kitty-title-arrow {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 7px);
+  color: var(--faint);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9px;
+  font-style: normal;
+  opacity: 0;
+  transform: translate(-2px, -35%);
+  transition:
+    color 0.3s ease,
+    opacity 0.22s ease,
+    transform 0.45s var(--ease-out-expo);
+}
+.kitty-title-link:hover .kitty-title-arrow,
+.kitty-title-link:focus-visible .kitty-title-arrow {
+  color: var(--muted);
+  opacity: 1;
+  transform: translate(0, -55%);
 }
 .kitty-close {
   grid-column: 3;

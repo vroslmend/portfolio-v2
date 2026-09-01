@@ -8,6 +8,7 @@ import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Magnetic } from "@/components/magnetic";
 import { useKitty } from "@/components/kitty/kitty-provider";
+import { KittyTitleLink } from "@/components/kitty/kitty-title-link";
 import { site } from "@/data/site";
 import { EASE } from "@/lib/motion";
 
@@ -87,7 +88,7 @@ export function Nav() {
             exit={reduced ? { opacity: 0 } : { opacity: 0, x: 22 }}
             transition={{ duration: reduced ? 0 : 0.68, ease: EASE }}
           >
-            <span className="kitty-title">kitty.</span>
+            <KittyTitleLink />
             <button
               type="button"
               className="kitty-close"

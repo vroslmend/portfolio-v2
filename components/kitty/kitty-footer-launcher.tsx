@@ -14,9 +14,10 @@ import { useKitty } from "@/components/kitty/kitty-provider";
 type DiscoveryClue =
   | "waiting"
   | "rustling"
-  | "after-rustle"
   | "peeking"
   | "resting";
+
+const EXIT_EASE = [0.7, 0, 0.84, 0] as const;
 
 const DIALOGUES = [
   "ask me about the work.",
@@ -60,7 +61,7 @@ export function KittyFooterLauncher() {
     if (!element) return;
     const observer = new IntersectionObserver(
       ([entry]) => setInView(entry.isIntersecting),
-      { threshold: 0.15 },
+      { threshold: 0.45 },
     );
     observer.observe(element);
     return () => observer.disconnect();
@@ -94,24 +95,17 @@ export function KittyFooterLauncher() {
   useEffect(() => {
     if (!clueActive || interacting || reduced) return;
 
-    const mobile = window.matchMedia("(max-width: 520px)").matches;
     const delay = (() => {
-      if (clue === "waiting") return randomBetween(2000, 4000);
-      if (clue === "rustling") return 1150;
-      if (clue === "after-rustle") {
-        return mobile
-          ? randomBetween(2200, 3400)
-          : randomBetween(2600, 4000);
-      }
-      if (clue === "peeking") return 1500;
-      return randomBetween(5500, 8500);
+      if (clue === "waiting") return randomBetween(800, 1400);
+      if (clue === "rustling") return 650;
+      if (clue === "peeking") return 2500;
+      return randomBetween(6000, 9000);
     })();
 
     const timer = window.setTimeout(() => {
       setClue((current) => {
         if (current === "waiting") return "rustling";
-        if (current === "rustling") return "after-rustle";
-        if (current === "after-rustle") return "peeking";
+        if (current === "rustling") return "peeking";
         if (current === "peeking") return "resting";
         return "waiting";
       });
@@ -201,7 +195,8 @@ export function KittyFooterLauncher() {
   const visible = revealed && artReady && !open;
   const peeking =
     !revealed && artReady && (clue === "peeking" || interacting);
-  const awake = eyesOpen && (idle || (revealed && !settled));
+  const awake =
+    revealed && (interacting || (eyesOpen && (idle || !settled)));
   const label: string | null =
     !revealed
       ? null
@@ -227,14 +222,17 @@ export function KittyFooterLauncher() {
           discoverKitty();
           return;
         }
+        setInteracting(false);
         openKitty(event.currentTarget);
       }}
       onMouseEnter={() => setInteracting(true)}
-      onMouseLeave={() => {
-        setInteracting(false);
+      onMouseLeave={(event) => {
+        setInteracting(event.currentTarget.matches(":focus-visible"));
         if (!revealed) setClue("resting");
       }}
-      onFocus={() => setInteracting(true)}
+      onFocus={(event) =>
+        setInteracting(event.currentTarget.matches(":focus-visible"))
+      }
       onBlur={() => {
         setInteracting(false);
         if (!revealed) setClue("resting");
@@ -245,32 +243,58 @@ export function KittyFooterLauncher() {
         aria-hidden="true"
         initial={false}
         animate={
-          clueActive && clue === "rustling"
+          clueActive && !interacting && clue === "rustling"
             ? { opacity: [0, 1, 1, 1, 1, 0] }
             : { opacity: 0 }
         }
         transition={{
-          duration: reduced ? 0 : 1.15,
+          duration: reduced ? 0 : 0.65,
           times: [0, 0.12, 0.34, 0.56, 0.84, 1],
           ease: EASE,
         }}
       >
         <motion.i
           animate={
-            clueActive && clue === "rustling"
+            clueActive && !interacting && clue === "rustling"
               ? {
-                  y: [0, -3, 0, -3, 0, 0],
-                  scaleX: [0.72, 1, 0.82, 0.96, 0.78, 0.72],
+                  y: [0, -3, 0, 0, -4, 0],
+                  scaleX: [0.72, 0.94, 0.8, 0.78, 1, 0.72],
                 }
               : { y: 0, scaleX: 0.8 }
           }
           transition={{
-            duration: reduced ? 0 : 1.15,
+            duration: reduced ? 0 : 0.65,
             times: [0, 0.16, 0.34, 0.6, 0.82, 1],
             ease: EASE,
           }}
         />
       </motion.span>
+
+      <motion.svg
+        className="kitty-footer-impact"
+        viewBox="0 0 56 22"
+        fill="none"
+        aria-hidden="true"
+        initial={false}
+        animate={
+          clueActive && !interacting && clue === "rustling"
+            ? {
+                opacity: [0, 0.72, 0, 0, 1, 0],
+                scale: [0.82, 1, 0.92, 0.86, 1.06, 1],
+                y: [2, 0, 1, 2, -1, 0],
+              }
+            : { opacity: 0, scale: 0.9, y: 1 }
+        }
+        transition={{
+          duration: reduced ? 0 : 0.65,
+          times: [0, 0.14, 0.34, 0.56, 0.82, 1],
+          ease: EASE,
+        }}
+      >
+        <path d="M18 13 13 8" />
+        <path d="m28 9-1-7" />
+        <path d="m38 13 5-6" />
+      </motion.svg>
 
       <motion.span
         aria-hidden="true"
@@ -294,9 +318,7 @@ export function KittyFooterLauncher() {
                       "inset(0 0 0% 0)",
                     ],
                   }
-              : peeking
-                ? { clipPath: "inset(0 0 36% 0)" }
-                : { clipPath: "inset(0 0 100% 0)" }
+              : { clipPath: "inset(0 0 36% 0)" }
         }
         transition={
           !settled && revealed && !reduced
@@ -330,7 +352,7 @@ export function KittyFooterLauncher() {
                       ],
                     }
                 : peeking
-                  ? { y: "45%" }
+                  ? { y: "41%" }
                   : { y: "57%" }
           }
           transition={
@@ -340,7 +362,10 @@ export function KittyFooterLauncher() {
                   times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
                   ease: EASE,
                 }
-              : { duration: reduced ? 0 : 0.42, ease: EASE }
+              : {
+                  duration: reduced ? 0 : peeking ? 0.42 : 0.4,
+                  ease: !revealed && !peeking ? EXIT_EASE : EASE,
+                }
           }
         >
           <span className="kitty-footer-face">

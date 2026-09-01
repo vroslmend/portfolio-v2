@@ -25,6 +25,7 @@ import {
   preloadKittyArt,
   type KittyArtId,
 } from "@/lib/kitty-art";
+import { KittyTitleLink } from "@/components/kitty/kitty-title-link";
 
 const API = process.env.NEXT_PUBLIC_KITTY_API_URL?.replace(/\/$/, "");
 const STORE = "portfolio-kitty-session-v1";
@@ -74,7 +75,7 @@ type KittyContextValue = {
   wide: boolean;
   discoverKitty: () => void;
   openKitty: (opener?: HTMLElement | null) => void;
-  closeKitty: () => void;
+  closeKitty: (restoreFocus?: boolean) => void;
 };
 
 const KittyContext = createContext<KittyContextValue | null>(null);
@@ -257,6 +258,20 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     const target = wide ? input.current : closeButton.current;
     window.setTimeout(() => target?.focus({ preventScroll: true }), reduced ? 0 : 700);
   }, [open, reduced, wide]);
+
+  useEffect(() => {
+    if (!open || !wide) return;
+
+    const closeFromOutside = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (panel.current?.contains(target) || target.closest(".kitty-rail-head")) return;
+      closeKitty(false);
+    };
+
+    document.addEventListener("pointerdown", closeFromOutside);
+    return () => document.removeEventListener("pointerdown", closeFromOutside);
+  }, [closeKitty, open, wide]);
 
   useEffect(() => {
     if (!open) return;
@@ -560,7 +575,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                   transition={{ duration: reduced ? 0 : wide ? 0.68 : 0.62, ease: EASE }}
                 >
                   <header className="kitty-head">
-                    <span className="kitty-title">kitty.</span>
+                    <KittyTitleLink />
                     <button
                       ref={closeButton}
                       type="button"
