@@ -62,7 +62,7 @@ export function KittyFooterLauncher() {
     if (!element) return;
     const observer = new IntersectionObserver(
       ([entry]) => setInView(entry.isIntersecting),
-      { threshold: 0.45 },
+      { threshold: 0.65 },
     );
     observer.observe(element);
     return () => observer.disconnect();
@@ -97,7 +97,7 @@ export function KittyFooterLauncher() {
     if (!clueActive || interacting || reduced) return;
 
     const delay = (() => {
-      if (clue === "waiting") return randomBetween(800, 1400);
+      if (clue === "waiting") return randomBetween(1200, 1800);
       if (clue === "rustling") return 650;
       if (clue === "quiet") return randomBetween(900, 1150);
       if (clue === "peeking") return 2300;
@@ -257,17 +257,36 @@ export function KittyFooterLauncher() {
         }}
       >
         <motion.i
+          className="kitty-footer-knock-left"
           animate={
             clueActive && !interacting && clue === "rustling"
               ? {
-                  y: [0, -3, 0, 0, -4, 0],
-                  scaleX: [0.72, 0.94, 0.8, 0.78, 1, 0.72],
+                  x: [0, -1, 0, 0, 0, 0, 0],
+                  y: [0, -3, 0, 0, 0, 0, 0],
+                  scaleX: [1, 0.9, 1, 1, 1, 1, 1],
                 }
-              : { y: 0, scaleX: 0.8 }
+              : { x: 0, y: 0, scaleX: 1 }
           }
           transition={{
             duration: reduced ? 0 : 0.65,
-            times: [0, 0.16, 0.34, 0.6, 0.82, 1],
+            times: [0, 0.16, 0.32, 0.5, 0.62, 0.82, 1],
+            ease: EASE,
+          }}
+        />
+        <motion.i
+          className="kitty-footer-knock-right"
+          animate={
+            clueActive && !interacting && clue === "rustling"
+              ? {
+                  x: [0, 0, 0, 0, 0, 1, 0],
+                  y: [0, 0, 0, 0, 0, -4, 0],
+                  scaleX: [1, 1, 1, 1, 1, 0.9, 1],
+                }
+              : { x: 0, y: 0, scaleX: 1 }
+          }
+          transition={{
+            duration: reduced ? 0 : 0.65,
+            times: [0, 0.16, 0.32, 0.5, 0.62, 0.82, 1],
             ease: EASE,
           }}
         />
