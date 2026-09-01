@@ -33,6 +33,8 @@ export function KittyFooterLauncher() {
   const [pastEndActive, setPastEndActive] = useState(false);
   const [interacting, setInteracting] = useState(false);
   const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [dialogueStarted, setDialogueStarted] = useState(false);
+  const [dialogueVisible, setDialogueVisible] = useState(true);
   const [eyesOpen, setEyesOpen] = useState(false);
   const [glance, setGlance] = useState(0);
   const [artReady, setArtReady] = useState(() =>
@@ -89,26 +91,46 @@ export function KittyFooterLauncher() {
 
   useEffect(() => {
     if (!idle) return;
-    let timer: ReturnType<typeof setTimeout>;
+    let holdTimer: ReturnType<typeof setTimeout>;
+    let swapTimer: ReturnType<typeof setTimeout>;
     let cancelled = false;
 
     const schedule = () => {
-      timer = setTimeout(() => {
+      holdTimer = setTimeout(() => {
         if (cancelled) return;
-        setDialogueIndex((current) => {
-          const offset = 1 + Math.floor(Math.random() * (DIALOGUES.length - 1));
-          return (current + offset) % DIALOGUES.length;
-        });
-        schedule();
-      }, randomBetween(7000, 11000));
+        setDialogueVisible(false);
+        swapTimer = setTimeout(() => {
+          if (cancelled) return;
+          setDialogueIndex((current) => {
+            const offset = 1 + Math.floor(Math.random() * (DIALOGUES.length - 1));
+            return (current + offset) % DIALOGUES.length;
+          });
+          setDialogueVisible(true);
+          schedule();
+        }, randomBetween(820, 1070));
+      }, randomBetween(6500, 10000));
     };
 
-    schedule();
+    const resumeTimer = setTimeout(
+      () => {
+        if (cancelled) return;
+        if (!dialogueStarted) {
+          setDialogueStarted(true);
+          return;
+        }
+        setDialogueVisible(true);
+        schedule();
+      },
+      dialogueStarted ? 0 : randomBetween(820, 1070),
+    );
+
     return () => {
       cancelled = true;
-      clearTimeout(timer);
+      clearTimeout(resumeTimer);
+      clearTimeout(holdTimer);
+      clearTimeout(swapTimer);
     };
-  }, [idle]);
+  }, [dialogueStarted, idle]);
 
   useEffect(() => {
     if (!idle) return;
@@ -141,12 +163,14 @@ export function KittyFooterLauncher() {
   if (!enabled) return null;
 
   const visible = revealed && artReady && !open;
-  const label =
+  const label: string | null =
     reduced || interacting
       ? "ask about the work →"
       : settled
-        ? DIALOGUES[dialogueIndex]
-        : "hey. down here.";
+        ? dialogueStarted && dialogueVisible
+          ? DIALOGUES[dialogueIndex]
+          : null
+        : "oh. hello.";
 
   return (
     <>
@@ -217,15 +241,17 @@ export function KittyFooterLauncher() {
           aria-hidden="true"
         >
           <AnimatePresence mode="wait" initial={false}>
-            <motion.span
-              key={label}
-              initial={reduced ? false : { opacity: 0, y: 3 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, y: -3 }}
-              transition={{ duration: reduced ? 0 : 0.2, ease: EASE }}
-            >
-              {label}
-            </motion.span>
+            {label ? (
+              <motion.span
+                key={label}
+                initial={reduced ? false : { opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduced ? undefined : { opacity: 0, y: 3 }}
+                transition={{ duration: reduced ? 0 : 0.22, ease: EASE }}
+              >
+                {label}
+              </motion.span>
+            ) : null}
           </AnimatePresence>
         </motion.span>
       </motion.button>
