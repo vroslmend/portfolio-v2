@@ -16,6 +16,7 @@ import {
   type Variants,
 } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useLenis } from "lenis/react";
 import { EASE } from "@/lib/motion";
 import {
@@ -539,6 +540,10 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
 
   const busy = phase === "working" || phase === "streaming";
   const rateLimited = rateLimitedUntil !== null;
+  // The sheet covers the page it just sent them to; focus belongs to the route.
+  const closeOnNavigate = useCallback(() => {
+    if (!wide) closeKitty(false);
+  }, [closeKitty, wide]);
   const latestKitty = [...messages].reverse().find((message) => message.role === "kitty");
   const latestUser = [...messages].reverse().find((message) => message.role === "user");
   const latestPose: KittyArtId =
@@ -656,7 +661,10 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                                   >
                                     <article className={`kitty-turn kitty-${message.role}`}>
                                       <span className="kitty-turn-label">{message.role}</span>
-                                      <KittyMessageText text={message.text} />
+                                      <KittyMessageText
+                                        text={message.text}
+                                        onNavigate={closeOnNavigate}
+                                      />
                                       {message.kind === "question" &&
                                       message.options?.length ? (
                                         <KittyOptions
@@ -834,9 +842,17 @@ function KittyScene({
   );
 }
 
-const LINK_PATTERN = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s]+)/g;
+// (?!\/) keeps protocol-relative //host out of the site-path branch.
+const LINK_PATTERN =
+  /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/(?!\/)[^\s)]*)\)|(https?:\/\/[^\s]+)/g;
 
-function KittyMessageText({ text }: { text: string }) {
+function KittyMessageText({
+  text,
+  onNavigate,
+}: {
+  text: string;
+  onNavigate: () => void;
+}) {
   const parts: React.ReactNode[] = [];
   let cursor = 0;
 
@@ -848,10 +864,17 @@ function KittyMessageText({ text }: { text: string }) {
     if (!rawUrl) continue;
     const trailing = match[3]?.match(/[.,!?;:]+$/)?.[0] ?? "";
     const url = trailing ? rawUrl.slice(0, -trailing.length) : rawUrl;
+    const label = match[1] ?? url;
     parts.push(
-      <a key={`${index}-${url}`} href={url} target="_blank" rel="noreferrer">
-        {match[1] ?? url}
-      </a>,
+      url.startsWith("/") ? (
+        <Link key={`${index}-${url}`} href={url} onClick={onNavigate}>
+          {label}
+        </Link>
+      ) : (
+        <a key={`${index}-${url}`} href={url} target="_blank" rel="noreferrer">
+          {label}
+        </a>
+      ),
     );
     if (trailing) parts.push(trailing);
     cursor = index + match[0].length;
