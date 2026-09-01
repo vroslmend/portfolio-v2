@@ -1076,6 +1076,13 @@ body::after {
   background: var(--bg);
   pointer-events: none;
 }
+.kitty-footer-disturbance-mask i {
+  position: absolute;
+  inset: 1px 0 auto;
+  display: block;
+  height: 1px;
+  background: var(--line);
+}
 .kitty-footer-disturbance i {
   position: absolute;
   inset: 4px 0 auto;
