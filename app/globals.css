@@ -1068,11 +1068,18 @@ body::after {
 }
 .kitty-footer-disturbance i {
   position: absolute;
-  inset: 4px 0 auto;
+  top: 4px;
   display: block;
+  width: 23px;
   height: 1px;
   background: var(--faint);
   transform-origin: center;
+}
+.kitty-footer-knock-left {
+  left: 0;
+}
+.kitty-footer-knock-right {
+  right: 0;
 }
 .kitty-footer-impact {
   position: absolute;
