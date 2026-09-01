@@ -732,7 +732,6 @@ function KittyScene({
           </motion.span>
         ) : null}
       </AnimatePresence>
-      <span className="kitty-ledge" />
       <span className="kitty-status">{status}</span>
     </motion.div>
   );
