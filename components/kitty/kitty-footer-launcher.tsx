@@ -14,6 +14,7 @@ import { useKitty } from "@/components/kitty/kitty-provider";
 type DiscoveryClue =
   | "waiting"
   | "rustling"
+  | "quiet"
   | "peeking"
   | "resting";
 
@@ -98,14 +99,16 @@ export function KittyFooterLauncher() {
     const delay = (() => {
       if (clue === "waiting") return randomBetween(800, 1400);
       if (clue === "rustling") return 650;
-      if (clue === "peeking") return 2500;
-      return randomBetween(6000, 9000);
+      if (clue === "quiet") return randomBetween(900, 1150);
+      if (clue === "peeking") return 2300;
+      return randomBetween(7000, 10000);
     })();
 
     const timer = window.setTimeout(() => {
       setClue((current) => {
         if (current === "waiting") return "rustling";
-        if (current === "rustling") return "peeking";
+        if (current === "rustling") return "quiet";
+        if (current === "quiet") return "peeking";
         if (current === "peeking") return "resting";
         return "waiting";
       });
@@ -287,13 +290,13 @@ export function KittyFooterLauncher() {
         }
         transition={{
           duration: reduced ? 0 : 0.65,
-          times: [0, 0.14, 0.34, 0.56, 0.82, 1],
+          times: [0, 0.16, 0.3, 0.62, 0.82, 1],
           ease: EASE,
         }}
       >
-        <path d="M18 13 13 8" />
-        <path d="m28 9-1-7" />
-        <path d="m38 13 5-6" />
+        <path d="m17.5 15.5-7-4.1 1.8-2.2 6.3 5.1Z" />
+        <path d="m27.2 10.8-1.7-8.6h3.1l.2 8.5Z" />
+        <path d="m37.8 14.5 6-6.2 2 2.1-7 5.4Z" />
       </motion.svg>
 
       <motion.span
