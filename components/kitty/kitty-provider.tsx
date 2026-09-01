@@ -16,7 +16,6 @@ import { EASE } from "@/lib/motion";
 
 const API = process.env.NEXT_PUBLIC_KITTY_API_URL?.replace(/\/$/, "");
 const STORE = "portfolio-kitty-session-v1";
-const SEEN = "portfolio-kitty-seen-v1";
 const MIN_STEP_MS = 450;
 
 type Phase = "idle" | "working" | "streaming" | "error" | "sleeping";
@@ -114,10 +113,6 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
           if (Array.isArray(parsed.messages)) setMessages(parsed.messages.slice(-24));
           if (typeof parsed.threadId === "string") setThreadId(parsed.threadId);
         }
-        if (sessionStorage.getItem(SEEN) === "true") {
-          setRevealed(true);
-          setSettled(true);
-        }
       } catch {
         // A blocked session store should not block the assistant.
       }
@@ -155,9 +150,6 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
       if (shouldIntroduce) {
         introTimer.current = setTimeout(() => setSettled(true), 2600);
       }
-      try {
-        sessionStorage.setItem(SEEN, "true");
-      } catch {}
     },
     [enabled, reduced, revealed],
   );
