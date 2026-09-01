@@ -1063,8 +1063,7 @@ body::after {
   transform-origin: 50% 82%;
 }
 .kitty-footer-face,
-.kitty-footer-art,
-.kitty-footer-frame {
+.kitty-footer-art {
   position: absolute;
   inset: 0;
   display: block;
@@ -1074,7 +1073,8 @@ body::after {
 .kitty-footer-face {
   transition: transform 0.5s var(--ease-out-expo);
 }
-.kitty-footer-frame {
+.kitty-footer-eyes {
+  overflow: visible;
   pointer-events: none;
 }
 .kitty-footer-launcher[data-discovered="true"]:hover .kitty-footer-face,
