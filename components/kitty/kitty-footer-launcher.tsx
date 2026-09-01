@@ -20,6 +20,7 @@ type DiscoveryClue =
 
 const EXIT_EASE = [0.7, 0, 0.84, 0] as const;
 const KNOCK_EASE = [0.65, 0, 0.35, 1] as const;
+const KNOCK_DELAYS = [0, 0.56] as const;
 
 const DIALOGUES = [
   "ask me about the work.",
@@ -99,7 +100,7 @@ export function KittyFooterLauncher() {
 
     const delay = (() => {
       if (clue === "waiting") return randomBetween(1200, 1800);
-      if (clue === "rustling") return 800;
+      if (clue === "rustling") return 1300;
       if (clue === "quiet") return randomBetween(900, 1150);
       if (clue === "peeking") return 2300;
       return randomBetween(7000, 10000);
@@ -200,13 +201,15 @@ export function KittyFooterLauncher() {
   const peeking =
     !revealed && artReady && (clue === "peeking" || interacting);
   const knocking = clueActive && !interacting && clue === "rustling";
-  const knockTransition = {
-    duration: reduced ? 0 : 0.26,
-    times: [0, 0.28, 1],
-    repeat: reduced ? 0 : 1,
-    repeatDelay: reduced ? 0 : 0.26,
-    ease: KNOCK_EASE,
-  };
+  const knockTransition = (delay: number) =>
+    knocking
+      ? {
+          duration: reduced ? 0 : 0.72,
+          times: [0, 0.1, 0.34, 1],
+          delay: reduced ? 0 : delay,
+          ease: KNOCK_EASE,
+        }
+      : { duration: 0 };
   const awake =
     revealed && (interacting || (eyesOpen && (idle || !settled)));
   const label: string | null =
@@ -250,47 +253,57 @@ export function KittyFooterLauncher() {
         if (!revealed) setClue("waiting");
       }}
     >
-      <motion.span
-        className="kitty-footer-disturbance"
-        aria-hidden="true"
-        initial={false}
-        animate={knocking ? { opacity: [0, 1, 0] } : { opacity: 0 }}
-        transition={knockTransition}
-      >
-        <motion.i
+      {KNOCK_DELAYS.map((delay) => (
+        <motion.span
+          key={`ripple-${delay}`}
+          className="kitty-footer-disturbance"
+          aria-hidden="true"
+          initial={false}
+          animate={
+            knocking
+              ? { opacity: [0, 1, 0.64, 0] }
+              : { opacity: 0 }
+          }
+          transition={knockTransition(delay)}
+        >
+          <motion.i
+            animate={
+              knocking
+                ? {
+                    y: [0, -4, -1, 0],
+                    scaleX: [1, 0.88, 0.96, 1],
+                  }
+                : { y: 0, scaleX: 1 }
+            }
+            transition={knockTransition(delay)}
+          />
+        </motion.span>
+      ))}
+
+      {KNOCK_DELAYS.map((delay) => (
+        <motion.svg
+          key={`impact-${delay}`}
+          className="kitty-footer-impact"
+          viewBox="0 0 56 22"
+          fill="none"
+          aria-hidden="true"
+          initial={false}
           animate={
             knocking
               ? {
-                  y: [0, -4, 0],
-                  scaleX: [1, 0.88, 1],
+                  opacity: [0, 0.88, 0.62, 0],
+                  scale: [0.9, 1, 1.03, 1.08],
+                  y: [1, -1, -3, -7],
                 }
-              : { y: 0, scaleX: 1 }
+              : { opacity: 0, scale: 0.9, y: 1 }
           }
-          transition={knockTransition}
-        />
-      </motion.span>
-
-      <motion.svg
-        className="kitty-footer-impact"
-        viewBox="0 0 56 22"
-        fill="none"
-        aria-hidden="true"
-        initial={false}
-        animate={
-          knocking
-            ? {
-                opacity: [0, 0.88, 0],
-                scale: [0.9, 1, 1.05],
-                y: [1, -1, -2],
-              }
-            : { opacity: 0, scale: 0.9, y: 1 }
-        }
-        transition={knockTransition}
-      >
-        <path d="m17.5 15.5-7-4.1 1.8-2.2 6.3 5.1Z" />
-        <path d="m27.2 10.8-1.7-8.6h3.1l.2 8.5Z" />
-        <path d="m37.8 14.5 6-6.2 2 2.1-7 5.4Z" />
-      </motion.svg>
+          transition={knockTransition(delay)}
+        >
+          <path d="m17.5 15.5-7-4.1 1.8-2.2 6.3 5.1Z" />
+          <path d="m27.2 10.8-1.7-8.6h3.1l.2 8.5Z" />
+          <path d="m37.8 14.5 6-6.2 2 2.1-7 5.4Z" />
+        </motion.svg>
+      ))}
 
       <motion.span
         aria-hidden="true"
