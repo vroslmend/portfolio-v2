@@ -1209,7 +1209,7 @@ body::after {
   width: 112px;
   min-height: 98px;
   margin: 0 auto 22px;
-  grid-template-rows: 72px 1px 25px;
+  grid-template-rows: 72px 26px;
   justify-items: center;
 }
 .kitty-scene-pose {
@@ -1229,16 +1229,11 @@ body::after {
   min-height: 74px;
   margin-top: 14px;
   margin-bottom: 8px;
-  grid-template-rows: 58px 1px 15px;
+  grid-template-rows: 58px 16px;
 }
 .kitty-scene.is-compact .kitty-art {
   width: 56px;
   height: 56px;
-}
-.kitty-ledge {
-  width: 112px;
-  height: 1px;
-  background: var(--line);
 }
 .kitty-status {
   align-self: end;
@@ -1453,7 +1448,7 @@ body::after {
   .kitty-scene {
     min-height: 108px;
     margin-bottom: 27px;
-    grid-template-rows: 82px 1px 25px;
+    grid-template-rows: 82px 26px;
   }
   .kitty-scene .kitty-art {
     width: 80px;
@@ -1462,7 +1457,7 @@ body::after {
   .kitty-scene.is-compact {
     min-height: 74px;
     margin-bottom: 8px;
-    grid-template-rows: 58px 1px 15px;
+    grid-template-rows: 58px 16px;
   }
   .kitty-scene.is-compact .kitty-art {
     width: 56px;
