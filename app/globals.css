@@ -1084,12 +1084,11 @@ body::after {
   overflow: visible;
   color: var(--faint);
   pointer-events: none;
-  stroke: currentColor;
-  stroke-width: 1;
-  stroke-linecap: round;
+  fill: currentColor;
 }
 .kitty-footer-impact path {
-  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center bottom;
 }
 .kitty-footer-mask,
 .kitty-footer-mark {
