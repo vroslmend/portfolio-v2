@@ -4,6 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { EASE } from "@/lib/motion";
+import {
+  FOOTER_KITTY_ART_ID,
+  isKittyArtReady,
+  kittyArtSrc,
+  preloadKittyArt,
+} from "@/lib/kitty-art";
 import { useKitty } from "@/components/kitty/kitty-provider";
 
 const DIALOGUES = [
@@ -29,6 +35,19 @@ export function KittyFooterLauncher() {
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [eyesOpen, setEyesOpen] = useState(false);
   const [glance, setGlance] = useState(0);
+  const [artReady, setArtReady] = useState(() =>
+    isKittyArtReady(FOOTER_KITTY_ART_ID),
+  );
+
+  useEffect(() => {
+    let active = true;
+    void preloadKittyArt(FOOTER_KITTY_ART_ID).then((ready) => {
+      if (active) setArtReady(ready);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const element = button.current;
@@ -121,7 +140,7 @@ export function KittyFooterLauncher() {
 
   if (!enabled) return null;
 
-  const visible = revealed && !open;
+  const visible = revealed && artReady && !open;
   const label =
     reduced || interacting
       ? "ask about the work →"
@@ -162,11 +181,12 @@ export function KittyFooterLauncher() {
         >
           <span className="kitty-footer-face">
             <Image
-              src="/kitty/cat-8317982.svg"
+              src={kittyArtSrc(FOOTER_KITTY_ART_ID)}
               alt=""
               width={100}
               height={100}
               unoptimized
+              preload
               className="kitty-art kitty-footer-art"
             />
             <motion.span
