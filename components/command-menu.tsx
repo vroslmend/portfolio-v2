@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useLenis } from "lenis/react";
@@ -427,18 +428,16 @@ function KittyCommandLabel() {
       ask kitty
       <span
         aria-hidden
-        className="pointer-events-none absolute left-full ml-2.5 block h-[17px] w-6 translate-y-1 scale-95 opacity-0 transition-[opacity,transform] duration-300 ease-out-expo group-data-[selected=true]:translate-y-0 group-data-[selected=true]:scale-100 group-data-[selected=true]:opacity-75"
+        className="pointer-events-none absolute left-full ml-2.5 block h-[17px] w-6 translate-y-0.5 transform-gpu overflow-hidden opacity-0 transition-[opacity,transform] duration-300 ease-out-expo will-change-transform group-data-[selected=true]:translate-y-0 group-data-[selected=true]:opacity-75"
       >
-        <svg
-          viewBox="20 5 70 48"
-          className="block h-full w-full overflow-hidden dark:invert"
-        >
-          <image
-            href={kittyArtSrc("8317982")}
-            width="100"
-            height="100"
-          />
-        </svg>
+        <Image
+          src={kittyArtSrc("8317982")}
+          alt=""
+          width={100}
+          height={100}
+          unoptimized
+          className="absolute -top-0.5 -left-[7px] h-[35px] w-[35px] max-w-none dark:invert"
+        />
       </span>
     </span>
   );
