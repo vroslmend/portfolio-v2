@@ -9,7 +9,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  type Variants,
+} from "motion/react";
 import Image from "next/image";
 import { useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
@@ -26,6 +31,24 @@ import {
 const API = process.env.NEXT_PUBLIC_KITTY_API_URL?.replace(/\/$/, "");
 const STORE = "portfolio-kitty-session-v1";
 const MIN_STEP_MS = 450;
+
+const CHAT_SEQUENCE: Variants = {
+  hidden: {},
+  show: { transition: { delayChildren: 0.08, staggerChildren: 0.07 } },
+};
+
+const CHAT_LIST: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { delayChildren: 0.05, staggerChildren: 0.045 },
+  },
+};
+
+const CHAT_ITEM: Variants = {
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE } },
+};
 
 type Phase = "idle" | "working" | "streaming" | "error" | "sleeping";
 type MessageKind = "answer" | "question" | "error" | "napping";
@@ -566,62 +589,93 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                     }}
                   >
                     <div className="kitty-inner">
-                      {messages.length === 0 ? (
-                        <KittyEmpty onAsk={(question) => void send(question)} />
-                      ) : (
-                        <div className="kitty-transcript">
-                          {messages.map((message) => {
-                            const isLatestKitty = message.id === latestKitty?.id;
-                            const showWorking = busy && message.id === latestUser?.id;
-                            return (
-                              <div key={message.id}>
-                                {!busy && isLatestKitty ? (
-                                  <KittyScene id={latestPose} status="" compact />
-                                ) : null}
-                                <article className={`kitty-turn kitty-${message.role}`}>
-                                  <span className="kitty-turn-label">{message.role}</span>
-                                  <KittyMessageText text={message.text} />
-                                  {message.kind === "question" && message.options?.length ? (
-                                    <div className="kitty-options">
-                                      {message.options.map((option) => (
-                                        <button
-                                          key={option}
-                                          type="button"
+                      <AnimatePresence initial={false} mode="wait">
+                        {messages.length === 0 ? (
+                          <KittyEmpty
+                            key="empty"
+                            onAsk={(question) => void send(question)}
+                          />
+                        ) : (
+                          <motion.div
+                            key="transcript"
+                            className="kitty-transcript"
+                            initial={reduced ? false : { opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={reduced ? undefined : { opacity: 0, y: -4 }}
+                            transition={{ duration: reduced ? 0 : 0.26, ease: EASE }}
+                          >
+                            <AnimatePresence initial={false}>
+                              {messages.map((message) => {
+                                const isLatestKitty = message.id === latestKitty?.id;
+                                const showScene = message.id === latestUser?.id;
+                                const scenePose: KittyArtId = busy
+                                  ? phase === "working"
+                                    ? "8273687"
+                                    : "8273689"
+                                  : latestPose;
+
+                                return (
+                                  <motion.div
+                                    key={message.id}
+                                    className="kitty-message"
+                                    initial={reduced ? false : { opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={reduced ? undefined : { opacity: 0, y: -4 }}
+                                    transition={{
+                                      duration: reduced ? 0 : 0.28,
+                                      ease: EASE,
+                                    }}
+                                  >
+                                    <article className={`kitty-turn kitty-${message.role}`}>
+                                      <span className="kitty-turn-label">{message.role}</span>
+                                      <KittyMessageText text={message.text} />
+                                      {message.kind === "question" &&
+                                      message.options?.length ? (
+                                        <KittyOptions
+                                          options={message.options}
                                           disabled={busy || Boolean(message.selected)}
-                                          data-selected={message.selected === option}
-                                          onClick={() => selectOption(message.id, option)}
+                                          selected={message.selected}
+                                          onSelect={(option) =>
+                                            selectOption(message.id, option)
+                                          }
+                                        />
+                                      ) : null}
+                                      {message.kind === "error" &&
+                                      isLatestKitty &&
+                                      retry?.errorId === message.id ? (
+                                        <motion.button
+                                          type="button"
+                                          className="kitty-retry"
+                                          disabled={rateLimited}
+                                          onClick={retryLast}
+                                          initial={
+                                            reduced ? false : { opacity: 0, y: 4 }
+                                          }
+                                          animate={{ opacity: 1, y: 0 }}
+                                          transition={{
+                                            duration: reduced ? 0 : 0.24,
+                                            delay: reduced ? 0 : 0.08,
+                                            ease: EASE,
+                                          }}
                                         >
-                                          <span>{option}</span>
-                                          <i aria-hidden="true">↗</i>
-                                        </button>
-                                      ))}
-                                    </div>
-                                  ) : null}
-                                  {message.kind === "error" &&
-                                    isLatestKitty &&
-                                    retry?.errorId === message.id ? (
-                                      <button
-                                        type="button"
-                                        className="kitty-retry"
-                                        disabled={rateLimited}
-                                        onClick={retryLast}
-                                      >
-                                        retry <i aria-hidden="true">↗</i>
-                                      </button>
+                                          retry <i aria-hidden="true">↗</i>
+                                        </motion.button>
+                                      ) : null}
+                                    </article>
+                                    {showScene ? (
+                                      <KittyScene
+                                        id={scenePose}
+                                        status={busy ? liveStatus : ""}
+                                        compact
+                                      />
                                     ) : null}
-                                </article>
-                                {showWorking ? (
-                                  <KittyScene
-                                    id={phase === "working" ? "8273687" : "8273689"}
-                                    status={liveStatus}
-                                    compact={phase === "streaming"}
-                                  />
-                                ) : null}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
+                                  </motion.div>
+                                );
+                              })}
+                            </AnimatePresence>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
 
@@ -732,7 +786,21 @@ function KittyScene({
           </motion.span>
         ) : null}
       </AnimatePresence>
-      <span className="kitty-status">{status}</span>
+      <span className="kitty-status">
+        <AnimatePresence initial={false} mode="wait">
+          {status ? (
+            <motion.span
+              key={status}
+              initial={reduced ? false : { opacity: 0, y: 2 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduced ? undefined : { opacity: 0, y: -2 }}
+              transition={{ duration: reduced ? 0 : 0.18, ease: EASE }}
+            >
+              {status}
+            </motion.span>
+          ) : null}
+        </AnimatePresence>
+      </span>
     </motion.div>
   );
 }
@@ -771,18 +839,75 @@ const SUGGESTIONS = [
 ];
 
 function KittyEmpty({ onAsk }: { onAsk: (question: string) => void }) {
+  const reduced = useReducedMotion();
+
   return (
-    <div className="kitty-empty">
+    <motion.div
+      className="kitty-empty"
+      variants={CHAT_SEQUENCE}
+      initial={reduced ? false : "hidden"}
+      animate="show"
+      exit={reduced ? undefined : { opacity: 0, y: -4 }}
+      transition={{ duration: reduced ? 0 : 0.18, ease: EASE }}
+    >
       <KittyScene id="8273689" status="" />
-      <p className="kitty-intro">Ask about a project, the stack, or why I built it.</p>
-      <div className="kitty-prompts" aria-label="suggested questions">
+      <motion.p className="kitty-intro" variants={CHAT_ITEM}>
+        Ask about a project, the stack, or why I built it.
+      </motion.p>
+      <motion.div
+        className="kitty-prompts"
+        aria-label="suggested questions"
+        variants={CHAT_LIST}
+      >
         {SUGGESTIONS.map((question) => (
-          <button key={question} type="button" onClick={() => onAsk(question)}>
+          <motion.button
+            key={question}
+            type="button"
+            onClick={() => onAsk(question)}
+            variants={CHAT_ITEM}
+          >
             <span>{question}</span>
             <i aria-hidden="true">↗</i>
-          </button>
+          </motion.button>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function KittyOptions({
+  options,
+  disabled,
+  selected,
+  onSelect,
+}: {
+  options: string[];
+  disabled: boolean;
+  selected?: string;
+  onSelect: (option: string) => void;
+}) {
+  const reduced = useReducedMotion();
+
+  return (
+    <motion.div
+      className="kitty-options"
+      variants={CHAT_LIST}
+      initial={reduced ? false : "hidden"}
+      animate="show"
+    >
+      {options.map((option) => (
+        <motion.button
+          key={option}
+          type="button"
+          disabled={disabled}
+          data-selected={selected === option}
+          onClick={() => onSelect(option)}
+          variants={CHAT_ITEM}
+        >
+          <span>{option}</span>
+          <i aria-hidden="true">↗</i>
+        </motion.button>
+      ))}
+    </motion.div>
   );
 }

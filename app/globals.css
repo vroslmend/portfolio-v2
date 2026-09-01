@@ -1098,7 +1098,7 @@ body::after {
 .kitty-footer-dialogue {
   position: absolute;
   top: 31px;
-  right: 94px;
+  right: 104px;
   display: block;
   width: 132px;
   font-size: 9px;
@@ -1124,7 +1124,7 @@ body::after {
   }
   .kitty-footer-dialogue {
     top: 26px;
-    right: 84px;
+    right: 94px;
     width: 132px;
     font-size: 8.5px;
   }
@@ -1236,7 +1236,9 @@ body::after {
   height: 56px;
 }
 .kitty-status {
+  display: grid;
   align-self: end;
+  place-items: end center;
   color: var(--faint);
   font-family: var(--font-geist-mono), monospace;
   font-size: 9px;
@@ -1244,6 +1246,9 @@ body::after {
   letter-spacing: 0.1em;
   text-align: center;
   white-space: nowrap;
+}
+.kitty-status > span {
+  grid-area: 1 / 1;
 }
 .kitty-status:empty {
   visibility: hidden;
@@ -1281,7 +1286,8 @@ body::after {
   line-height: 1.45;
   transition:
     border-color 0.5s var(--ease-out-expo),
-    color 0.3s ease;
+    color 0.3s ease,
+    opacity 0.22s ease;
 }
 .kitty-prompts button:hover,
 .kitty-options button:hover:not(:disabled) {
@@ -1366,6 +1372,9 @@ body::after {
   font-family: var(--font-geist-mono), monospace;
   font-size: 10px;
   letter-spacing: 0.12em;
+  transition:
+    color 0.3s ease,
+    opacity 0.22s ease;
 }
 .kitty-retry:disabled {
   cursor: default;
@@ -1414,7 +1423,8 @@ body::after {
   font-size: 13px;
   transition:
     color 0.3s ease,
-    transform 0.5s var(--ease-out-expo);
+    transform 0.5s var(--ease-out-expo),
+    opacity 0.22s ease;
 }
 .kitty-compose button:hover:not(:disabled) {
   color: var(--fg);
