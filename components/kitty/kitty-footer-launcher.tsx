@@ -449,7 +449,7 @@ export function KittyFooterLauncher() {
             ? { opacity: 0 }
             : revealed
               ? { opacity: [1, 1, 1, 1, 1, 1, 1, 0] }
-              : { opacity: 1 }
+              : { opacity: 0 }
         }
         transition={
           revealed && !settled && !reduced
