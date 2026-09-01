@@ -258,8 +258,27 @@ export function KittyFooterLauncher() {
         aria-hidden="true"
         initial={false}
         animate={{ opacity: knocking ? 1 : 0 }}
-        transition={{ duration: reduced ? 0 : 0.04 }}
-      />
+        transition={{
+          duration: reduced ? 0 : knocking ? 0.04 : 0.18,
+          ease: knocking ? EASE : EXIT_EASE,
+        }}
+      >
+        <motion.i
+          initial={false}
+          animate={
+            knocking ? { opacity: [1, 0, 0, 1] } : { opacity: 1 }
+          }
+          transition={
+            knocking
+              ? {
+                  duration: reduced ? 0 : 1.3,
+                  times: [0, 0.05, 0.82, 1],
+                  ease: KNOCK_EASE,
+                }
+              : { duration: 0 }
+          }
+        />
+      </motion.span>
 
       {KNOCK_DELAYS.map((delay) => (
         <motion.span
