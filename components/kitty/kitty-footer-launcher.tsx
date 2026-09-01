@@ -291,7 +291,8 @@ export function KittyFooterLauncher() {
                       "inset(0 0 36% 0)",
                       "inset(0 0 36% 0)",
                       "inset(0 0 36% 0)",
-                      "inset(0 0 0% 0)",
+                      "inset(0 0 36% 0)",
+                      "inset(0 0 36% 0)",
                       "inset(0 0 0% 0)",
                     ],
                   }
@@ -303,7 +304,7 @@ export function KittyFooterLauncher() {
           !settled && revealed && !reduced
             ? {
                 duration: 1.55,
-                times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 1],
+                times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
                 ease: EASE,
               }
             : { duration: reduced ? 0 : 0.32, ease: EASE }
@@ -319,7 +320,16 @@ export function KittyFooterLauncher() {
                 ? settled || reduced
                   ? { y: "0%" }
                   : {
-                      y: ["48%", "45%", "32%", "0%", "0%", "2%", "0%"],
+                      y: [
+                        "48%",
+                        "45%",
+                        "32%",
+                        "0%",
+                        "0%",
+                        "2%",
+                        "0%",
+                        "0%",
+                      ],
                     }
                 : peeking
                   ? { y: "45%" }
@@ -329,7 +339,7 @@ export function KittyFooterLauncher() {
             !settled && revealed && !reduced
               ? {
                   duration: 1.55,
-                  times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 1],
+                  times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
                   ease: EASE,
                 }
               : { duration: reduced ? 0 : 0.42, ease: EASE }
@@ -380,14 +390,14 @@ export function KittyFooterLauncher() {
           !artReady || open || settled
             ? { opacity: 0 }
             : revealed
-              ? { opacity: [1, 1, 1, 1, 1, 1, 0] }
+              ? { opacity: [1, 1, 1, 1, 1, 1, 1, 0] }
               : { opacity: 1 }
         }
         transition={
           revealed && !settled && !reduced
             ? {
                 duration: 1.55,
-                times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 1],
+                times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
                 ease: EASE,
               }
             : { duration: reduced ? 0 : 0.18, ease: EASE }
