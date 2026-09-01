@@ -74,7 +74,7 @@ type KittyContextValue = {
   settled: boolean;
   wide: boolean;
   discoverKitty: () => void;
-  openKitty: (opener?: HTMLElement | null) => void;
+  openKitty: (opener?: HTMLElement | null, focusInput?: boolean) => void;
   closeKitty: (restoreFocus?: boolean) => void;
 };
 
@@ -130,7 +130,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
   const scroll = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
   const running = useRef(false);
-  const closeButton = useRef<HTMLButtonElement>(null);
+  const focusInputOnOpen = useRef(false);
   const input = useRef<HTMLInputElement>(null);
   const introTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const rateTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -213,9 +213,10 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
   }, [reduced]);
 
   const openKitty = useCallback(
-    (source?: HTMLElement | null) => {
+    (source?: HTMLElement | null, focusInput = false) => {
       if (!enabled) return;
       opener.current = source ?? (document.activeElement as HTMLElement | null);
+      focusInputOnOpen.current = focusInput;
       revealKitty(false);
       setOpen(true);
       window.dispatchEvent(new CustomEvent("kitty-open-change", { detail: { open: true } }));
@@ -224,7 +225,13 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    const onOpen = () => openKitty();
+    const onOpen = (event: Event) =>
+      openKitty(
+        undefined,
+        Boolean(
+          (event as CustomEvent<{ focusInput?: boolean }>).detail?.focusInput,
+        ),
+      );
     const onClose = (event: Event) =>
       closeKitty((event as CustomEvent<{ restoreFocus?: boolean }>).detail?.restoreFocus ?? true);
     window.addEventListener("open-kitty", onOpen);
@@ -255,9 +262,16 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!open) return;
-    const target = wide ? input.current : closeButton.current;
-    window.setTimeout(() => target?.focus({ preventScroll: true }), reduced ? 0 : 700);
-  }, [open, reduced, wide]);
+    const timer = window.setTimeout(() => {
+      const target = focusInputOnOpen.current ? input.current : panel.current;
+      target?.focus({ preventScroll: true });
+      focusInputOnOpen.current = false;
+    }, reduced ? 0 : 700);
+    return () => {
+      window.clearTimeout(timer);
+      focusInputOnOpen.current = false;
+    };
+  }, [open, reduced]);
 
   useEffect(() => {
     if (!open || !wide) return;
@@ -290,7 +304,10 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      if (
+        event.shiftKey &&
+        (document.activeElement === first || document.activeElement === panel.current)
+      ) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
@@ -557,6 +574,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                   aria-modal={!wide}
                   aria-label="Ask kitty about Ammar's work"
                   className="kitty-panel"
+                  tabIndex={-1}
                   initial={
                     reduced
                       ? { opacity: 1 }
@@ -577,7 +595,6 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                   <header className="kitty-head">
                     <KittyTitleLink />
                     <button
-                      ref={closeButton}
                       type="button"
                       className="kitty-close"
                       aria-label="close kitty"
@@ -701,6 +718,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                       value={draft}
                       maxLength={2000}
                       autoComplete="off"
+                      enterKeyHint="send"
                       placeholder="about the work…"
                       onChange={(event) => setDraft(event.target.value)}
                     />

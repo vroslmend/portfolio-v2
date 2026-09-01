@@ -20,9 +20,9 @@ Dark by default, and monochrome at heart. Greys on near-black in the dark theme,
 
 There's a photos page as well, a wall of shots I've taken on a Pixel 5 that open fullscreen with a quiet morph and show how each one was taken.
 
-Near the work list, a small cat opens a conversation with kitty, an on-site agent that answers questions about my projects and writing. Its LangGraph backend lives in [kitty-agent](https://github.com/vroslmend/kitty-agent).
+A small cat hides behind the footer hairline and opens a conversation with kitty, an on-site agent that answers questions about my projects and writing. Its LangGraph backend lives in [kitty-agent](https://github.com/vroslmend/kitty-agent).
 
-Down in the footer, a little equalizer shows whatever I'm playing on Spotify at the time, and stays quiet when I'm not. Scroll past the very bottom and a live visitor and Prius counter slides up. It's served by a small AWS backend that lives in its own repo, [cloud-visitor-counter](https://github.com/vroslmend/cloud-visitor-counter).
+Beside it, a little equalizer shows whatever I'm playing on Spotify at the time, and stays quiet when I'm not. Scroll past the very bottom and a live visitor and Prius counter slides up. It's served by a small AWS backend that lives in its own repo, [cloud-visitor-counter](https://github.com/vroslmend/cloud-visitor-counter).
 
 Content lives in [`data/site.ts`](data/site.ts). Pages are in [`app/`](app), components in [`components/`](components).
 
