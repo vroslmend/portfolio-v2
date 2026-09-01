@@ -5,10 +5,11 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { EASE } from "@/lib/motion";
 import {
+  FOOTER_KITTY_AWAKE_SRC,
   FOOTER_KITTY_ART_ID,
-  isKittyArtReady,
+  isFooterKittyArtReady,
   kittyArtSrc,
-  preloadKittyArt,
+  preloadFooterKittyArt,
 } from "@/lib/kitty-art";
 import { useKitty } from "@/components/kitty/kitty-provider";
 
@@ -39,14 +40,11 @@ export function KittyFooterLauncher() {
   const [dialogueStarted, setDialogueStarted] = useState(false);
   const [dialogueVisible, setDialogueVisible] = useState(true);
   const [eyesOpen, setEyesOpen] = useState(false);
-  const [glance, setGlance] = useState(0);
-  const [artReady, setArtReady] = useState(() =>
-    isKittyArtReady(FOOTER_KITTY_ART_ID),
-  );
+  const [artReady, setArtReady] = useState(isFooterKittyArtReady);
 
   useEffect(() => {
     let active = true;
-    void preloadKittyArt(FOOTER_KITTY_ART_ID).then((ready) => {
+    void preloadFooterKittyArt().then((ready) => {
       if (active) setArtReady(ready);
     });
     return () => {
@@ -101,8 +99,8 @@ export function KittyFooterLauncher() {
         : clue === "rustling"
           ? 820
           : mobile
-            ? randomBetween(6000, 10000)
-            : randomBetween(10000, 16000);
+            ? randomBetween(3000, 4500)
+            : randomBetween(3500, 5500);
 
     const timer = window.setTimeout(() => {
       setClue((current) => {
@@ -163,12 +161,10 @@ export function KittyFooterLauncher() {
     const schedule = () => {
       wakeTimer = setTimeout(() => {
         if (cancelled) return;
-        setGlance([-0.8, 0, 0.8][Math.floor(Math.random() * 3)]);
         setEyesOpen(true);
         sleepTimer = setTimeout(() => {
           if (cancelled) return;
           setEyesOpen(false);
-          setGlance(0);
           schedule();
         }, randomBetween(650, 1050));
       }, randomBetween(5000, 9000));
@@ -198,6 +194,7 @@ export function KittyFooterLauncher() {
   const visible = revealed && artReady && !open;
   const peeking =
     !revealed && artReady && (clue === "peeking" || interacting || reduced);
+  const awake = eyesOpen && (idle || (revealed && !settled));
   const label: string | null =
     !revealed
       ? null
@@ -236,20 +233,30 @@ export function KittyFooterLauncher() {
         initial={false}
         animate={
           clueActive && clue === "rustling"
-            ? {
-                opacity: [0, 1, 1, 1, 0],
-                y: [0, -1, 0, -2, 0],
-                scaleX: [0.72, 1, 0.86, 1, 0.78],
-              }
-            : { opacity: 0, y: 0, scaleX: 0.78 }
+            ? { opacity: [0, 1, 1, 1, 0] }
+            : { opacity: 0 }
         }
         transition={{
-          duration: reduced ? 0 : 0.72,
-          times: [0, 0.2, 0.45, 0.72, 1],
+          duration: reduced ? 0 : 0.9,
+          times: [0, 0.14, 0.5, 0.86, 1],
           ease: EASE,
         }}
       >
-        <i />
+        <motion.i
+          animate={
+            clueActive && clue === "rustling"
+              ? {
+                  y: [0, -3, 0, -2, 0],
+                  scaleX: [0.76, 1, 0.88, 0.96, 0.8],
+                }
+              : { y: 0, scaleX: 0.8 }
+          }
+          transition={{
+            duration: reduced ? 0 : 0.9,
+            times: [0, 0.2, 0.48, 0.72, 1],
+            ease: EASE,
+          }}
+        />
       </motion.span>
 
       <motion.span
@@ -295,9 +302,9 @@ export function KittyFooterLauncher() {
               : revealed
                 ? settled || reduced
                   ? { y: "0%" }
-                  : { y: ["57%", "52%", "39%", "0%", "2%", "0%"] }
+                  : { y: ["48%", "45%", "32%", "0%", "2%", "0%"] }
                 : peeking
-                  ? { y: "52%" }
+                  ? { y: "45%" }
                   : { y: "57%" }
           }
           transition={
@@ -311,31 +318,63 @@ export function KittyFooterLauncher() {
           }
         >
           <span className="kitty-footer-face">
-            <Image
-              src={kittyArtSrc(FOOTER_KITTY_ART_ID)}
-              alt=""
-              width={100}
-              height={100}
-              unoptimized
-              preload
-              className="kitty-art kitty-footer-art"
-            />
             <motion.span
-              className="kitty-footer-open-eyes"
-              animate={{
-                opacity: eyesOpen && (idle || (revealed && !settled)) ? 1 : 0,
-                x: eyesOpen && idle ? glance : 0,
-              }}
+              className="kitty-footer-frame"
+              initial={false}
+              animate={{ opacity: awake ? 0 : 1 }}
               transition={{ duration: reduced ? 0 : 0.12, ease: EASE }}
             >
-              <i className="kitty-eye-patch kitty-eye-patch-left" />
-              <i className="kitty-eye-patch kitty-eye-patch-right" />
-              <i className="kitty-open-eye kitty-open-eye-left" />
-              <i className="kitty-open-eye kitty-open-eye-right" />
+              <Image
+                src={kittyArtSrc(FOOTER_KITTY_ART_ID)}
+                alt=""
+                width={100}
+                height={100}
+                unoptimized
+                preload
+                className="kitty-art kitty-footer-art"
+              />
+            </motion.span>
+            <motion.span
+              className="kitty-footer-frame"
+              initial={false}
+              animate={{ opacity: awake ? 1 : 0 }}
+              transition={{ duration: reduced ? 0 : 0.12, ease: EASE }}
+            >
+              <Image
+                src={FOOTER_KITTY_AWAKE_SRC}
+                alt=""
+                width={100}
+                height={100}
+                unoptimized
+                preload
+                className="kitty-art kitty-footer-art"
+              />
             </motion.span>
           </span>
         </motion.span>
       </motion.span>
+
+      <motion.span
+        className="kitty-footer-edge"
+        aria-hidden="true"
+        initial={false}
+        animate={
+          !artReady || open || settled
+            ? { opacity: 0 }
+            : revealed
+              ? { opacity: [1, 1, 1, 0, 0, 0] }
+              : { opacity: 1 }
+        }
+        transition={
+          revealed && !settled && !reduced
+            ? {
+                duration: 1.42,
+                times: [0, 0.08, 0.27, 0.76, 0.91, 1],
+                ease: EASE,
+              }
+            : { duration: reduced ? 0 : 0.18, ease: EASE }
+        }
+      />
 
       <motion.span
         className="kitty-footer-dialogue"
