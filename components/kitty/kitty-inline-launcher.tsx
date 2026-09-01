@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { motion, useInView, useReducedMotion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { EASE } from "@/lib/motion";
 import { useKitty } from "@/components/kitty/kitty-provider";
@@ -10,11 +10,25 @@ export function KittyInlineLauncher() {
   const { enabled, open, settled, wide, openKitty, revealKitty } = useKitty();
   const reduced = useReducedMotion();
   const anchor = useRef<HTMLSpanElement>(null);
-  const inView = useInView(anchor, { once: true, margin: "0px 0px -30% 0px" });
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
-    if (inView) revealKitty(true);
-  }, [inView, revealKitty]);
+    const element = anchor.current;
+    if (!enabled || !element || inView) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setInView(true);
+        revealKitty(true);
+        observer.disconnect();
+      },
+      { rootMargin: "0px 0px -30% 0px" },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [enabled, inView, revealKitty]);
 
   if (!enabled) return null;
 
