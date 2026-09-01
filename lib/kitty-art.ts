@@ -9,6 +9,7 @@ export const KITTY_ART_IDS = [
 export type KittyArtId = (typeof KITTY_ART_IDS)[number];
 
 export const FOOTER_KITTY_ART_ID: KittyArtId = "8317982";
+export const FOOTER_KITTY_AWAKE_SRC = "/kitty/cat-8317982-awake.svg";
 
 type KittyArtEntry = {
   image: HTMLImageElement;
@@ -16,14 +17,14 @@ type KittyArtEntry = {
   ready: boolean;
 };
 
-const cache = new Map<KittyArtId, KittyArtEntry>();
+const cache = new Map<string, KittyArtEntry>();
 
 export function kittyArtSrc(id: KittyArtId) {
   return `/kitty/cat-${id}.svg`;
 }
 
 export function isKittyArtReady(id: KittyArtId) {
-  return cache.get(id)?.ready ?? false;
+  return cache.get(kittyArtSrc(id))?.ready ?? false;
 }
 
 /**
@@ -31,8 +32,8 @@ export function isKittyArtReady(id: KittyArtId) {
  * Keeping the detached image referenced avoids throwing away decoded artwork
  * between infrequent state changes.
  */
-export function preloadKittyArt(id: KittyArtId): Promise<boolean> {
-  const cached = cache.get(id);
+function preloadKittySrc(src: string): Promise<boolean> {
+  const cached = cache.get(src);
   if (cached) return cached.promise;
   if (typeof window === "undefined") return Promise.resolve(false);
 
@@ -76,15 +77,36 @@ export function preloadKittyArt(id: KittyArtId): Promise<boolean> {
 
     image.addEventListener("load", onLoad, { once: true });
     image.addEventListener("error", onError, { once: true });
-    image.src = kittyArtSrc(id);
+    image.src = src;
 
     if (image.complete) void finish(image.naturalWidth > 0);
   });
 
-  cache.set(id, entry);
+  cache.set(src, entry);
   return entry.promise;
 }
 
+export function preloadKittyArt(id: KittyArtId): Promise<boolean> {
+  return preloadKittySrc(kittyArtSrc(id));
+}
+
+export function isFooterKittyArtReady() {
+  return (
+    isKittyArtReady(FOOTER_KITTY_ART_ID) &&
+    (cache.get(FOOTER_KITTY_AWAKE_SRC)?.ready ?? false)
+  );
+}
+
+export function preloadFooterKittyArt() {
+  return Promise.all([
+    preloadKittyArt(FOOTER_KITTY_ART_ID),
+    preloadKittySrc(FOOTER_KITTY_AWAKE_SRC),
+  ]).then((frames) => frames.every(Boolean));
+}
+
 export function preloadAllKittyArt() {
-  return Promise.all(KITTY_ART_IDS.map(preloadKittyArt));
+  return Promise.all([
+    ...KITTY_ART_IDS.map(preloadKittyArt),
+    preloadKittySrc(FOOTER_KITTY_AWAKE_SRC),
+  ]);
 }
