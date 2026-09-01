@@ -261,6 +261,24 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     return () => lenis?.start();
   }, [lenis, open, wide]);
 
+  // dvh tracks browser chrome, not the keyboard, so the sheet needs the real inset.
+  useEffect(() => {
+    const view = window.visualViewport;
+    if (!open || wide || !view) return;
+    const track = () => {
+      const inset = Math.max(0, window.innerHeight - view.height - view.offsetTop);
+      document.documentElement.style.setProperty("--kitty-keyboard", `${inset}px`);
+    };
+    track();
+    view.addEventListener("resize", track);
+    view.addEventListener("scroll", track);
+    return () => {
+      view.removeEventListener("resize", track);
+      view.removeEventListener("scroll", track);
+      document.documentElement.style.removeProperty("--kitty-keyboard");
+    };
+  }, [open, wide]);
+
   useEffect(() => {
     if (!open) return;
     const timer = window.setTimeout(() => {
