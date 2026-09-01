@@ -8,8 +8,7 @@ export const KITTY_ART_IDS = [
 
 export type KittyArtId = (typeof KITTY_ART_IDS)[number];
 
-export const FOOTER_KITTY_ART_ID: KittyArtId = "8317982";
-export const FOOTER_KITTY_AWAKE_SRC = "/kitty/cat-8317982-awake.svg";
+export const FOOTER_KITTY_BODY_SRC = "/kitty/cat-8317982-body.svg";
 
 type KittyArtEntry = {
   image: HTMLImageElement;
@@ -91,22 +90,16 @@ export function preloadKittyArt(id: KittyArtId): Promise<boolean> {
 }
 
 export function isFooterKittyArtReady() {
-  return (
-    isKittyArtReady(FOOTER_KITTY_ART_ID) &&
-    (cache.get(FOOTER_KITTY_AWAKE_SRC)?.ready ?? false)
-  );
+  return cache.get(FOOTER_KITTY_BODY_SRC)?.ready ?? false;
 }
 
 export function preloadFooterKittyArt() {
-  return Promise.all([
-    preloadKittyArt(FOOTER_KITTY_ART_ID),
-    preloadKittySrc(FOOTER_KITTY_AWAKE_SRC),
-  ]).then((frames) => frames.every(Boolean));
+  return preloadKittySrc(FOOTER_KITTY_BODY_SRC);
 }
 
 export function preloadAllKittyArt() {
   return Promise.all([
     ...KITTY_ART_IDS.map(preloadKittyArt),
-    preloadKittySrc(FOOTER_KITTY_AWAKE_SRC),
+    preloadKittySrc(FOOTER_KITTY_BODY_SRC),
   ]);
 }

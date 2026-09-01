@@ -5,10 +5,8 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { EASE } from "@/lib/motion";
 import {
-  FOOTER_KITTY_AWAKE_SRC,
-  FOOTER_KITTY_ART_ID,
+  FOOTER_KITTY_BODY_SRC,
   isFooterKittyArtReady,
-  kittyArtSrc,
   preloadFooterKittyArt,
 } from "@/lib/kitty-art";
 import { useKitty } from "@/components/kitty/kitty-provider";
@@ -346,38 +344,37 @@ export function KittyFooterLauncher() {
           }
         >
           <span className="kitty-footer-face">
-            <motion.span
-              className="kitty-footer-frame"
-              initial={false}
-              animate={{ opacity: awake ? 0 : 1 }}
-              transition={{ duration: reduced ? 0 : 0.12, ease: EASE }}
+            <Image
+              src={FOOTER_KITTY_BODY_SRC}
+              alt=""
+              width={100}
+              height={100}
+              unoptimized
+              preload
+              className="kitty-art kitty-footer-art"
+            />
+            <svg
+              viewBox="0 0 100 100"
+              className="kitty-art kitty-footer-art kitty-footer-eyes"
+              aria-hidden="true"
             >
-              <Image
-                src={kittyArtSrc(FOOTER_KITTY_ART_ID)}
-                alt=""
-                width={100}
-                height={100}
-                unoptimized
-                preload
-                className="kitty-art kitty-footer-art"
-              />
-            </motion.span>
-            <motion.span
-              className="kitty-footer-frame"
-              initial={false}
-              animate={{ opacity: awake ? 1 : 0 }}
-              transition={{ duration: reduced ? 0 : 0.12, ease: EASE }}
-            >
-              <Image
-                src={FOOTER_KITTY_AWAKE_SRC}
-                alt=""
-                width={100}
-                height={100}
-                unoptimized
-                preload
-                className="kitty-art kitty-footer-art"
-              />
-            </motion.span>
+              <motion.g
+                initial={false}
+                animate={{ opacity: awake ? 0 : 1 }}
+                transition={{ duration: reduced ? 0 : 0.09, ease: EASE }}
+              >
+                <path d="m53.559 24.031c-1.9805-0.39062-4.1484-0.058594-4.2383-0.050781-0.55078 0.078125-0.92187 0.58984-0.83984 1.1406 0.078125 0.55078 0.60156 0.92188 1.1406 0.83984 0.019531 0 1.9297-0.28906 3.5586 0.03125 0.058593 0.011718 0.12891 0.019531 0.19141 0.019531 0.46875 0 0.89062-0.32812 0.98047-0.80859 0.10938-0.53906-0.25-1.0703-0.78906-1.1719z" />
+                <path d="m64.711 24.102c-2.0898-0.46875-4.1602-0.10937-4.2383-0.089843-0.53906 0.10156-0.89844 0.62109-0.80859 1.1602 0.089844 0.53906 0.62109 0.91016 1.1602 0.80859 0.019531 0 1.7695-0.30078 3.4609 0.078125 0.070313 0.019531 0.14844 0.019531 0.21875 0.019531 0.46094 0 0.87109-0.32031 0.96875-0.78125 0.12109-0.53906-0.21875-1.0703-0.76172-1.1914z" />
+              </motion.g>
+              <motion.g
+                initial={false}
+                animate={{ opacity: awake ? 1 : 0 }}
+                transition={{ duration: reduced ? 0 : 0.09, ease: EASE }}
+              >
+                <circle cx="51.75" cy="25" r="1.3" />
+                <circle cx="62.85" cy="25.05" r="1.3" />
+              </motion.g>
+            </svg>
           </span>
         </motion.span>
       </motion.span>
