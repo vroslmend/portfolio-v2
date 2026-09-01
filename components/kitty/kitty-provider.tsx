@@ -17,10 +17,8 @@ import {
 } from "motion/react";
 import Image from "next/image";
 import { useLenis } from "lenis/react";
-import { usePathname } from "next/navigation";
 import { EASE } from "@/lib/motion";
 import {
-  FOOTER_KITTY_ART_ID,
   isKittyArtReady,
   kittyArtSrc,
   preloadAllKittyArt,
@@ -65,6 +63,7 @@ type Message = {
 type StoredSession = {
   threadId: string | null;
   messages: Message[];
+  discovered?: boolean;
 };
 
 type KittyContextValue = {
@@ -73,6 +72,7 @@ type KittyContextValue = {
   revealed: boolean;
   settled: boolean;
   wide: boolean;
+  discoverKitty: () => void;
   openKitty: (opener?: HTMLElement | null) => void;
   closeKitty: () => void;
 };
@@ -109,7 +109,6 @@ function useWideRail() {
 
 export function KittyProvider({ children }: { children: React.ReactNode }) {
   const enabled = Boolean(API);
-  const pathname = usePathname();
   const wide = useWideRail();
   const reduced = useReducedMotion();
   const lenis = useLenis();
@@ -149,6 +148,10 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
           const parsed = JSON.parse(saved) as StoredSession;
           if (Array.isArray(parsed.messages)) setMessages(parsed.messages.slice(-24));
           if (typeof parsed.threadId === "string") setThreadId(parsed.threadId);
+          if (parsed.discovered) {
+            setRevealed(true);
+            setSettled(true);
+          }
         }
       } catch {
         // A blocked session store should not block the assistant.
@@ -163,12 +166,16 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     try {
       sessionStorage.setItem(
         STORE,
-        JSON.stringify({ threadId, messages: messages.slice(-24) } satisfies StoredSession),
+        JSON.stringify({
+          threadId,
+          messages: messages.slice(-24),
+          discovered: revealed,
+        } satisfies StoredSession),
       );
     } catch {
       // Conversation still works for this page lifetime.
     }
-  }, [hydrated, messages, phase, threadId]);
+  }, [hydrated, messages, phase, revealed, threadId]);
 
   useEffect(
     () => () => {
@@ -181,6 +188,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
   const revealKitty = useCallback(
     (introduce = true) => {
       if (!enabled || revealed) return;
+      clearTimeout(introTimer.current);
       setRevealed(true);
       const shouldIntroduce = introduce && !reduced;
       setSettled(!shouldIntroduce);
@@ -191,23 +199,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     [enabled, reduced, revealed],
   );
 
-  useEffect(() => {
-    if (!enabled || revealed) return;
-    const target = document.querySelector<HTMLElement>("[data-kitty-reveal]");
-    if (!target) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        void preloadKittyArt(FOOTER_KITTY_ART_ID).then(() => revealKitty(true));
-        observer.disconnect();
-      },
-      { rootMargin: "0px 0px -10% 0px" },
-    );
-
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [enabled, pathname, revealKitty, revealed]);
+  const discoverKitty = useCallback(() => revealKitty(true), [revealKitty]);
 
   const closeKitty = useCallback((restoreFocus = true) => {
     setOpen(false);
@@ -506,10 +498,11 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
       revealed,
       settled,
       wide,
+      discoverKitty,
       openKitty,
       closeKitty,
     }),
-    [closeKitty, enabled, open, openKitty, revealed, settled, wide],
+    [closeKitty, discoverKitty, enabled, open, openKitty, revealed, settled, wide],
   );
 
   const busy = phase === "working" || phase === "streaming";

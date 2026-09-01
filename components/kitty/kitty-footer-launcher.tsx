@@ -12,6 +12,8 @@ import {
 } from "@/lib/kitty-art";
 import { useKitty } from "@/components/kitty/kitty-provider";
 
+type DiscoveryClue = "waiting" | "rustling" | "after-rustle" | "peeking";
+
 const DIALOGUES = [
   "ask me about the work.",
   "pick a project.",
@@ -25,13 +27,14 @@ function randomBetween(min: number, max: number) {
 }
 
 export function KittyFooterLauncher() {
-  const { enabled, open, revealed, settled, openKitty } = useKitty();
+  const { enabled, open, revealed, settled, discoverKitty, openKitty } = useKitty();
   const reduced = useReducedMotion();
   const button = useRef<HTMLButtonElement>(null);
   const [inView, setInView] = useState(false);
   const [pageVisible, setPageVisible] = useState(true);
   const [pastEndActive, setPastEndActive] = useState(false);
   const [interacting, setInteracting] = useState(false);
+  const [clue, setClue] = useState<DiscoveryClue>("waiting");
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [dialogueStarted, setDialogueStarted] = useState(false);
   const [dialogueVisible, setDialogueVisible] = useState(true);
@@ -79,6 +82,39 @@ export function KittyFooterLauncher() {
     return () => window.removeEventListener("past-end-priority", update);
   }, []);
 
+  const clueActive =
+    !revealed &&
+    artReady &&
+    inView &&
+    pageVisible &&
+    !open &&
+    !pastEndActive;
+
+  useEffect(() => {
+    if (!clueActive || clue === "peeking") return;
+    if (reduced) return;
+
+    const mobile = window.matchMedia("(max-width: 520px)").matches;
+    const delay =
+      clue === "waiting"
+        ? randomBetween(2000, 4000)
+        : clue === "rustling"
+          ? 820
+          : mobile
+            ? randomBetween(6000, 10000)
+            : randomBetween(10000, 16000);
+
+    const timer = window.setTimeout(() => {
+      setClue((current) => {
+        if (current === "waiting") return "rustling";
+        if (current === "rustling") return "after-rustle";
+        return "peeking";
+      });
+    }, delay);
+
+    return () => window.clearTimeout(timer);
+  }, [clue, clueActive, reduced]);
+
   const idle =
     revealed &&
     settled &&
@@ -91,46 +127,32 @@ export function KittyFooterLauncher() {
 
   useEffect(() => {
     if (!idle) return;
-    let holdTimer: ReturnType<typeof setTimeout>;
-    let swapTimer: ReturnType<typeof setTimeout>;
-    let cancelled = false;
 
-    const schedule = () => {
-      holdTimer = setTimeout(() => {
-        if (cancelled) return;
-        setDialogueVisible(false);
-        swapTimer = setTimeout(() => {
-          if (cancelled) return;
-          setDialogueIndex((current) => {
-            const offset = 1 + Math.floor(Math.random() * (DIALOGUES.length - 1));
-            return (current + offset) % DIALOGUES.length;
-          });
-          setDialogueVisible(true);
-          schedule();
-        }, randomBetween(820, 1070));
-      }, randomBetween(6500, 10000));
-    };
+    const delay = !dialogueStarted
+      ? randomBetween(1500, 2200)
+      : dialogueVisible
+        ? randomBetween(5000, 7000)
+        : randomBetween(9000, 14000);
 
-    const resumeTimer = setTimeout(
-      () => {
-        if (cancelled) return;
-        if (!dialogueStarted) {
-          setDialogueStarted(true);
-          return;
-        }
+    const timer = window.setTimeout(() => {
+      if (!dialogueStarted) {
+        setDialogueStarted(true);
         setDialogueVisible(true);
-        schedule();
-      },
-      dialogueStarted ? 0 : randomBetween(820, 1070),
-    );
+        return;
+      }
+      if (dialogueVisible) {
+        setDialogueVisible(false);
+        return;
+      }
+      setDialogueIndex((current) => {
+        const offset = 1 + Math.floor(Math.random() * (DIALOGUES.length - 1));
+        return (current + offset) % DIALOGUES.length;
+      });
+      setDialogueVisible(true);
+    }, delay);
 
-    return () => {
-      cancelled = true;
-      clearTimeout(resumeTimer);
-      clearTimeout(holdTimer);
-      clearTimeout(swapTimer);
-    };
-  }, [dialogueStarted, idle]);
+    return () => window.clearTimeout(timer);
+  }, [dialogueStarted, dialogueVisible, idle]);
 
   useEffect(() => {
     if (!idle) return;
@@ -160,48 +182,133 @@ export function KittyFooterLauncher() {
     };
   }, [idle]);
 
+  useEffect(() => {
+    if (!revealed || settled || reduced || open || !artReady) return;
+
+    const openTimer = window.setTimeout(() => setEyesOpen(true), 1580);
+    const closeTimer = window.setTimeout(() => setEyesOpen(false), 1880);
+    return () => {
+      window.clearTimeout(openTimer);
+      window.clearTimeout(closeTimer);
+    };
+  }, [artReady, open, reduced, revealed, settled]);
+
   if (!enabled) return null;
 
   const visible = revealed && artReady && !open;
+  const peeking =
+    !revealed && artReady && (clue === "peeking" || interacting || reduced);
   const label: string | null =
-    reduced || interacting
-      ? "ask about the work →"
-      : settled
-        ? dialogueStarted && dialogueVisible
-          ? DIALOGUES[dialogueIndex]
-          : null
-        : "oh. hello.";
+    !revealed
+      ? null
+      : !settled
+        ? "oh. hello."
+        : reduced || interacting
+          ? "ask about the work →"
+          : dialogueStarted && dialogueVisible
+            ? DIALOGUES[dialogueIndex]
+            : null;
 
   return (
-    <>
-      <span className="kitty-footer-reveal" data-kitty-reveal aria-hidden="true" />
-      <motion.button
-        ref={button}
-        type="button"
-        className="kitty-footer-launcher"
-        data-visible={visible}
-        disabled={!visible}
-        aria-label="Ask kitty about Ammar's work"
-        aria-expanded={open}
-        onClick={(event) => openKitty(event.currentTarget)}
-        onMouseEnter={() => setInteracting(true)}
-        onMouseLeave={() => setInteracting(false)}
-        onFocus={() => setInteracting(true)}
-        onBlur={() => setInteracting(false)}
+    <motion.button
+      ref={button}
+      type="button"
+      className="kitty-footer-launcher"
+      data-discovered={revealed}
+      data-clue={clue}
+      aria-label={revealed ? "Ask kitty about Ammar's work" : "Reveal kitty"}
+      aria-expanded={revealed ? open : undefined}
+      onClick={(event) => {
+        if (!revealed) {
+          discoverKitty();
+          return;
+        }
+        openKitty(event.currentTarget);
+      }}
+      onMouseEnter={() => setInteracting(true)}
+      onMouseLeave={() => setInteracting(false)}
+      onFocus={() => setInteracting(true)}
+      onBlur={() => setInteracting(false)}
+    >
+      <motion.span
+        className="kitty-footer-disturbance"
+        aria-hidden="true"
+        initial={false}
+        animate={
+          clueActive && clue === "rustling"
+            ? {
+                opacity: [0, 1, 1, 1, 0],
+                y: [0, -1, 0, -2, 0],
+                scaleX: [0.72, 1, 0.86, 1, 0.78],
+              }
+            : { opacity: 0, y: 0, scaleX: 0.78 }
+        }
+        transition={{
+          duration: reduced ? 0 : 0.72,
+          times: [0, 0.2, 0.45, 0.72, 1],
+          ease: EASE,
+        }}
+      >
+        <i />
+      </motion.span>
+
+      <motion.span
+        aria-hidden="true"
+        className="kitty-footer-mask"
+        initial={false}
+        animate={
+          !artReady || open
+            ? { clipPath: "inset(0 0 100% 0)" }
+            : revealed
+              ? settled || reduced
+                ? { clipPath: "inset(0 0 0% 0)" }
+                : {
+                    clipPath: [
+                      "inset(0 0 100% 0)",
+                      "inset(0 0 36% 0)",
+                      "inset(0 0 36% 0)",
+                      "inset(0 0 0% 0)",
+                      "inset(0 0 0% 0)",
+                      "inset(0 0 0% 0)",
+                    ],
+                  }
+              : peeking
+                ? { clipPath: "inset(0 0 36% 0)" }
+                : { clipPath: "inset(0 0 100% 0)" }
+        }
+        transition={
+          !settled && revealed && !reduced
+            ? {
+                duration: 1.42,
+                times: [0, 0.08, 0.27, 0.76, 0.91, 1],
+                ease: EASE,
+              }
+            : { duration: reduced ? 0 : 0.32, ease: EASE }
+        }
       >
         <motion.span
-          aria-hidden="true"
           className="kitty-footer-mark"
           initial={false}
           animate={
-            visible
-              ? { y: 0, clipPath: "inset(0 0 0% 0)" }
-              : { y: 14, clipPath: "inset(0 0 100% 0)" }
+            !artReady || open
+              ? { y: "57%" }
+              : revealed
+                ? settled || reduced
+                  ? { y: "0%" }
+                  : { y: ["57%", "52%", "39%", "0%", "2%", "0%"] }
+                : peeking
+                  ? { y: "52%" }
+                  : { y: "57%" }
           }
-          transition={{
-            duration: reduced ? 0 : settled ? 0.32 : 0.58,
-            ease: EASE,
-          }}
+          transition={
+            !settled && revealed && !reduced
+              ? {
+                  duration: 1.42,
+                  times: [0, 0.08, 0.27, 0.76, 0.91, 1],
+                  ease: EASE,
+                }
+              : { duration: reduced ? 0 : 0.42, ease: EASE }
+          }
         >
           <span className="kitty-footer-face">
             <Image
@@ -216,7 +323,7 @@ export function KittyFooterLauncher() {
             <motion.span
               className="kitty-footer-open-eyes"
               animate={{
-                opacity: eyesOpen && idle ? 1 : 0,
+                opacity: eyesOpen && (idle || (revealed && !settled)) ? 1 : 0,
                 x: eyesOpen && idle ? glance : 0,
               }}
               transition={{ duration: reduced ? 0 : 0.12, ease: EASE }}
@@ -228,33 +335,33 @@ export function KittyFooterLauncher() {
             </motion.span>
           </span>
         </motion.span>
+      </motion.span>
 
-        <motion.span
-          className="kitty-footer-dialogue"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 4 }}
-          transition={{
-            duration: reduced ? 0 : 0.32,
-            delay: visible && !settled && !reduced ? 0.52 : 0,
-            ease: EASE,
-          }}
-          aria-hidden="true"
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            {label ? (
-              <motion.span
-                key={label}
-                initial={reduced ? false : { opacity: 0, y: 3 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reduced ? undefined : { opacity: 0, y: 3 }}
-                transition={{ duration: reduced ? 0 : 0.22, ease: EASE }}
-              >
-                {label}
-              </motion.span>
-            ) : null}
-          </AnimatePresence>
-        </motion.span>
-      </motion.button>
-    </>
+      <motion.span
+        className="kitty-footer-dialogue"
+        initial={false}
+        animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 4 }}
+        transition={{
+          duration: reduced ? 0 : 0.32,
+          delay: visible && !settled && !reduced ? 1.42 : 0,
+          ease: EASE,
+        }}
+        aria-hidden="true"
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {label ? (
+            <motion.span
+              key={label}
+              initial={reduced ? false : { opacity: 0, y: 3 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduced ? undefined : { opacity: 0, y: 3 }}
+              transition={{ duration: reduced ? 0 : 0.22, ease: EASE }}
+            >
+              {label}
+            </motion.span>
+          ) : null}
+        </AnimatePresence>
+      </motion.span>
+    </motion.button>
   );
 }
