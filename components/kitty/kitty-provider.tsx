@@ -14,6 +14,14 @@ import Image from "next/image";
 import { useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
 import { EASE } from "@/lib/motion";
+import {
+  FOOTER_KITTY_ART_ID,
+  isKittyArtReady,
+  kittyArtSrc,
+  preloadAllKittyArt,
+  preloadKittyArt,
+  type KittyArtId,
+} from "@/lib/kitty-art";
 
 const API = process.env.NEXT_PUBLIC_KITTY_API_URL?.replace(/\/$/, "");
 const STORE = "portfolio-kitty-session-v1";
@@ -106,6 +114,11 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!enabled) return;
+    void preloadAllKittyArt();
+  }, [enabled]);
+
+  useEffect(() => {
+    if (!enabled) return;
     const frame = requestAnimationFrame(() => {
       try {
         const saved = sessionStorage.getItem(STORE);
@@ -163,7 +176,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
-        revealKitty(true);
+        void preloadKittyArt(FOOTER_KITTY_ART_ID).then(() => revealKitty(true));
         observer.disconnect();
       },
       { rootMargin: "0px 0px -10% 0px" },
@@ -480,7 +493,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
   const rateLimited = rateLimitedUntil !== null;
   const latestKitty = [...messages].reverse().find((message) => message.role === "kitty");
   const latestUser = [...messages].reverse().find((message) => message.role === "user");
-  const latestPose =
+  const latestPose: KittyArtId =
     latestKitty?.kind === "error"
       ? "8273706"
       : latestKitty?.kind === "napping"
@@ -654,10 +667,10 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function KittyArt({ id, className = "" }: { id: string; className?: string }) {
+function KittyArt({ id, className = "" }: { id: KittyArtId; className?: string }) {
   return (
     <Image
-      src={`/kitty/cat-${id}.svg`}
+      src={kittyArtSrc(id)}
       alt=""
       width={100}
       height={100}
@@ -667,24 +680,58 @@ function KittyArt({ id, className = "" }: { id: string; className?: string }) {
   );
 }
 
+function useDecodedKittyArt(id: KittyArtId) {
+  const [displayedId, setDisplayedId] = useState<KittyArtId | null>(() =>
+    isKittyArtReady(id) ? id : null,
+  );
+
+  useEffect(() => {
+    let active = true;
+    void preloadKittyArt(id).then((ready) => {
+      if (active && ready) setDisplayedId(id);
+    });
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  return displayedId;
+}
+
 function KittyScene({
   id,
   status,
   compact = false,
 }: {
-  id: string;
+  id: KittyArtId;
   status: string;
   compact?: boolean;
 }) {
+  const reduced = useReducedMotion();
+  const displayedId = useDecodedKittyArt(id);
+
   return (
     <motion.div
       className={`kitty-scene${compact ? " is-compact" : ""}`}
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.32, ease: EASE }}
+      animate={{ opacity: displayedId ? 1 : 0 }}
+      transition={{ duration: reduced ? 0 : 0.28, ease: EASE }}
       aria-hidden="true"
     >
-      <KittyArt id={id} />
+      <AnimatePresence initial={false} mode="sync">
+        {displayedId ? (
+          <motion.span
+            key={displayedId}
+            className="kitty-scene-pose"
+            initial={reduced ? false : { opacity: 0, y: 3 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduced ? undefined : { opacity: 0, y: -2 }}
+            transition={{ duration: reduced ? 0 : 0.24, ease: EASE }}
+          >
+            <KittyArt id={displayedId} />
+          </motion.span>
+        ) : null}
+      </AnimatePresence>
       <span className="kitty-ledge" />
       <span className="kitty-status">{status}</span>
     </motion.div>

@@ -1212,6 +1212,14 @@ body::after {
   grid-template-rows: 72px 1px 25px;
   justify-items: center;
 }
+.kitty-scene-pose {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-row: 1;
+  grid-column: 1;
+  place-items: end center;
+}
 .kitty-scene .kitty-art {
   width: 70px;
   height: 70px;
