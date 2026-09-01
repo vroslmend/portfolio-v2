@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLenis } from "lenis/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Magnetic } from "@/components/magnetic";
+import { useKitty } from "@/components/kitty/kitty-provider";
 import { site } from "@/data/site";
+import { EASE } from "@/lib/motion";
 
 const links = [
   { href: "/work", label: "work" },
@@ -18,6 +21,8 @@ const links = [
 export function Nav() {
   const pathname = usePathname();
   const lenis = useLenis();
+  const reduced = useReducedMotion();
+  const { open: kittyOpen, wide: kittyWide, closeKitty } = useKitty();
 
   // clicking the link for the page you're already on smooth-scrolls to top
   // (route changes are handled by SmoothScroll's scroll-to-top instead)
@@ -29,8 +34,8 @@ export function Nav() {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-line/60 bg-bg/75 backdrop-blur-md transition-colors duration-500">
-      <nav className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6">
+    <header className="site-header fixed inset-x-0 top-0 z-50 border-b border-line/60 bg-bg/75 backdrop-blur-md transition-colors duration-500">
+      <nav className="site-nav mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6">
         <Magnetic strength={0.2}>
           <Link
             href="/"
@@ -72,6 +77,28 @@ export function Nav() {
           <ThemeToggle />
         </div>
       </nav>
+
+      <AnimatePresence>
+        {kittyOpen && kittyWide ? (
+          <motion.div
+            className="kitty-rail-head"
+            initial={reduced ? { opacity: 1 } : { opacity: 0, x: 28 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, x: 22 }}
+            transition={{ duration: reduced ? 0 : 0.68, ease: EASE }}
+          >
+            <span className="kitty-title">kitty.</span>
+            <button
+              type="button"
+              className="kitty-close"
+              aria-label="close kitty"
+              onClick={() => closeKitty()}
+            >
+              ×
+            </button>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </header>
   );
 }
