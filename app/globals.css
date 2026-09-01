@@ -28,6 +28,12 @@
   --grain-invert: 0;
   --grain-size: 220px;
   --grain-speed: 0.8s;
+  --site-header-height: 57px;
+  --kitty-wide-rail-width: clamp(
+    340px,
+    calc((100vw - 48rem) / 2 + 24px),
+    664px
+  );
 }
 
 .light {
@@ -999,6 +1005,27 @@ body::after {
   .footer-now-playing {
   max-width: calc(100% - 250px);
 }
+
+.site-header {
+  height: var(--site-header-height);
+}
+.site-nav {
+  height: 100%;
+}
+.kitty-rail-head {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  width: var(--kitty-wide-rail-width);
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+  border-left: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  padding: 0 24px;
+  pointer-events: auto;
+}
 .kitty-footer-launcher {
   --kitty-mark-size: 84px;
   --kitty-dialogue-gap: 14px;
@@ -1166,11 +1193,11 @@ body::after {
   pointer-events: auto;
 }
 .kitty-head {
-  display: flex;
+  display: grid;
   min-height: 58px;
   flex: 0 0 auto;
+  grid-template-columns: 30px minmax(0, 1fr) 30px;
   align-items: center;
-  justify-content: space-between;
   border-bottom: 1px solid var(--line);
   padding: 0 20px;
   color: var(--faint);
@@ -1180,6 +1207,8 @@ body::after {
   text-transform: uppercase;
 }
 .kitty-title {
+  grid-column: 2;
+  justify-self: center;
   color: var(--muted);
   font-family: var(--font-newsreader), serif;
   font-size: 17px;
@@ -1188,6 +1217,7 @@ body::after {
   text-transform: none;
 }
 .kitty-close {
+  grid-column: 3;
   display: grid;
   width: 30px;
   height: 30px;
@@ -1449,24 +1479,19 @@ body::after {
 
 @media (min-width: 1400px) {
   .kitty-panel {
-    top: 0;
+    top: var(--site-header-height);
     right: 0;
     bottom: 0;
     left: auto;
-    width: clamp(340px, calc((100vw - 48rem) / 2 + 24px), 664px);
+    width: var(--kitty-wide-rail-width);
     height: auto;
     border-top: 0;
-    border-left: 1px solid var(--line);
+    border-left: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
     background: var(--panel);
     box-shadow: none;
   }
   .kitty-head {
-    min-height: 57px;
-    border-bottom-color: color-mix(in srgb, var(--line) 60%, transparent);
-    background: color-mix(in srgb, var(--bg) 75%, transparent);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    padding-inline: 24px;
+    display: none;
   }
   .kitty-inner {
     padding: 26px 24px 36px;
