@@ -983,8 +983,8 @@ body::after {
 }
 
 /* ---- kitty widget ----
-   A structural annotation, not a floating chat product. The only new visual
-   signature is the cat treating a real hairline as a ledge. */
+   A footer resident, not a floating chat product. The cat shares the footer's
+   real hairline so its placement explains where the interaction came from. */
 .kitty-art {
   display: block;
   object-fit: contain;
@@ -995,99 +995,139 @@ body::after {
   filter: invert(1);
 }
 
-.kitty-inline-launcher {
-  position: relative;
-  display: flex;
-  width: 100%;
-  height: 84px;
-  align-items: center;
-  justify-content: space-between;
-  overflow: hidden;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  background: transparent;
-  padding: 0 8px 0 40px;
-  color: var(--faint);
-  cursor: pointer;
-  text-align: left;
-  transition:
-    border-color 0.5s var(--ease-out-expo),
-    color 0.3s ease;
-}
-.kitty-reveal-anchor {
-  display: block;
+.kitty-footer-reveal {
+  position: absolute;
+  top: -1px;
+  right: 0;
+  width: 1px;
   height: 1px;
+  pointer-events: none;
 }
-.kitty-inline-launcher:hover {
-  border-color: var(--faint);
-  color: var(--muted);
+.site-footer-row:has(.kitty-footer-launcher) .footer-now-playing {
+  max-width: calc(100% - 250px);
 }
-.kitty-inline-launcher .kitty-art {
-  width: 78px;
-  height: 78px;
-  align-self: flex-end;
-  margin-bottom: -5px;
-  transform-origin: 50% 88%;
-  transition: transform 0.5s var(--ease-out-expo);
-}
-.kitty-inline-launcher:hover .kitty-art {
-  transform: translateY(-2px);
-}
-.kitty-inline-label {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10px;
-  letter-spacing: 0.12em;
-}
-
-.kitty-margin-launcher {
-  position: fixed;
-  right: clamp(24px, calc((100vw - 48rem) / 4), 156px);
-  bottom: 26px;
-  z-index: 40;
-  display: none;
-  width: 122px;
-  height: 94px;
+.kitty-footer-launcher {
+  position: absolute;
+  top: -54px;
+  right: 0;
+  z-index: 2;
+  width: 226px;
+  height: 84px;
   border: 0;
   background: transparent;
   padding: 0;
   color: var(--faint);
   cursor: pointer;
+  font-family: var(--font-geist-mono), monospace;
+  text-align: right;
+  transition: color 0.3s ease;
 }
-.kitty-launcher-art {
+.kitty-footer-launcher[data-visible="false"] {
+  pointer-events: none;
+}
+.kitty-footer-launcher:disabled {
+  cursor: default;
+}
+.kitty-footer-launcher:hover,
+.kitty-footer-launcher:focus-visible {
+  color: var(--muted);
+}
+.kitty-footer-launcher:focus-visible {
+  outline: 1px solid var(--faint);
+  outline-offset: 4px;
+}
+.kitty-footer-mark {
   position: absolute;
-  left: 50%;
-  bottom: 18px;
-  width: 74px;
-  height: 74px;
-  transform: translateX(-50%);
-  transform-origin: 50% 86%;
+  top: 0;
+  right: 0;
+  width: 84px;
+  height: 84px;
+  transform-origin: 50% 82%;
+}
+.kitty-footer-face,
+.kitty-footer-art,
+.kitty-footer-open-eyes {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.kitty-footer-face {
   transition: transform 0.5s var(--ease-out-expo);
 }
-.kitty-margin-launcher:hover .kitty-launcher-art {
-  transform: translateX(-50%) translateY(-3px);
+.kitty-footer-launcher:hover .kitty-footer-face,
+.kitty-footer-launcher:focus-visible .kitty-footer-face {
+  transform: translateY(-2px);
 }
-.kitty-launcher-rule {
+.kitty-footer-open-eyes {
+  pointer-events: none;
+}
+.kitty-eye-patch,
+.kitty-open-eye {
   position: absolute;
-  right: 0;
-  bottom: 21px;
-  left: 0;
-  height: 1px;
-  background: var(--line);
-  transition: background-color 0.5s var(--ease-out-expo);
+  display: block;
+  font-style: normal;
 }
-.kitty-margin-launcher:hover .kitty-launcher-rule {
-  background: var(--faint);
+.kitty-eye-patch {
+  top: 22.5%;
+  width: 7%;
+  height: 4.8%;
+  border-radius: 999px;
+  background: var(--bg);
 }
-.kitty-launcher-label {
+.kitty-eye-patch-left {
+  left: 48.2%;
+}
+.kitty-eye-patch-right {
+  left: 59.3%;
+}
+.kitty-open-eye {
+  top: 24%;
+  width: 1.8%;
+  height: 2.8%;
+  border-radius: 999px;
+  background: var(--fg);
+}
+.kitty-open-eye-left {
+  left: 51%;
+}
+.kitty-open-eye-right {
+  left: 62.1%;
+}
+.kitty-footer-dialogue {
   position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  font-family: var(--font-geist-mono), monospace;
+  top: 31px;
+  right: 94px;
+  display: block;
+  width: 132px;
   font-size: 9px;
-  line-height: 1;
-  letter-spacing: 0.12em;
-  text-align: center;
+  line-height: 1.3;
+  letter-spacing: 0.1em;
   white-space: nowrap;
+}
+.kitty-footer-dialogue > span {
+  display: block;
+}
+
+@media (max-width: 520px) {
+  .site-footer-row:has(.kitty-footer-launcher) .footer-now-playing {
+    max-width: calc(100% - 216px);
+  }
+  .kitty-footer-launcher {
+    top: -49px;
+    width: 216px;
+  }
+  .kitty-footer-mark {
+    width: 76px;
+    height: 76px;
+  }
+  .kitty-footer-dialogue {
+    top: 26px;
+    right: 84px;
+    width: 132px;
+    font-size: 8.5px;
+  }
 }
 
 .kitty-overlay {
@@ -1383,12 +1423,6 @@ body::after {
 }
 
 @media (min-width: 1400px) {
-  .kitty-inline-launcher {
-    display: none;
-  }
-  .kitty-margin-launcher {
-    display: block;
-  }
   .kitty-panel {
     top: 57px;
     right: 0;

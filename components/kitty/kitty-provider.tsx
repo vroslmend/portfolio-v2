@@ -44,7 +44,6 @@ type KittyContextValue = {
   wide: boolean;
   openKitty: (opener?: HTMLElement | null) => void;
   closeKitty: () => void;
-  revealKitty: (introduce?: boolean) => void;
 };
 
 const KittyContext = createContext<KittyContextValue | null>(null);
@@ -473,9 +472,8 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
       wide,
       openKitty,
       closeKitty,
-      revealKitty,
     }),
-    [closeKitty, enabled, open, openKitty, revealKitty, revealed, settled, wide],
+    [closeKitty, enabled, open, openKitty, revealed, settled, wide],
   );
 
   const busy = phase === "working" || phase === "streaming";
@@ -494,27 +492,6 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
       {children}
       {enabled && (
         <>
-          <AnimatePresence>
-            {revealed && !open && wide && (
-              <motion.button
-                type="button"
-                className="kitty-margin-launcher"
-                aria-label="open kitty"
-                onClick={(event) => openKitty(event.currentTarget)}
-                initial={reduced ? { opacity: 1 } : { opacity: 0, y: 34 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: reduced ? 0 : 0.7, ease: EASE }}
-              >
-                <KittyArt id="8317982" className="kitty-launcher-art" />
-                <span className="kitty-launcher-rule" aria-hidden="true" />
-                <span className="kitty-launcher-label">
-                  {settled || reduced ? "ask" : "hey, down here."}
-                </span>
-              </motion.button>
-            )}
-          </AnimatePresence>
-
           <AnimatePresence>
             {open && (
               <div className="kitty-overlay" data-wide={wide}>

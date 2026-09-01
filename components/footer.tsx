@@ -1,4 +1,5 @@
 import { KbdHint } from "@/components/kbd-hint";
+import { KittyFooterLauncher } from "@/components/kitty/kitty-footer-launcher";
 import { LocalTime } from "@/components/local-time";
 import { NowPlaying } from "@/components/now-playing";
 import { site } from "@/data/site";
@@ -6,9 +7,10 @@ import { site } from "@/data/site";
 export function Footer() {
   return (
     <footer className="mx-auto w-full max-w-3xl px-6 pb-10 pt-24">
-      <div className="relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3 border-t border-line pt-6">
+      <div className="site-footer-row relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3 border-t border-line pt-10">
         {/* a quiet line that fades in just above the footer while a track plays */}
         <NowPlaying />
+        <KittyFooterLauncher />
         <div className="flex gap-5 font-mono text-[11px] tracking-[0.12em] text-muted">
           <a href={`mailto:${site.email}`} className="u-link hover:text-fg">
             email
