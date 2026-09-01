@@ -253,6 +253,14 @@ export function KittyFooterLauncher() {
         if (!revealed) setClue("waiting");
       }}
     >
+      <motion.span
+        className="kitty-footer-disturbance-mask"
+        aria-hidden="true"
+        initial={false}
+        animate={{ opacity: knocking ? 1 : 0 }}
+        transition={{ duration: reduced ? 0 : 0.04 }}
+      />
+
       {KNOCK_DELAYS.map((delay) => (
         <motion.span
           key={`ripple-${delay}`}

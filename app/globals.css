@@ -1063,6 +1063,16 @@ body::after {
   display: block;
   width: 42px;
   height: 9px;
+  pointer-events: none;
+}
+.kitty-footer-disturbance-mask {
+  position: absolute;
+  top: 52px;
+  right: 7px;
+  z-index: 4;
+  display: block;
+  width: 42px;
+  height: 3px;
   background: var(--bg);
   pointer-events: none;
 }
@@ -1127,14 +1137,23 @@ body::after {
 }
 .kitty-footer-edge {
   position: absolute;
-  top: 53px;
+  top: 52px;
   right: 0;
   z-index: 3;
   display: block;
   width: var(--kitty-mark-size);
+  height: 3px;
+  background: var(--bg);
+  pointer-events: none;
+}
+.kitty-footer-edge::after {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  left: 0;
   height: 1px;
   background: var(--line);
-  pointer-events: none;
+  content: "";
 }
 .kitty-footer-dialogue {
   position: absolute;
@@ -1169,8 +1188,11 @@ body::after {
   .kitty-footer-disturbance {
     top: 44px;
   }
+  .kitty-footer-disturbance-mask {
+    top: 47px;
+  }
   .kitty-footer-edge {
-    top: 48px;
+    top: 47px;
   }
   .kitty-footer-dialogue {
     top: 26px;
