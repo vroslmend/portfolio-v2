@@ -12,6 +12,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { useLenis } from "lenis/react";
+import { usePathname } from "next/navigation";
 import { EASE } from "@/lib/motion";
 
 const API = process.env.NEXT_PUBLIC_KITTY_API_URL?.replace(/\/$/, "");
@@ -78,6 +79,7 @@ function useWideRail() {
 
 export function KittyProvider({ children }: { children: React.ReactNode }) {
   const enabled = Boolean(API);
+  const pathname = usePathname();
   const wide = useWideRail();
   const reduced = useReducedMotion();
   const lenis = useLenis();
@@ -153,6 +155,24 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     },
     [enabled, reduced, revealed],
   );
+
+  useEffect(() => {
+    if (!enabled || revealed) return;
+    const target = document.querySelector<HTMLElement>("[data-kitty-reveal]");
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        revealKitty(true);
+        observer.disconnect();
+      },
+      { rootMargin: "0px 0px -10% 0px" },
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [enabled, pathname, revealKitty, revealed]);
 
   const closeKitty = useCallback((restoreFocus = true) => {
     setOpen(false);
