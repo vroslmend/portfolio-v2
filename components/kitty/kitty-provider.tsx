@@ -560,7 +560,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                   transition={{ duration: reduced ? 0 : wide ? 0.68 : 0.62, ease: EASE }}
                 >
                   <header className="kitty-head">
-                    <span>kitty</span>
+                    <span className="kitty-title">kitty.</span>
                     <button
                       ref={closeButton}
                       type="button"

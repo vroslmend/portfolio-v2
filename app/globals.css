@@ -1179,6 +1179,14 @@ body::after {
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
+.kitty-title {
+  color: var(--muted);
+  font-family: var(--font-newsreader), serif;
+  font-size: 17px;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
 .kitty-close {
   display: grid;
   width: 30px;
@@ -1445,7 +1453,7 @@ body::after {
     right: 0;
     bottom: 0;
     left: auto;
-    width: clamp(320px, calc((100vw - 48rem) / 2), 640px);
+    width: clamp(340px, calc((100vw - 48rem) / 2 + 24px), 664px);
     height: auto;
     border-top: 0;
     border-left: 1px solid var(--line);
@@ -1464,22 +1472,22 @@ body::after {
     padding: 26px 24px 36px;
   }
   .kitty-scene {
-    min-height: 108px;
+    min-height: 122px;
     margin-bottom: 27px;
-    grid-template-rows: 82px 26px;
+    grid-template-rows: 96px 26px;
   }
   .kitty-scene .kitty-art {
-    width: 80px;
-    height: 80px;
+    width: 96px;
+    height: 96px;
   }
   .kitty-scene.is-compact {
-    min-height: 74px;
-    margin-bottom: 8px;
-    grid-template-rows: 58px 16px;
+    min-height: 86px;
+    margin-bottom: 6px;
+    grid-template-rows: 70px 16px;
   }
   .kitty-scene.is-compact .kitty-art {
-    width: 56px;
-    height: 56px;
+    width: 68px;
+    height: 68px;
   }
   .kitty-intro {
     font-size: 14px;
