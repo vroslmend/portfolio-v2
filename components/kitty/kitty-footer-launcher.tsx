@@ -198,6 +198,14 @@ export function KittyFooterLauncher() {
   const visible = revealed && artReady && !open;
   const peeking =
     !revealed && artReady && (clue === "peeking" || interacting);
+  const knocking = clueActive && !interacting && clue === "rustling";
+  const knockTransition = {
+    duration: reduced ? 0 : 0.18,
+    times: [0, 0.35, 1],
+    repeat: reduced ? 0 : 1,
+    repeatDelay: reduced ? 0 : 0.28,
+    ease: EASE,
+  };
   const awake =
     revealed && (interacting || (eyesOpen && (idle || !settled)));
   const label: string | null =
@@ -245,50 +253,19 @@ export function KittyFooterLauncher() {
         className="kitty-footer-disturbance"
         aria-hidden="true"
         initial={false}
-        animate={
-          clueActive && !interacting && clue === "rustling"
-            ? { opacity: [0, 1, 1, 1, 1, 0] }
-            : { opacity: 0 }
-        }
-        transition={{
-          duration: reduced ? 0 : 0.65,
-          times: [0, 0.12, 0.34, 0.56, 0.84, 1],
-          ease: EASE,
-        }}
+        animate={{ opacity: knocking ? 1 : 0 }}
+        transition={{ duration: 0 }}
       >
         <motion.i
-          className="kitty-footer-knock-left"
           animate={
-            clueActive && !interacting && clue === "rustling"
+            knocking
               ? {
-                  x: [0, -1, 0, 0, 0, 0, 0],
-                  y: [0, -3, 0, 0, 0, 0, 0],
-                  scaleX: [1, 0.9, 1, 1, 1, 1, 1],
+                  y: [0, -4, 0],
+                  scaleX: [0.82, 1, 0.82],
                 }
-              : { x: 0, y: 0, scaleX: 1 }
+              : { y: 0, scaleX: 0.82 }
           }
-          transition={{
-            duration: reduced ? 0 : 0.65,
-            times: [0, 0.16, 0.32, 0.5, 0.62, 0.82, 1],
-            ease: EASE,
-          }}
-        />
-        <motion.i
-          className="kitty-footer-knock-right"
-          animate={
-            clueActive && !interacting && clue === "rustling"
-              ? {
-                  x: [0, 0, 0, 0, 0, 1, 0],
-                  y: [0, 0, 0, 0, 0, -4, 0],
-                  scaleX: [1, 1, 1, 1, 1, 0.9, 1],
-                }
-              : { x: 0, y: 0, scaleX: 1 }
-          }
-          transition={{
-            duration: reduced ? 0 : 0.65,
-            times: [0, 0.16, 0.32, 0.5, 0.62, 0.82, 1],
-            ease: EASE,
-          }}
+          transition={knockTransition}
         />
       </motion.span>
 
@@ -299,19 +276,15 @@ export function KittyFooterLauncher() {
         aria-hidden="true"
         initial={false}
         animate={
-          clueActive && !interacting && clue === "rustling"
+          knocking
             ? {
-                opacity: [0, 0.72, 0, 0, 1, 0],
-                scale: [0.82, 1, 0.92, 0.86, 1.06, 1],
-                y: [2, 0, 1, 2, -1, 0],
+                opacity: [0, 1, 0],
+                scale: [0.82, 1.05, 0.9],
+                y: [2, -1, 0],
               }
             : { opacity: 0, scale: 0.9, y: 1 }
         }
-        transition={{
-          duration: reduced ? 0 : 0.65,
-          times: [0, 0.16, 0.3, 0.62, 0.82, 1],
-          ease: EASE,
-        }}
+        transition={knockTransition}
       >
         <path d="m17.5 15.5-7-4.1 1.8-2.2 6.3 5.1Z" />
         <path d="m27.2 10.8-1.7-8.6h3.1l.2 8.5Z" />
