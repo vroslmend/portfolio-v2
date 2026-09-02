@@ -198,6 +198,12 @@ export function KittyFooterLauncher() {
   if (!enabled) return null;
 
   const visible = revealed && artReady && !open;
+  // The mask, the mark and the edge are choreographed onto one 1.55s timeline
+  // whose keyframes have to land on the same frame. They each selected it with
+  // their own expression and two of the three left out `open`, so opening mid
+  // introduction ran the descent on the reveal and the cat sank in front of the
+  // footer instead of behind it. Select it in exactly one place.
+  const introducing = revealed && !settled && !reduced && !open;
   const peeking =
     !revealed && artReady && (clue === "peeking" || interacting);
   const knocking = clueActive && !interacting && clue === "rustling";
@@ -365,7 +371,7 @@ export function KittyFooterLauncher() {
               : { clipPath: "inset(0 0 36% 0)" }
         }
         transition={
-          !settled && revealed && !reduced
+          introducing
             ? {
                 duration: 1.55,
                 times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
@@ -408,7 +414,7 @@ export function KittyFooterLauncher() {
                   : { y: "57%" }
           }
           transition={
-            !settled && revealed && !reduced
+            introducing
               ? {
                   duration: 1.55,
                   times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
@@ -479,7 +485,7 @@ export function KittyFooterLauncher() {
                 : { opacity: [1, 1, 1, 1, 1, 1, 1, 0] }
         }
         transition={
-          revealed && !settled && !reduced && !open
+          introducing
             ? {
                 duration: 1.55,
                 times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
