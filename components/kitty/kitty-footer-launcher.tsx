@@ -59,6 +59,7 @@ export function KittyFooterLauncher() {
     };
   }, []);
 
+
   useEffect(() => {
     const element = button.current;
     if (!element) return;
@@ -337,9 +338,14 @@ export function KittyFooterLauncher() {
         className="kitty-footer-mask"
         initial={false}
         animate={
-          !artReady || open
+          !artReady
             ? { clipPath: "inset(0 0 100% 0)" }
-            : revealed
+            : open
+              ? // The line, not the whole element. Clipping to 100% closes the
+                // window upward through kitty while kitty travels down, which
+                // wipes it out instead of sinking it behind the footer.
+                { clipPath: "inset(0 0 36% 0)" }
+              : revealed
               ? settled || reduced
                 ? { clipPath: "inset(0 0 0% 0)" }
                 : {
@@ -445,20 +451,30 @@ export function KittyFooterLauncher() {
         aria-hidden="true"
         initial={false}
         animate={
-          !artReady || open || settled
+          !artReady || !revealed
             ? { opacity: 0 }
-            : revealed
-              ? { opacity: [1, 1, 1, 1, 1, 1, 1, 0] }
-              : { opacity: 0 }
+            : open
+              ? { opacity: 1 }
+              : settled
+                ? { opacity: 0 }
+                : { opacity: [1, 1, 1, 1, 1, 1, 1, 0] }
         }
         transition={
-          revealed && !settled && !reduced
-            ? {
-                duration: 1.55,
-                times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
-                ease: EASE,
-              }
-            : { duration: reduced ? 0 : 0.18, ease: EASE }
+          open
+            ? { duration: reduced ? 0 : 0.12, ease: EASE }
+            : revealed && !settled && !reduced
+              ? {
+                  duration: 1.55,
+                  times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
+                  ease: EASE,
+                }
+              : {
+                  duration: reduced ? 0 : 0.18,
+                  // Outlast the climb back up. Fading the moment `open` clears
+                  // takes the edge away while kitty is still rising through it.
+                  delay: reduced ? 0 : 0.42,
+                  ease: EASE,
+                }
         }
       />
 
