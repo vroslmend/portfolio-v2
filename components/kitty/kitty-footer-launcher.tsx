@@ -372,11 +372,12 @@ export function KittyFooterLauncher() {
                 ease: EASE,
               }
             : {
-                duration: reduced ? 0 : open ? 0.18 : 0.28,
-                // Coming back, the paws stay clipped until the climb is over.
-                // Releasing them early paints kitty over the footer row on the
-                // way up, which is what makes it read as in front of it.
-                delay: reduced || open ? 0 : 0.4,
+                // Identical to the edge below on purpose. The reveal clears the
+                // drawn border on the same keyframe it releases the paws, so the
+                // fake line and the real one swap with nothing visible between.
+                // Coming back, both wait for the climb to finish first.
+                duration: reduced ? 0 : 0.26,
+                delay: reduced || open ? 0 : 0.55,
                 ease: EASE,
               }
         }
@@ -414,8 +415,17 @@ export function KittyFooterLauncher() {
                   ease: EASE,
                 }
               : {
-                  duration: reduced ? 0 : peeking ? 0.42 : 0.4,
-                  ease: !revealed && !peeking ? EXIT_EASE : EASE,
+                  // Sinking accelerates away, climbing decelerates in.
+                  duration: reduced
+                    ? 0
+                    : peeking
+                      ? 0.42
+                      : open
+                        ? 0.5
+                        : revealed
+                          ? 0.55
+                          : 0.4,
+                  ease: open || (!revealed && !peeking) ? EXIT_EASE : EASE,
                 }
           }
         >
@@ -476,10 +486,9 @@ export function KittyFooterLauncher() {
                 ease: EASE,
               }
             : {
-                duration: reduced ? 0 : 0.18,
-                // Hold the drawn border through the climb and past the moment
-                // the paws are released, or kitty rises in front of nothing.
-                delay: reduced || open ? 0 : 0.62,
+                // Deliberately identical to the mask's timing above.
+                duration: reduced ? 0 : 0.26,
+                delay: reduced || open ? 0 : 0.55,
                 ease: EASE,
               }
         }
