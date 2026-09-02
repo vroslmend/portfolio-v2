@@ -1117,7 +1117,6 @@ body::after {
 }
 .kitty-footer-mask {
   z-index: 1;
-  overflow: hidden;
   pointer-events: none;
 }
 .kitty-footer-mark {
@@ -1142,6 +1141,26 @@ body::after {
 .kitty-footer-launcher[data-discovered="true"]:hover .kitty-footer-face,
 .kitty-footer-launcher[data-discovered="true"]:focus-visible .kitty-footer-face {
   transform: translateY(-2px) rotate(1deg);
+}
+.kitty-footer-edge {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  z-index: 3;
+  display: block;
+  width: var(--kitty-mark-size);
+  height: 3px;
+  background: var(--bg);
+  pointer-events: none;
+}
+.kitty-footer-edge::after {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--line);
+  content: "";
 }
 .kitty-footer-dialogue {
   position: absolute;
@@ -1177,6 +1196,9 @@ body::after {
     top: 44px;
   }
   .kitty-footer-disturbance-mask {
+    top: 47px;
+  }
+  .kitty-footer-edge {
     top: 47px;
   }
   .kitty-footer-dialogue {
