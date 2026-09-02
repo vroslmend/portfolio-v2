@@ -193,7 +193,12 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
 
   const revealKitty = useCallback(
     (introduce = true) => {
-      if (!enabled || revealed) return;
+      if (!enabled) return;
+      // Opening ends the introduction. This used to return whenever kitty was
+      // already revealed, so opening mid introduction left settled false with
+      // the 2600ms timer still pending: the descent ran on the reveal's own
+      // timeline, then swapped branches under itself when the timer fired.
+      if (revealed && introduce) return;
       clearTimeout(introTimer.current);
       setRevealed(true);
       const shouldIntroduce = introduce && !reduced;
