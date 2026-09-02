@@ -340,9 +340,14 @@ export function KittyFooterLauncher() {
         className="kitty-footer-mask"
         initial={false}
         animate={
-          !artReady || open
+          !artReady
             ? { clipPath: "inset(0 0 100% 0)" }
-            : revealed
+            : open
+              ? // Back to the footer's own border. 100% closes the window
+                // upward through kitty while kitty travels down, wiping it
+                // out instead of sinking it.
+                { clipPath: "inset(0 0 36% 0)" }
+              : revealed
               ? settled || reduced
                 ? { clipPath: "inset(0 0 0% 0)" }
                 : {
@@ -366,7 +371,14 @@ export function KittyFooterLauncher() {
                 times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
                 ease: EASE,
               }
-            : { duration: reduced ? 0 : 0.32, ease: EASE }
+            : {
+                duration: reduced ? 0 : open ? 0.18 : 0.28,
+                // Coming back, the paws stay clipped until the climb is over.
+                // Releasing them early paints kitty over the footer row on the
+                // way up, which is what makes it read as in front of it.
+                delay: reduced || open ? 0 : 0.4,
+                ease: EASE,
+              }
         }
       >
         <motion.span
@@ -448,20 +460,28 @@ export function KittyFooterLauncher() {
         aria-hidden="true"
         initial={false}
         animate={
-          !artReady || open || settled
+          !artReady || !revealed
             ? { opacity: 0 }
-            : revealed
-              ? { opacity: [1, 1, 1, 1, 1, 1, 1, 0] }
-              : { opacity: 0 }
+            : open
+              ? { opacity: 1 }
+              : settled
+                ? { opacity: 0 }
+                : { opacity: [1, 1, 1, 1, 1, 1, 1, 0] }
         }
         transition={
-          revealed && !settled && !reduced
+          revealed && !settled && !reduced && !open
             ? {
                 duration: 1.55,
                 times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
                 ease: EASE,
               }
-            : { duration: reduced ? 0 : 0.18, ease: EASE }
+            : {
+                duration: reduced ? 0 : 0.18,
+                // Hold the drawn border through the climb and past the moment
+                // the paws are released, or kitty rises in front of nothing.
+                delay: reduced || open ? 0 : 0.62,
+                ease: EASE,
+              }
         }
       />
 
