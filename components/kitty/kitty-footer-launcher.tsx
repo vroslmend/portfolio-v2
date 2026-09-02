@@ -232,6 +232,9 @@ export function KittyFooterLauncher() {
       data-clue={clue}
       aria-label={revealed ? "Ask kitty about Ammar's work" : "Reveal kitty"}
       aria-expanded={revealed ? open : undefined}
+      // The rail starts to the right of this button, so it stays exposed and
+      // clickable while the panel is up, reopening it and resetting the entrance.
+      disabled={open}
       onClick={(event) => {
         if (!revealed) {
           discoverKitty();
