@@ -1047,6 +1047,9 @@ body::after {
 .kitty-footer-launcher[data-discovered="true"] {
   width: 226px;
 }
+.kitty-footer-launcher:disabled {
+  pointer-events: none;
+}
 .kitty-footer-launcher:hover,
 .kitty-footer-launcher:focus-visible {
   color: var(--muted);

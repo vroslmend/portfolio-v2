@@ -255,10 +255,17 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     if (!open || !stickToBottom.current) return;
     const frame = requestAnimationFrame(() => {
       const element = scroll.current;
-      if (element) element.scrollTop = element.scrollHeight;
+      if (!element) return;
+      // Assigning scrollTop teleports the transcript the moment the answer row
+      // mounts, which reads as a jump against the vignette's own travel.
+      // Repeated smooth calls retarget one animation rather than queueing.
+      element.scrollTo({
+        top: element.scrollHeight,
+        behavior: reduced ? "auto" : "smooth",
+      });
     });
     return () => cancelAnimationFrame(frame);
-  }, [liveStatus, messages, open]);
+  }, [liveStatus, messages, open, reduced]);
 
   useEffect(() => {
     if (!open || wide) {
@@ -726,18 +733,13 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                                         </motion.button>
                                       ) : null}
                                     </article>
-                                    {/* the vignette follows the newest visitor row, so
-                                        it needs an exit where it leaves, not a cut */}
-                                    <AnimatePresence initial={false}>
-                                      {showScene ? (
-                                        <KittyScene
-                                          key="scene"
-                                          id={scenePose}
-                                          status={busy ? liveStatus : ""}
-                                          compact
-                                        />
-                                      ) : null}
-                                    </AnimatePresence>
+                                    {showScene ? (
+                                      <KittyScene
+                                        id={scenePose}
+                                        status={busy ? liveStatus : ""}
+                                        compact
+                                      />
+                                    ) : null}
                                   </motion.div>
                                 );
                               })}
@@ -836,11 +838,20 @@ function KittyScene({
 
   return (
     <motion.div
+      // One vignette that travels to the newest turn, not one per turn. Mounting
+      // a second and unmounting the first put two cats on screen at once and
+      // then teleported the survivor when the old one's height collapsed.
+      layoutId="kitty-vignette"
       className={`kitty-scene${compact ? " is-compact" : ""}`}
-      initial={{ opacity: 0 }}
+      // Not a fade from zero: relocating remounts this, and an enter animation
+      // then dips the cat to transparent halfway through its own travel.
+      initial={false}
       animate={{ opacity: displayedId ? 1 : 0 }}
-      exit={reduced ? undefined : { opacity: 0 }}
-      transition={{ duration: reduced ? 0 : 0.32, ease: EASE }}
+      transition={{
+        duration: reduced ? 0 : 0.32,
+        ease: EASE,
+        layout: { duration: reduced ? 0 : 0.62, ease: EASE },
+      }}
       aria-hidden="true"
     >
       <AnimatePresence initial={false} mode="sync">

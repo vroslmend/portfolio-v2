@@ -232,6 +232,9 @@ export function KittyFooterLauncher() {
       data-clue={clue}
       aria-label={revealed ? "Ask kitty about Ammar's work" : "Reveal kitty"}
       aria-expanded={revealed ? open : undefined}
+      // The rail starts to the right of this button, so it stays exposed and
+      // clickable while the panel is up, reopening it and resetting the entrance.
+      disabled={open}
       onClick={(event) => {
         if (!revealed) {
           discoverKitty();
@@ -337,9 +340,14 @@ export function KittyFooterLauncher() {
         className="kitty-footer-mask"
         initial={false}
         animate={
-          !artReady || open
+          !artReady
             ? { clipPath: "inset(0 0 100% 0)" }
-            : revealed
+            : open
+              ? // Back to the footer's own border. 100% closes the window
+                // upward through kitty while kitty travels down, wiping it
+                // out instead of sinking it.
+                { clipPath: "inset(0 0 36% 0)" }
+              : revealed
               ? settled || reduced
                 ? { clipPath: "inset(0 0 0% 0)" }
                 : {
@@ -363,7 +371,15 @@ export function KittyFooterLauncher() {
                 times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
                 ease: EASE,
               }
-            : { duration: reduced ? 0 : 0.32, ease: EASE }
+            : {
+                // Identical to the edge below on purpose. The reveal clears the
+                // drawn border on the same keyframe it releases the paws, so the
+                // fake line and the real one swap with nothing visible between.
+                // Coming back, both wait for the climb to finish first.
+                duration: reduced ? 0 : 0.26,
+                delay: reduced || open ? 0 : 0.55,
+                ease: EASE,
+              }
         }
       >
         <motion.span
@@ -399,8 +415,17 @@ export function KittyFooterLauncher() {
                   ease: EASE,
                 }
               : {
-                  duration: reduced ? 0 : peeking ? 0.42 : 0.4,
-                  ease: !revealed && !peeking ? EXIT_EASE : EASE,
+                  // Sinking accelerates away, climbing decelerates in.
+                  duration: reduced
+                    ? 0
+                    : peeking
+                      ? 0.42
+                      : open
+                        ? 0.5
+                        : revealed
+                          ? 0.55
+                          : 0.4,
+                  ease: open || (!revealed && !peeking) ? EXIT_EASE : EASE,
                 }
           }
         >
@@ -445,20 +470,27 @@ export function KittyFooterLauncher() {
         aria-hidden="true"
         initial={false}
         animate={
-          !artReady || open || settled
+          !artReady || !revealed
             ? { opacity: 0 }
-            : revealed
-              ? { opacity: [1, 1, 1, 1, 1, 1, 1, 0] }
-              : { opacity: 0 }
+            : open
+              ? { opacity: 1 }
+              : settled
+                ? { opacity: 0 }
+                : { opacity: [1, 1, 1, 1, 1, 1, 1, 0] }
         }
         transition={
-          revealed && !settled && !reduced
+          revealed && !settled && !reduced && !open
             ? {
                 duration: 1.55,
                 times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
                 ease: EASE,
               }
-            : { duration: reduced ? 0 : 0.18, ease: EASE }
+            : {
+                // Deliberately identical to the mask's timing above.
+                duration: reduced ? 0 : 0.26,
+                delay: reduced || open ? 0 : 0.55,
+                ease: EASE,
+              }
         }
       />
 
