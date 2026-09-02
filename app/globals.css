@@ -1327,6 +1327,12 @@ body::after {
 .kitty-scene {
   display: grid;
   width: 112px;
+  /* Not redundant against the width above. The status row is nowrap, so its
+     min-content contribution grows an auto track past 112px and the pose box,
+     sized to the track, slides right by half the overflow: 32px on "looking
+     through the projects". Pinning the track lets the label overflow both
+     edges instead of moving the cat. */
+  grid-template-columns: minmax(0, 1fr);
   min-height: 98px;
   margin: 0 auto 22px;
   grid-template-rows: 72px 26px;
