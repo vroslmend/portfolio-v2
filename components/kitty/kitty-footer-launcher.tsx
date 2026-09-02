@@ -233,6 +233,9 @@ export function KittyFooterLauncher() {
       data-clue={clue}
       aria-label={revealed ? "Ask kitty about Ammar's work" : "Reveal kitty"}
       aria-expanded={revealed ? open : undefined}
+      // Kitty is behind the footer while the panel is up. Clicking where it
+      // used to be reopens an already open panel and resets its entrance.
+      disabled={open}
       onClick={(event) => {
         if (!revealed) {
           discoverKitty();
@@ -333,59 +336,24 @@ export function KittyFooterLauncher() {
         </motion.svg>
       ))}
 
-      <motion.span
-        aria-hidden="true"
-        className="kitty-footer-mask"
-        initial={false}
-        animate={
-          !artReady
-            ? { clipPath: "inset(0 0 100% 0)" }
-            : open
-              ? // The line, not the whole element. Clipping to 100% closes the
-                // window upward through kitty while kitty travels down, which
-                // wipes it out instead of sinking it behind the footer.
-                { clipPath: "inset(0 0 36% 0)" }
-              : revealed
-              ? settled || reduced
-                ? { clipPath: "inset(0 0 0% 0)" }
-                : {
-                    clipPath: [
-                      "inset(0 0 100% 0)",
-                      "inset(0 0 36% 0)",
-                      "inset(0 0 36% 0)",
-                      "inset(0 0 36% 0)",
-                      "inset(0 0 36% 0)",
-                      "inset(0 0 36% 0)",
-                      "inset(0 0 36% 0)",
-                      "inset(0 0 0% 0)",
-                    ],
-                  }
-              : { clipPath: "inset(0 0 36% 0)" }
-        }
-        transition={
-          !settled && revealed && !reduced
-            ? {
-                duration: 1.55,
-                times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
-                ease: EASE,
-              }
-            : { duration: reduced ? 0 : 0.32, ease: EASE }
-        }
-      >
+      <span aria-hidden="true" className="kitty-footer-mask">
         <motion.span
           className="kitty-footer-mark"
           initial={false}
+          // The mask ends on the footer's own border, so 100% is fully behind
+          // it and 0% is sitting on it. Only kitty moves; the edge it passes
+          // is the real one and never animates.
           animate={
             !artReady || open
-              ? { y: "57%" }
+              ? { y: "100%" }
               : revealed
                 ? settled || reduced
                   ? { y: "0%" }
                   : {
                       y: [
-                        "48%",
-                        "45%",
-                        "32%",
+                        "100%",
+                        "96%",
+                        "88%",
                         "0%",
                         "0%",
                         "2%",
@@ -394,8 +362,8 @@ export function KittyFooterLauncher() {
                       ],
                     }
                 : peeking
-                  ? { y: "41%" }
-                  : { y: "57%" }
+                  ? { y: "88%" }
+                  : { y: "100%" }
           }
           transition={
             !settled && revealed && !reduced
@@ -444,39 +412,7 @@ export function KittyFooterLauncher() {
             </svg>
           </span>
         </motion.span>
-      </motion.span>
-
-      <motion.span
-        className="kitty-footer-edge"
-        aria-hidden="true"
-        initial={false}
-        animate={
-          !artReady || !revealed
-            ? { opacity: 0 }
-            : open
-              ? { opacity: 1 }
-              : settled
-                ? { opacity: 0 }
-                : { opacity: [1, 1, 1, 1, 1, 1, 1, 0] }
-        }
-        transition={
-          open
-            ? { duration: reduced ? 0 : 0.12, ease: EASE }
-            : revealed && !settled && !reduced
-              ? {
-                  duration: 1.55,
-                  times: [0, 0.08, 0.28, 0.68, 0.84, 0.92, 0.98, 1],
-                  ease: EASE,
-                }
-              : {
-                  duration: reduced ? 0 : 0.18,
-                  // Outlast the climb back up. Fading the moment `open` clears
-                  // takes the edge away while kitty is still rising through it.
-                  delay: reduced ? 0 : 0.42,
-                  ease: EASE,
-                }
-        }
-      />
+      </span>
 
       <motion.span
         className="kitty-footer-dialogue"
