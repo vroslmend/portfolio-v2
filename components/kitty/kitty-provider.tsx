@@ -94,10 +94,6 @@ function uid() {
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function wait(ms: number) {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
 function useWideRail() {
   const [wide, setWide] = useState(false);
   useEffect(() => {
@@ -256,12 +252,13 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
     const frame = requestAnimationFrame(() => {
       const element = scroll.current;
       if (!element) return;
-      // Assigning scrollTop teleports the transcript the moment the answer row
-      // mounts, which reads as a jump against the vignette's own travel.
-      // Repeated smooth calls retarget one animation rather than queueing.
+      const top = element.scrollHeight - element.clientHeight;
+      // A streamed token adds a few pixels. Easing each one restarts the smooth
+      // scroll about twenty-five times a second, which is the stutter. Only a
+      // row mounting moves far enough to be worth easing.
       element.scrollTo({
-        top: element.scrollHeight,
-        behavior: reduced ? "auto" : "smooth",
+        top,
+        behavior: reduced || top - element.scrollTop < 40 ? "auto" : "smooth",
       });
     });
     return () => cancelAnimationFrame(frame);
@@ -387,25 +384,25 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
       let answerText = "";
       let questionText = "";
       let eventError = false;
+      let painting = false;
 
-      async function holdLabel() {
-        if (!shownLabel) return;
-        const left = MIN_STEP_MS - (performance.now() - shownAt);
-        if (left > 0) await wait(left);
-      }
+      // Label pacing must never block the stream. It used to be awaited inside
+      // the read loop, so a tool that answered faster than MIN_STEP_MS held
+      // every token behind the current label's minimum, then released the
+      // backlog at once. Queue the change instead and let tokens through.
+      let labelTimer: ReturnType<typeof setTimeout> | undefined;
 
-      async function showLabel(label: string) {
+      function queueLabel(label: string) {
         if (label === shownLabel) return;
-        await holdLabel();
-        shownLabel = label;
-        shownAt = performance.now();
-        setLiveStatus(label);
-      }
-
-      async function clearLabel() {
-        await holdLabel();
-        shownLabel = "";
-        setLiveStatus("");
+        const left = shownLabel
+          ? Math.max(0, MIN_STEP_MS - (performance.now() - shownAt))
+          : 0;
+        clearTimeout(labelTimer);
+        labelTimer = setTimeout(() => {
+          shownLabel = label;
+          shownAt = performance.now();
+          setLiveStatus(label);
+        }, left);
       }
 
       try {
@@ -423,7 +420,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
           setRateLimitedUntil(Date.now() + seconds * 1000);
           clearTimeout(rateTimer.current);
           rateTimer.current = setTimeout(() => setRateLimitedUntil(null), seconds * 1000);
-          await clearLabel();
+          queueLabel("");
           setDraft(text);
           appendError(payload?.message ?? "too many requests. slow down.", text);
           return;
@@ -452,10 +449,13 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
           };
 
           if (event.type === "step" && event.label) {
-            await showLabel(event.label);
+            queueLabel(event.label);
           } else if (event.type === "token" && event.text) {
             if (!answerId) {
-              await clearLabel();
+              // Not awaited. The stream keeps arriving through the label's
+              // minimum display time, so blocking here stalls the answer and
+              // then floods the backlog in one burst.
+              queueLabel("");
               answerId = uid();
               setMessages((current) => [
                 ...current,
@@ -464,14 +464,22 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
               setPhase("streaming");
             }
             answerText += event.text;
-            const id = answerId;
-            setMessages((current) =>
-              current.map((message) =>
-                message.id === id ? { ...message, text: answerText } : message,
-              ),
-            );
+            // One render a frame. A token is a few characters and a render
+            // each costs a layout pass and a scroll correction.
+            if (!painting) {
+              painting = true;
+              requestAnimationFrame(() => {
+                painting = false;
+                const id = answerId;
+                setMessages((current) =>
+                  current.map((message) =>
+                    message.id === id ? { ...message, text: answerText } : message,
+                  ),
+                );
+              });
+            }
           } else if (event.type === "question" && event.text) {
-            await clearLabel();
+            queueLabel("");
             questionText = event.text;
             setMessages((current) => [
               ...current,
@@ -484,7 +492,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
               },
             ]);
           } else if (event.type === "error") {
-            await clearLabel();
+            queueLabel("");
             eventError = true;
             appendError(event.message ?? "something went wrong on my end.", text);
           } else if (event.type === "done" && event.thread_id) {
@@ -502,7 +510,17 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
         }
         if (buffer.trim()) await handle(buffer);
 
-        await clearLabel();
+        // The last frame's worth of tokens may still be queued behind a rAF.
+        if (answerId) {
+          const id = answerId;
+          setMessages((current) =>
+            current.map((message) =>
+              message.id === id ? { ...message, text: answerText } : message,
+            ),
+          );
+        }
+
+        queueLabel("");
         if (eventError) return;
         const finalText = answerText || questionText;
         if (answerId && finalText === "kitty's napping right now. try again in a bit.") {
@@ -528,7 +546,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
         }
         setAnnouncement(finalText);
       } catch {
-        await clearLabel();
+        queueLabel("");
         appendError("couldn't reach kitty. try again.", text);
       } finally {
         running.current = false;
@@ -642,9 +660,13 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                     </button>
                   </header>
 
-                  <div
+                  <motion.div
                     ref={scroll}
                     className="kitty-scroll"
+                    // The vignette layout-animates inside here. Without this,
+                    // Motion reads every scroll as the cat having moved and
+                    // fires a correction on each streamed token.
+                    layoutScroll
                     // Lenis preventDefaults wheel and touch even while stopped,
                     // so without this the transcript never scrolls.
                     data-lenis-prevent
@@ -748,7 +770,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                         )}
                       </AnimatePresence>
                     </div>
-                  </div>
+                  </motion.div>
 
                   <form
                     className="kitty-compose"
