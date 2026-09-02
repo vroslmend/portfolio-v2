@@ -815,7 +815,22 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Each pose is a separate drawing sharing one 0 0 100 100 canvas, and the cat
+// sits somewhere different in every file, so swapping one for another slides it
+// sideways and lifts it. Measured from the largest path in each: the body centre
+// runs 36.2 to 54.2 and the baseline 80.3 to 92.7. These bring each pose onto the
+// attentive one's centre and baseline. Percentages, so they hold at any size.
+const POSE_ALIGNMENT: Record<KittyArtId, { x: number; y: number }> = {
+  "8273689": { x: 0, y: 0 },
+  "8273687": { x: -10.4, y: 5.6 },
+  "8273706": { x: 7.6, y: -1.7 },
+  "7574338": { x: -6.2, y: 10.7 },
+  // The footer draws its own art rather than going through here.
+  "8317982": { x: 0, y: 0 },
+};
+
 function KittyArt({ id, className = "" }: { id: KittyArtId; className?: string }) {
+  const align = POSE_ALIGNMENT[id];
   return (
     <Image
       src={kittyArtSrc(id)}
@@ -823,6 +838,7 @@ function KittyArt({ id, className = "" }: { id: KittyArtId; className?: string }
       width={100}
       height={100}
       unoptimized
+      style={{ transform: `translate(${align.x}%, ${align.y}%)` }}
       className={`kitty-art ${className}`}
     />
   );
