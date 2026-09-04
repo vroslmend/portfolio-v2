@@ -1,8 +1,16 @@
-# ammar hassan · personal site
+<p align="center">
+  <img src="app/icon.svg" width="96" alt="Ammar Hassan's ah. mark">
+</p>
 
-My corner of the internet. Quiet, monochrome, and built with probably too much attention to detail.
+<h1 align="center">ammarhassan.dev</h1>
 
-**Live:** [ammarhassan.dev](https://ammarhassan.dev)
+<div align="center">
+  <p>My corner of the internet.<br>A quiet, monochrome home for projects, writing, photography, and a small resident cat.</p>
+
+  <p><a href="https://ammarhassan.dev">Visit the site</a></p>
+
+  <p><a href="https://github.com/vroslmend/portfolio-v2/actions/workflows/ci.yml"><img src="https://github.com/vroslmend/portfolio-v2/actions/workflows/ci.yml/badge.svg" alt="CI"></a></p>
+</div>
 
 ## Stack
 
