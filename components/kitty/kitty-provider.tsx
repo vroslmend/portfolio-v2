@@ -814,6 +814,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                                       <KittyScene
                                         id={scenePose}
                                         status={busy ? liveStatus : ""}
+                                        anchorId={message.id}
                                         compact
                                       />
                                     ) : null}
@@ -920,10 +921,12 @@ function useDecodedKittyArt(id: KittyArtId) {
 function KittyScene({
   id,
   status,
+  anchorId,
   compact = false,
 }: {
   id: KittyArtId;
   status: string;
+  anchorId: string;
   compact?: boolean;
 }) {
   const reduced = useReducedMotion();
@@ -935,6 +938,10 @@ function KittyScene({
       // a second and unmounting the first put two cats on screen at once and
       // then teleported the survivor when the old one's height collapsed.
       layoutId="kitty-vignette"
+      // A route change rerenders the open rail without moving the vignette to
+      // a new turn. Keeping this dependency stable prevents that rerender from
+      // being interpreted as another shared-layout journey.
+      layoutDependency={anchorId}
       className={`kitty-scene${compact ? " is-compact" : ""}`}
       // Not a fade from zero: relocating remounts this, and an enter animation
       // then dips the cat to transparent halfway through its own travel.
@@ -1041,7 +1048,7 @@ const KittyEmpty = forwardRef<
       exit={reduced ? undefined : { opacity: 0, y: -4 }}
       transition={{ duration: reduced ? 0 : 0.18, ease: EASE }}
     >
-      <KittyScene id="8273689" status="" />
+      <KittyScene id="8273689" status="" anchorId="empty" />
       <motion.p className="kitty-intro" variants={CHAT_ITEM}>
         Ask about the work, the writing, or what he&apos;s doing lately.
       </motion.p>
