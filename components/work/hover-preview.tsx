@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import {
@@ -26,22 +26,35 @@ export function HoverPreview({ project }: { project: Project | null }) {
   const y = useMotionValue(0);
   const sx = useSpring(x, { stiffness: 180, damping: 22, mass: 0.5 });
   const sy = useSpring(y, { stiffness: 180, damping: 22, mass: 0.5 });
+  const positioned = useRef(false);
+  const [positionReady, setPositionReady] = useState(false);
 
   useEffect(() => {
     if (!finePointer) return;
     function onMove(e: MouseEvent) {
-      x.set(e.clientX + 24);
-      y.set(e.clientY - 90);
+      const nextX = e.clientX + 24;
+      const nextY = e.clientY - 90;
+      if (!positioned.current) {
+        x.jump(nextX);
+        y.jump(nextY);
+        sx.jump(nextX);
+        sy.jump(nextY);
+        positioned.current = true;
+        setPositionReady(true);
+        return;
+      }
+      x.set(nextX);
+      y.set(nextY);
     }
     window.addEventListener("mousemove", onMove, { passive: true });
     return () => window.removeEventListener("mousemove", onMove);
-  }, [finePointer, x, y]);
+  }, [finePointer, sx, sy, x, y]);
 
   if (!finePointer) return null;
 
   return (
     <AnimatePresence>
-      {project && (
+      {project && positionReady && (
         <motion.div
           key={project.slug}
           style={{ x: sx, y: sy }}
