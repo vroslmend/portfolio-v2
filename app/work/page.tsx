@@ -7,7 +7,7 @@ import { projects } from "@/data/site";
 export const metadata: Metadata = {
   title: "work · ammar hassan",
   description:
-    "Selected projects: CUI Central, Check!, Imaginify, Karting Analysis, and other things built over the last few years.",
+    "Selected projects: CUI Central, kitty, Check!, Cloud Visitor Counter, Imaginify, and Karting Analysis.",
 };
 
 export default function WorkPage() {
