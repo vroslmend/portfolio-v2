@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ReadingProgress } from "@/components/reading-progress";
-import { Reveal } from "@/components/reveal";
+import {
+  EssayFooter,
+  EssayHeader,
+  EssaySection,
+  LinearFlow,
+  type EssayFlowStep,
+} from "@/components/writing/essay";
+import { EssayShell } from "@/components/writing/essay-shell";
 
 export const metadata: Metadata = {
   title: "a visitor counter, taken too seriously · ammar hassan",
@@ -9,16 +15,14 @@ export const metadata: Metadata = {
     "Why I wrapped a trivial visitor counter in Terraform, a keyless CI/CD pipeline, and atomic writes. A deliberately small take on the Cloud Resume Challenge.",
 };
 
-type Step = { label: string; note: string; emphasis?: boolean };
-
-const requestPath: Step[] = [
+const requestPath: EssayFlowStep[] = [
   { label: "browser", note: "the page on ammarhassan.dev" },
   { label: "api gateway", note: "http api, cors locked to the site" },
   { label: "lambda", note: "python, reads or increments atomically", emphasis: true },
   { label: "dynamodb", note: "two rows: visits, prius" },
 ];
 
-const deployPath: Step[] = [
+const deployPath: EssayFlowStep[] = [
   { label: "git push", note: "to main" },
   { label: "github actions", note: "runs the tests first" },
   { label: "oidc handshake", note: "short-lived token ⇄ temporary aws credentials", emphasis: true },
@@ -26,100 +30,25 @@ const deployPath: Step[] = [
   { label: "aws", note: "infrastructure updated" },
 ];
 
-function Flow({
-  steps,
-  caption,
-  label,
-}: {
-  steps: Step[];
-  caption: string;
-  label: string;
-}) {
-  return (
-    <figure className="select-none py-3">
-      <ul className="flex flex-col" aria-label={label}>
-        {steps.map((step) => (
-          <li
-            key={step.label}
-            className="relative flex flex-wrap items-baseline gap-x-4 gap-y-0.5 border-l border-line pb-6 pl-6 last:border-transparent last:pb-1"
-          >
-            <span
-              aria-hidden
-              className={`absolute -left-[4px] top-[9px] size-[7px] rounded-full ${
-                step.emphasis ? "bg-fg" : "border border-faint bg-bg"
-              }`}
-            />
-            <span
-              className={`font-mono text-[11px] uppercase tracking-[0.14em] ${
-                step.emphasis ? "font-medium text-fg" : "text-muted"
-              }`}
-            >
-              {step.label}
-            </span>
-            <span className="text-[13px] text-faint">{step.note}</span>
-          </li>
-        ))}
-      </ul>
-      <figcaption className="pt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-        {caption}
-      </figcaption>
-    </figure>
-  );
-}
-
-function Section({
-  n,
-  title,
-  children,
-}: {
-  n: string;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Reveal>
-      <section className="flex flex-col gap-4 border-t border-line pt-8">
-        <h2 className="flex items-baseline gap-3 text-[16px] font-medium tracking-tight">
-          <span className="select-none font-mono text-[11px] text-faint">
-            {n}
-          </span>
-          {title}
-        </h2>
-        <div className="flex flex-col gap-4 text-[15px] leading-[1.8] text-muted">
-          {children}
-        </div>
-      </section>
-    </Reveal>
-  );
-}
-
 export default function VisitorCounterEssay() {
   return (
-    <article className="flex flex-col gap-10 pb-8">
-      <ReadingProgress />
-      <header className="flex flex-col gap-5">
-        <Reveal mask>
-          <p className="select-none font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
-            writing — june 2026 · 6 min
-          </p>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <h1 className="max-w-[24ch] text-[26px] font-medium leading-[1.25] tracking-tight text-fg sm:text-[32px]">
+    <EssayShell>
+      <EssayHeader
+        eyebrow="writing — june 2026 · 6 min"
+        title={
+          <>
             A visitor counter, taken{" "}
             <span className="accent-serif">too seriously</span>
-          </h1>
-        </Reveal>
-        <Reveal delay={0.2}>
-          <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-            At the bottom of this site there are two numbers: how many people
-            have visited, and how many times the Prius easter egg has been
-            driven. The numbers don&apos;t really matter. What I want to write
-            about is everything I put behind them, and the one thing I left out.
-          </p>
-        </Reveal>
-      </header>
+          </>
+        }
+      >
+        At the bottom of this site there are two numbers: how many people have
+        visited, and how many times the Prius easter egg has been driven. The
+        numbers don&apos;t really matter. What I want to write about is everything
+        I put behind them, and the one thing I left out.
+      </EssayHeader>
 
-      <Section n="01" title="The toy">
+      <EssaySection n="01" title="The toy">
         <p className="text-pretty">
           It&apos;s just a counter, and I should be upfront that the numbers
           barely mean anything. The visit count is fuzzy on purpose. It counts
@@ -138,11 +67,11 @@ export default function VisitorCounterEssay() {
           resume, keep the counter, and take it much further than a counter
           needs.
         </p>
-      </Section>
+      </EssaySection>
 
-      <Section n="02" title="The shape of the system">
+      <EssaySection n="02" title="The shape of the system">
         <p className="text-pretty">A request goes through four steps.</p>
-        <Flow
+        <LinearFlow
           steps={requestPath}
           label="Request path: the browser calls API Gateway, which triggers a Lambda function, which reads or increments a counter in DynamoDB"
           caption="fig. 01 — one request, four steps. the increment is atomic"
@@ -165,9 +94,9 @@ export default function VisitorCounterEssay() {
           Lahore, and the billing is pay-per-request, which at this traffic is
           basically free.
         </p>
-      </Section>
+      </EssaySection>
 
-      <Section n="03" title="The choices">
+      <EssaySection n="03" title="The choices">
         <p className="text-pretty">
           <b className="font-medium text-fg">
             I didn&apos;t host the site on AWS.
@@ -195,7 +124,7 @@ export default function VisitorCounterEssay() {
           anywhere. This is called OIDC. It was more work to set up, and
           it&apos;s the part I&apos;m happiest I didn&apos;t cut.
         </p>
-        <Flow
+        <LinearFlow
           steps={deployPath}
           label="Deploy path: a push to main triggers GitHub Actions, which exchanges an OIDC token for temporary AWS credentials, then runs terraform apply"
           caption="fig. 02 — every deploy logs in with no stored keys"
@@ -224,9 +153,9 @@ export default function VisitorCounterEssay() {
           needs. But a counter is a cheap place to build the habit, before it
           matters somewhere it does.
         </p>
-      </Section>
+      </EssaySection>
 
-      <Section n="04" title="Limits">
+      <EssaySection n="04" title="Limits">
         <p className="text-pretty">
           It only counts, and the limits are on purpose. Visits are per browser
           session, not per person, so clearing your storage or opening another
@@ -237,9 +166,9 @@ export default function VisitorCounterEssay() {
           You could probably inflate the number if you really wanted to. At this
           scale I don&apos;t mind.
         </p>
-      </Section>
+      </EssaySection>
 
-      <Section n="05" title="Closing">
+      <EssaySection n="05" title="Closing">
         <p className="text-pretty">
           This is sort of the opposite of the last thing I wrote. In the{" "}
           <Link
@@ -262,18 +191,9 @@ export default function VisitorCounterEssay() {
           there to give it something to do. Most of the skill is{" "}
           <span className="accent-serif">telling those two apart</span>.
         </p>
-      </Section>
+      </EssaySection>
 
-      <Reveal>
-        <footer className="border-t border-line pt-6">
-          <Link
-            href="/writing"
-            className="u-link font-mono text-[11px] tracking-[0.12em] text-muted hover:text-fg"
-          >
-            ← all writing
-          </Link>
-        </footer>
-      </Reveal>
-    </article>
+      <EssayFooter />
+    </EssayShell>
   );
 }

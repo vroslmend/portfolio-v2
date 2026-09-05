@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ReadingProgress } from "@/components/reading-progress";
-import { Reveal } from "@/components/reveal";
+import {
+  EssayFooter,
+  EssayHeader,
+  EssaySection,
+  LinearFlow,
+  type EssayFlowStep,
+} from "@/components/writing/essay";
+import { EssayShell } from "@/components/writing/essay-shell";
 
 export const metadata: Metadata = {
   title: "putting my spotify on the page · ammar hassan",
@@ -9,9 +15,7 @@ export const metadata: Metadata = {
     "A now-playing line in the footer, the OAuth refresh-token dance behind it, and why a Vercel route handler was the right amount of backend.",
 };
 
-type Step = { label: string; note: string; emphasis?: boolean };
-
-const requestPath: Step[] = [
+const requestPath: EssayFlowStep[] = [
   { label: "browser", note: "polls /api/now-playing every 20s" },
   {
     label: "route handler",
@@ -22,100 +26,25 @@ const requestPath: Step[] = [
   { label: "footer", note: "the line fades in, or stays hidden" },
 ];
 
-function Flow({
-  steps,
-  caption,
-  label,
-}: {
-  steps: Step[];
-  caption: string;
-  label: string;
-}) {
-  return (
-    <figure className="select-none py-3">
-      <ul className="flex flex-col" aria-label={label}>
-        {steps.map((step) => (
-          <li
-            key={step.label}
-            className="relative flex flex-wrap items-baseline gap-x-4 gap-y-0.5 border-l border-line pb-6 pl-6 last:border-transparent last:pb-1"
-          >
-            <span
-              aria-hidden
-              className={`absolute -left-[4px] top-[9px] size-[7px] rounded-full ${
-                step.emphasis ? "bg-fg" : "border border-faint bg-bg"
-              }`}
-            />
-            <span
-              className={`font-mono text-[11px] uppercase tracking-[0.14em] ${
-                step.emphasis ? "font-medium text-fg" : "text-muted"
-              }`}
-            >
-              {step.label}
-            </span>
-            <span className="text-[13px] text-faint">{step.note}</span>
-          </li>
-        ))}
-      </ul>
-      <figcaption className="pt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-        {caption}
-      </figcaption>
-    </figure>
-  );
-}
-
-function Section({
-  n,
-  title,
-  children,
-}: {
-  n: string;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Reveal>
-      <section className="flex flex-col gap-4 border-t border-line pt-8">
-        <h2 className="flex items-baseline gap-3 text-[16px] font-medium tracking-tight">
-          <span className="select-none font-mono text-[11px] text-faint">
-            {n}
-          </span>
-          {title}
-        </h2>
-        <div className="flex flex-col gap-4 text-[15px] leading-[1.8] text-muted">
-          {children}
-        </div>
-      </section>
-    </Reveal>
-  );
-}
-
 export default function NowPlayingEssay() {
   return (
-    <article className="flex flex-col gap-10 pb-8">
-      <ReadingProgress />
-      <header className="flex flex-col gap-5">
-        <Reveal mask>
-          <p className="select-none font-mono text-[11px] uppercase tracking-[0.18em] text-faint">
-            writing — june 2026 · 4 min
-          </p>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <h1 className="max-w-[24ch] text-[26px] font-medium leading-[1.25] tracking-tight text-fg sm:text-[32px]">
+    <EssayShell>
+      <EssayHeader
+        eyebrow="writing — june 2026 · 4 min"
+        title={
+          <>
             Putting my Spotify on the page,{" "}
             <span className="accent-serif">without overdoing it</span>
-          </h1>
-        </Reveal>
-        <Reveal delay={0.2}>
-          <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-            When I&apos;m listening to something, a small line shows up at the
-            bottom of this site with the track. It&apos;s a tiny thing, and
-            that&apos;s the point. What I want to write about is the little bit of
-            backend behind it, and the parts I decided not to build.
-          </p>
-        </Reveal>
-      </header>
+          </>
+        }
+      >
+        When I&apos;m listening to something, a small line shows up at the bottom
+        of this site with the track. It&apos;s a tiny thing, and that&apos;s the point.
+        What I want to write about is the little bit of backend behind it, and
+        the parts I decided not to build.
+      </EssayHeader>
 
-      <Section n="01" title="The line">
+      <EssaySection n="01" title="The line">
         <p className="text-pretty">
           It shows what I&apos;m playing on Spotify, and nothing more. When
           I&apos;m not listening, the footer looks exactly like it always does,
@@ -127,16 +56,16 @@ export default function NowPlayingEssay() {
           No album art down there, no panel. It&apos;s meant to be noticed once
           and then ignored.
         </p>
-      </Section>
+      </EssaySection>
 
-      <Section n="02" title="The shape">
+      <EssaySection n="02" title="The shape">
         <p className="text-pretty">
           Spotify won&apos;t let the browser ask &ldquo;what is Ammar
           playing&rdquo; on its own, and it shouldn&apos;t, because that would
           mean putting a secret in the page where anyone could read it. So there
           is one small server step in the middle.
         </p>
-        <Flow
+        <LinearFlow
           steps={requestPath}
           label="Request path: the browser polls a Vercel route handler, which exchanges a refresh token for an access token and asks Spotify what is playing, then the footer shows it"
           caption="fig. 01 — one poll, four steps. the refresh token never leaves the server"
@@ -156,9 +85,9 @@ export default function NowPlayingEssay() {
           needs one, with no login screen and no secret ever reaching the
           browser.
         </p>
-      </Section>
+      </EssaySection>
 
-      <Section n="03" title="The choice">
+      <EssaySection n="03" title="The choice">
         <p className="text-pretty">
           I already had somewhere I could have put this. The visitor counter at
           the bottom of the site is a real AWS backend, with Lambda and Terraform
@@ -181,9 +110,9 @@ export default function NowPlayingEssay() {
           , where I deliberately built far more than the job needed, to practice
           the full setup. The skill is knowing which situation you&apos;re in.
         </p>
-      </Section>
+      </EssaySection>
 
-      <Section n="04" title="Caching">
+      <EssaySection n="04" title="Caching">
         <p className="text-pretty">
           Two bits of caching do the real work, and neither depends on where the
           code runs. The access token is good for an hour, so the server keeps it
@@ -193,9 +122,9 @@ export default function NowPlayingEssay() {
           one answer rather than each hitting Spotify. The polling is what makes
           it feel live; the caching is what keeps it from being wasteful.
         </p>
-      </Section>
+      </EssaySection>
 
-      <Section n="05" title="Closing">
+      <EssaySection n="05" title="Closing">
         <p className="text-pretty">
           So this is the counter&apos;s mirror image. There I wrapped a number
           that barely matters in remote state, federated login, and
@@ -209,18 +138,9 @@ export default function NowPlayingEssay() {
           reason to build <span className="accent-serif">almost nothing</span>.
           Same judgment, pointed the other way.
         </p>
-      </Section>
+      </EssaySection>
 
-      <Reveal>
-        <footer className="border-t border-line pt-6">
-          <Link
-            href="/writing"
-            className="u-link font-mono text-[11px] tracking-[0.12em] text-muted hover:text-fg"
-          >
-            ← all writing
-          </Link>
-        </footer>
-      </Reveal>
-    </article>
+      <EssayFooter />
+    </EssayShell>
   );
 }

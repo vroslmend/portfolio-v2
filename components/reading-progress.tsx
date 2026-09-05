@@ -1,11 +1,19 @@
 "use client";
 
+import type { RefObject } from "react";
 import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 
 /** 1px reading-progress hairline under the nav, for essay pages. */
-export function ReadingProgress() {
+export function ReadingProgress({
+  target,
+}: {
+  target: RefObject<HTMLElement | null>;
+}) {
   const reduced = useReducedMotion();
-  const { scrollYProgress } = useScroll();
+  const { scrollYProgress } = useScroll({
+    target,
+    offset: ["start start", "end end"],
+  });
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 140,
     damping: 28,
