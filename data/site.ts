@@ -50,9 +50,9 @@ export const projects: Project[] = [
     year: "2026",
     tagline: "on-site portfolio agent",
     description:
-      "An on-site agent for this portfolio that answers questions about my work, writing and background. I built its LangGraph tool loop by hand; FastAPI streams each step, and an evaluation suite checks tool routing and answer quality. Postgres keeps conversations durable, while bounded retries and a warm-on-load health check keep the public widget responsive.",
+      "An on-site agent for this portfolio that answers questions about my work, writing and background. A custom LangGraph tool loop coordinates its tools; FastAPI streams each step, and an evaluation suite checks routing and answer quality. Postgres keeps conversations durable, while bounded retries and a warm-on-load health check keep the public widget responsive.",
     evidence: [
-      "A hand-built LangGraph loop chooses among bounded tools, can interrupt for clarification, and resumes conversations through Postgres checkpoints.",
+      "The LangGraph loop chooses among bounded tools, can interrupt for clarification, and resumes conversations through Postgres checkpoints.",
       "The evaluation suite measures routing and answer quality separately; bounded retries, a model timeout, and a frontend health warm-up protect against common latency failures.",
       "The widget sends server-validated page context and returns one real project or essay link when it helps.",
     ],
@@ -67,7 +67,7 @@ export const projects: Project[] = [
     year: "2025",
     tagline: "multiplayer card game",
     description:
-      "An online multiplayer card game you can actually play with friends. I wrote the game server myself with Socket.IO, handling rooms, turns and reconnects, and learned a lot about keeping several players' screens in sync.",
+      "An online multiplayer card game you can play with friends. Its Socket.IO game server handles rooms, turns and reconnects, keeping every player's screen in sync.",
     evidence: [
       "An authoritative XState server validates every action and redacts hidden cards before broadcasting each player's view.",
       "Socket acknowledgements and explicit reconnect states keep two-to-six-player sessions coordinated across disconnects.",
