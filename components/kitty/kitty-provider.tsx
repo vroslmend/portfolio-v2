@@ -18,6 +18,7 @@ import {
 } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useLenis } from "lenis/react";
 import { EASE } from "@/lib/motion";
 import {
@@ -106,8 +107,52 @@ function useWideRail() {
   return wide;
 }
 
+function suggestionsForPath(pathname: string): string[] {
+  if (pathname === "/work") {
+    return [
+      "which project best shows backend work?",
+      "compare Check! and CUI Central",
+      "what has he pushed lately?",
+    ];
+  }
+  if (pathname === "/writing") {
+    return [
+      "what does he write about?",
+      "what does he think about agents?",
+      "which piece should I read first?",
+    ];
+  }
+  if (pathname.startsWith("/writing/")) {
+    return [
+      "what is this essay arguing?",
+      "what tradeoff is he making here?",
+      "what should I read after this?",
+    ];
+  }
+  if (pathname === "/about") {
+    return [
+      "where has he worked?",
+      "what backend technologies does he know?",
+      "give me a quick overview of his background",
+    ];
+  }
+  if (pathname === "/photos") {
+    return [
+      "what has he built with python?",
+      "what does he write about?",
+      "what is he listening to?",
+    ];
+  }
+  return [
+    "which project goes deepest technically?",
+    "what does he think about agents?",
+    "what has he pushed lately?",
+  ];
+}
+
 export function KittyProvider({ children }: { children: React.ReactNode }) {
   const enabled = Boolean(API);
+  const pathname = usePathname();
   const wide = useWideRail();
   const reduced = useReducedMotion();
   const lenis = useLenis();
@@ -414,7 +459,11 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
         const response = await fetch(`${API}/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text, thread_id: threadId }),
+          body: JSON.stringify({
+            message: text,
+            thread_id: threadId,
+            page_path: pathname,
+          }),
         });
 
         if (response.status === 429) {
@@ -557,7 +606,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
         running.current = false;
       }
     },
-    [appendError, phase, rateLimitedUntil, threadId],
+    [appendError, pathname, phase, rateLimitedUntil, threadId],
   );
 
   const selectOption = useCallback(
@@ -689,6 +738,7 @@ export function KittyProvider({ children }: { children: React.ReactNode }) {
                           <KittyEmpty
                             key="empty"
                             onAsk={(question) => void send(question)}
+                            suggestions={suggestionsForPath(pathname)}
                           />
                         ) : (
                           <motion.div
@@ -975,16 +1025,10 @@ function KittyMessageText({
   return <p>{parts}</p>;
 }
 
-const SUGGESTIONS = [
-  "which project goes deepest technically?",
-  "what have you built with ai?",
-  "show me the backend-heavy work",
-];
-
 const KittyEmpty = forwardRef<
   HTMLDivElement,
-  { onAsk: (question: string) => void }
->(function KittyEmpty({ onAsk }, ref) {
+  { onAsk: (question: string) => void; suggestions: string[] }
+>(function KittyEmpty({ onAsk, suggestions }, ref) {
   const reduced = useReducedMotion();
 
   return (
@@ -999,14 +1043,14 @@ const KittyEmpty = forwardRef<
     >
       <KittyScene id="8273689" status="" />
       <motion.p className="kitty-intro" variants={CHAT_ITEM}>
-        Ask about a project, the stack, or why I built it.
+        Ask about the work, the writing, or what he&apos;s doing lately.
       </motion.p>
       <motion.div
         className="kitty-prompts"
         aria-label="suggested questions"
         variants={CHAT_LIST}
       >
-        {SUGGESTIONS.map((question) => (
+        {suggestions.map((question) => (
           <motion.button
             key={question}
             type="button"
