@@ -4,6 +4,7 @@ export type Project = {
   year: string;
   tagline: string;
   description: string;
+  evidence?: string[];
   stack: string[];
   links: { live?: string; github?: string };
   image?: string;
@@ -34,6 +35,10 @@ export const projects: Project[] = [
     tagline: "campus operating system",
     description:
       "A platform for my university that brings cafeteria pre-ordering, room booking, faculty availability and a job portal into one place, with separate flows for students, teachers and admins. It also has a Gemini-powered chatbot that answers questions about the campus from a custom knowledge base.",
+    evidence: [
+      "Separate Next.js frontend and Express/MongoDB backend support student, teacher, company and admin workflows.",
+      "The campus assistant combines vector search over a custom knowledge base with function calls into live application data.",
+    ],
     stack: ["Next.js 15", "Socket.IO", "Gemini", "MongoDB"],
     links: { live: "https://cui-central.vercel.app" },
     image: "/images/projects/cui-central.webp",
@@ -46,6 +51,10 @@ export const projects: Project[] = [
     tagline: "multiplayer card game",
     description:
       "An online multiplayer card game you can actually play with friends. I wrote the game server myself with Socket.IO, handling rooms, turns and reconnects, and learned a lot about keeping several players' screens in sync.",
+    evidence: [
+      "An authoritative XState server validates every action and redacts hidden cards before broadcasting each player's view.",
+      "Socket acknowledgements and explicit reconnect states keep two-to-six-player sessions coordinated across disconnects.",
+    ],
     stack: ["Next.js", "Node.js", "Socket.IO", "XState"],
     links: {
       live: "https://check-the-game.vercel.app",
@@ -61,6 +70,10 @@ export const projects: Project[] = [
     tagline: "ai image platform",
     description:
       "An AI image editing app with generative fill, restore, recolor and background removal, plus a credits system and payments through Stripe. Built with Next.js, Cloudinary and MongoDB.",
+    evidence: [
+      "Cloudinary runs the image transformations while MongoDB stores a searchable community gallery.",
+      "Clerk and Stripe webhooks keep user accounts and purchased credit balances in sync.",
+    ],
     stack: ["Next.js", "TypeScript", "Cloudinary AI", "Stripe"],
     links: {
       github: "https://github.com/vroslmend/next-ai-saas-app",
@@ -75,6 +88,10 @@ export const projects: Project[] = [
     tagline: "lap-time analysis",
     description:
       "Lap-time analysis for go-karting sessions with my friends. It scrapes leaderboard data from the track's website, then uses Pandas and NumPy to chart fastest laps, distributions and how everyone stacks up.",
+    evidence: [
+      "Three RaceFacer leaderboard snapshots cover 7,508 rows across two Lahore tracks.",
+      "The analysis treats the data as best-time rankings rather than lap-by-lap telemetry and removes obvious 105-second-plus outliers.",
+    ],
     stack: ["Python", "Pandas", "NumPy"],
     links: {
       live: "https://karting-dashboard.vercel.app/",
@@ -90,6 +107,10 @@ export const projects: Project[] = [
     tagline: "serverless, the long way",
     description:
       "The live visitor and Prius counts at the bottom of this site, running as their own small AWS service. A Python Lambda and DynamoDB sit behind an API Gateway, all of it defined in Terraform and deployed by GitHub Actions with no stored keys. It's a tiny backend, but I built the full production setup around it on purpose, as my take on the Cloud Resume Challenge.",
+    evidence: [
+      "DynamoDB increments both counters with an atomic ADD, so simultaneous visits cannot overwrite one another.",
+      "Pull requests test and plan the infrastructure; main deploys through short-lived GitHub OIDC credentials with no stored AWS keys.",
+    ],
     stack: ["AWS Lambda", "DynamoDB", "API Gateway", "Terraform", "GitHub Actions"],
     links: { github: "https://github.com/vroslmend/cloud-visitor-counter" },
     featured: true,
