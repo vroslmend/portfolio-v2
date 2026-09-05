@@ -45,6 +45,23 @@ export const projects: Project[] = [
     featured: true,
   },
   {
+    slug: "kitty-agent",
+    name: "kitty",
+    year: "2026",
+    tagline: "on-site portfolio agent",
+    description:
+      "An on-site agent for this portfolio that answers questions about my work, writing and background. I built its LangGraph tool loop by hand; FastAPI streams each step, and an evaluation suite checks tool routing and answer quality. Postgres keeps conversations durable, while bounded retries and a warm-on-load health check keep the public widget responsive.",
+    evidence: [
+      "A hand-built LangGraph loop chooses among bounded tools, can interrupt for clarification, and resumes conversations through Postgres checkpoints.",
+      "The evaluation suite measures routing and answer quality separately; bounded retries, a model timeout, and a frontend health warm-up protect against common latency failures.",
+      "The widget sends server-validated page context and returns one real project or essay link when it helps.",
+    ],
+    stack: ["Python", "LangGraph", "FastAPI", "Postgres / pgvector", "SSE"],
+    links: { github: "https://github.com/vroslmend/kitty-agent" },
+    image: "/images/projects/kitty.webp",
+    featured: true,
+  },
+  {
     slug: "check",
     name: "Check!",
     year: "2025",
@@ -61,6 +78,21 @@ export const projects: Project[] = [
       github: "https://github.com/vroslmend/check-the-card-game-v2",
     },
     image: "/images/projects/check.webp",
+    featured: true,
+  },
+  {
+    slug: "cloud-visitor-counter",
+    name: "Cloud Visitor Counter",
+    year: "2026",
+    tagline: "serverless, the long way",
+    description:
+      "The live visitor and Prius counts at the bottom of this site, running as their own small AWS service. A Python Lambda and DynamoDB sit behind an API Gateway, all of it defined in Terraform and deployed by GitHub Actions with no stored keys. It's a tiny backend, but I built the full production setup around it on purpose, as my take on the Cloud Resume Challenge.",
+    evidence: [
+      "DynamoDB increments both counters with an atomic ADD, so simultaneous visits cannot overwrite one another.",
+      "Pull requests test and plan the infrastructure; main deploys through short-lived GitHub OIDC credentials with no stored AWS keys.",
+    ],
+    stack: ["AWS Lambda", "DynamoDB", "API Gateway", "Terraform", "GitHub Actions"],
+    links: { github: "https://github.com/vroslmend/cloud-visitor-counter" },
     featured: true,
   },
   {
@@ -98,21 +130,6 @@ export const projects: Project[] = [
       github: "https://github.com/vroslmend/sportzilla-laptime-analysis",
     },
     image: "/images/projects/karting-analysis.webp",
-    featured: true,
-  },
-  {
-    slug: "cloud-visitor-counter",
-    name: "Cloud Visitor Counter",
-    year: "2026",
-    tagline: "serverless, the long way",
-    description:
-      "The live visitor and Prius counts at the bottom of this site, running as their own small AWS service. A Python Lambda and DynamoDB sit behind an API Gateway, all of it defined in Terraform and deployed by GitHub Actions with no stored keys. It's a tiny backend, but I built the full production setup around it on purpose, as my take on the Cloud Resume Challenge.",
-    evidence: [
-      "DynamoDB increments both counters with an atomic ADD, so simultaneous visits cannot overwrite one another.",
-      "Pull requests test and plan the infrastructure; main deploys through short-lived GitHub OIDC credentials with no stored AWS keys.",
-    ],
-    stack: ["AWS Lambda", "DynamoDB", "API Gateway", "Terraform", "GitHub Actions"],
-    links: { github: "https://github.com/vroslmend/cloud-visitor-counter" },
     featured: true,
   },
   {
@@ -233,9 +250,13 @@ export const toolbox = [
   "Stripe",
   "Zod",
   "Python",
+  "FastAPI",
+  "LangGraph",
   "Pandas / NumPy / Matplotlib",
   "MongoDB + Vector Search",
+  "Postgres / pgvector",
   "Gemini API",
+  "LLM evals",
   "Spotify API",
   "OAuth",
   "SQL",
