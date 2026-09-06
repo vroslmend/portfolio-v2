@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { EASE } from "@/lib/motion";
 
@@ -13,6 +13,8 @@ type RevealProps = {
   once?: boolean;
 };
 
+const emptySubscribe = () => () => {};
+
 export function Reveal({
   children,
   delay = 0,
@@ -21,12 +23,20 @@ export function Reveal({
   once = true,
 }: RevealProps) {
   const reduced = useReducedMotion();
+  // The browser can know this preference before hydration, while the server
+  // cannot. Keep the server-shaped reveal for hydration, then remove its
+  // motion once the client has mounted.
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
   // Observe the (never-clipped) wrapper: the masked child itself is fully
   // clipped while hidden, so IntersectionObserver would never see it.
   const maskRef = useRef<HTMLDivElement>(null);
   const maskInView = useInView(maskRef, { once, margin: "0px" });
 
-  if (reduced) {
+  if (mounted && reduced) {
     return <div className={className}>{children}</div>;
   }
 

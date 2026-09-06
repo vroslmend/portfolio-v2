@@ -1,7 +1,7 @@
 "use client";
 
 import type { RefObject } from "react";
-import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
+import { motion, useScroll, useSpring } from "motion/react";
 
 /** 1px reading-progress hairline under the nav, for essay pages. */
 export function ReadingProgress({
@@ -9,7 +9,6 @@ export function ReadingProgress({
 }: {
   target: RefObject<HTMLElement | null>;
 }) {
-  const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target,
     offset: ["start start", "end end"],
@@ -20,12 +19,10 @@ export function ReadingProgress({
     mass: 0.4,
   });
 
-  if (reduced) return null;
-
   return (
     <motion.div
       aria-hidden
-      className="fixed inset-x-0 top-0 z-[60] h-px origin-left bg-fg/60"
+      className="fixed inset-x-0 top-0 z-[60] h-px origin-left bg-fg/60 motion-reduce:hidden"
       style={{ scaleX }}
     />
   );
