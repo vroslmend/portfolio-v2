@@ -3,24 +3,18 @@ import {
   EssayFooter,
   EssayHeader,
   EssaySection,
-  LinearFlow,
 } from "@/components/writing/essay";
 import { EssayShell } from "@/components/writing/essay-shell";
+import {
+  BookkeepingBoundaryFigure,
+  BookkeepingSystemFigure,
+} from "@/components/writing/bookkeeping-figures";
 
 export const metadata: Metadata = {
   title: "agents that do bookkeeping · ammar hassan",
   description:
     "An architecture for automating recurring bookkeeping work with AI agents, a deterministic core, and a hard human approval gate.",
 };
-
-const pipeline = [
-  { label: "bank data", note: "csv exports or a feed" },
-  { label: "01 — categorize", note: "history first, the model only for the new" },
-  { label: "02 — reconcile", note: "deterministic matching, no llm arithmetic" },
-  { label: "03 — qa", note: "exceptions, sorted by severity" },
-  { label: "human review", note: "approve, edit, or reject", emphasis: true },
-  { label: "ledger", note: "system of record" },
-];
 
 export default function AgenticBookkeepingEssay() {
   return (
@@ -67,11 +61,7 @@ export default function AgenticBookkeepingEssay() {
           accounting platform stays the system of record, and no agent writes to
           it directly. Every entry goes through a person first.
         </p>
-        <LinearFlow
-          steps={pipeline}
-          label="Pipeline: bank data flows through categorize, reconcile and QA agents, then a human review gate, before reaching the ledger"
-          caption="fig. 01 — nothing reaches the ledger without approval"
-        />
+        <BookkeepingSystemFigure />
         <p className="text-pretty">
           The first agent categorizes. For each transaction it looks at history
           before it asks the model anything: a vector lookup over how the client
@@ -124,6 +114,7 @@ export default function AgenticBookkeepingEssay() {
           confident. Relaxing that later, for a few narrow categories the
           accountants trust, is their call to make, not the software&apos;s.
         </p>
+        <BookkeepingBoundaryFigure />
         <p className="text-pretty">
           <b className="font-medium text-fg">A boring database, on purpose.</b>{" "}
           Decisions, approvals, and writes are stored in PostgreSQL, because

@@ -1,32 +1,6 @@
 import Image from "next/image";
+import { DiagramNode } from "@/components/writing/diagram";
 import { EssayFigure } from "@/components/writing/essay";
-
-function DiagramNode({
-  label,
-  detail,
-  strong = false,
-  className = "",
-}: {
-  label: string;
-  detail?: string;
-  strong?: boolean;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`border px-3 py-3 ${
-        strong ? "border-faint bg-surface text-fg" : "border-line text-muted"
-      } ${className}`}
-    >
-      <p className="font-mono text-[10px] uppercase tracking-[0.14em]">
-        {label}
-      </p>
-      {detail ? (
-        <p className="mt-1 text-[12px] leading-[1.45] text-faint">{detail}</p>
-      ) : null}
-    </div>
-  );
-}
 
 export function KittySystemFigure() {
   return (

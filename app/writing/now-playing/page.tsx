@@ -4,27 +4,15 @@ import {
   EssayFooter,
   EssayHeader,
   EssaySection,
-  LinearFlow,
-  type EssayFlowStep,
 } from "@/components/writing/essay";
 import { EssayShell } from "@/components/writing/essay-shell";
+import { NowPlayingRequestFigure } from "@/components/writing/now-playing-figure";
 
 export const metadata: Metadata = {
   title: "putting my spotify on the page · ammar hassan",
   description:
     "A now-playing line in the footer, the OAuth refresh-token dance behind it, and why a Vercel route handler was the right amount of backend.",
 };
-
-const requestPath: EssayFlowStep[] = [
-  { label: "browser", note: "polls /api/now-playing every 20s" },
-  {
-    label: "route handler",
-    note: "trades a refresh token for a one-hour access token",
-    emphasis: true,
-  },
-  { label: "spotify", note: "returns the currently-playing track" },
-  { label: "footer", note: "the line fades in, or stays hidden" },
-];
 
 export default function NowPlayingEssay() {
   return (
@@ -65,11 +53,7 @@ export default function NowPlayingEssay() {
           mean putting a secret in the page where anyone could read it. So there
           is one small server step in the middle.
         </p>
-        <LinearFlow
-          steps={requestPath}
-          label="Request path: the browser polls a Vercel route handler, which exchanges a refresh token for an access token and asks Spotify what is playing, then the footer shows it"
-          caption="fig. 01 — one poll, four steps. the refresh token never leaves the server"
-        />
+        <NowPlayingRequestFigure />
         <p className="text-pretty">
           The browser polls a single endpoint every twenty seconds. That
           endpoint runs on Vercel, in the same project as the site. It holds a
