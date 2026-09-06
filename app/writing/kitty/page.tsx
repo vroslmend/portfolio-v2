@@ -14,7 +14,7 @@ import {
 } from "@/components/writing/kitty-figures";
 
 export const metadata: Metadata = {
-  title: "teaching the cat in the footer to answer back · ammar hassan",
+  title: "a quiet cat, with a complicated backend · ammar hassan",
   description:
     "How Kitty became a small LangGraph agent for this portfolio, and what tool routing, streaming, persistence, evaluation, and real failures taught me along the way.",
 };
@@ -28,8 +28,8 @@ export default function KittyEssay() {
         eyebrow="writing — september 2026 · 9 min"
         title={
           <>
-            Teaching the cat in the footer to{" "}
-            <span className="accent-serif">answer back</span>
+            A quiet cat,{" "}
+            <span className="accent-serif">with a complicated backend</span>
           </>
         }
       >

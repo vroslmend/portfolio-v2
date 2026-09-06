@@ -1,6 +1,6 @@
 import { createEssayOpenGraph, ESSAY_OG_SIZE } from "@/lib/essay-og";
 
-export const alt = "Teaching the cat in the footer to answer back";
+export const alt = "A quiet cat, with a complicated backend";
 export const size = ESSAY_OG_SIZE;
 export const contentType = "image/png";
 
