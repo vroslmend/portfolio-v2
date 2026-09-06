@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const pieces = [
   {
     slug: "kitty",
-    title: "Teaching the cat in the footer to answer back",
+    title: "A quiet cat, with a complicated backend",
     tagline: "an agent case study",
     date: "september 2026 · 9 min",
   },
