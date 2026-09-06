@@ -21,7 +21,13 @@ export function DiagramNode({
         {label}
       </p>
       {detail ? (
-        <p className="mt-1 text-[12px] leading-[1.45] text-faint">{detail}</p>
+        <p
+          className={`mt-1 text-[12px] leading-[1.45] ${
+            strong ? "text-fg" : "text-muted"
+          }`}
+        >
+          {detail}
+        </p>
       ) : null}
     </div>
   );

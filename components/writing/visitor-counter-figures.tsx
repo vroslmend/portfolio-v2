@@ -3,7 +3,7 @@ import { EssayFigure } from "@/components/writing/essay";
 
 function Arrow({ children }: { children: string }) {
   return (
-    <div className="flex min-h-10 items-center justify-center font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+    <div className="flex min-h-10 items-center justify-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
       <span className="sm:hidden">↓ {children}</span>
       <span className="hidden sm:inline">{children} →</span>
     </div>
@@ -19,13 +19,13 @@ export function CounterTopologyFigure() {
         className="grid items-center gap-3 border-y border-line py-5 sm:grid-cols-[0.7fr_4rem_1.65fr] sm:gap-0"
       >
         <div>
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.14em] text-faint">
+          <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
             portfolio · Vercel
           </p>
           <DiagramNode label="browser" detail="counter request from the page" />
         </div>
 
-        <div className="flex flex-col items-center justify-center gap-1 font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+        <div className="flex flex-col items-center justify-center gap-1 font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
           <span className="sm:hidden">request ↓</span>
           <span className="hidden sm:block">request →</span>
           <span className="hidden h-px w-full bg-line sm:block" />
@@ -37,7 +37,7 @@ export function CounterTopologyFigure() {
             <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg">
               AWS boundary
             </p>
-            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
               least privilege
             </span>
           </div>
@@ -54,7 +54,7 @@ export function CounterTopologyFigure() {
             <DiagramNode label="DynamoDB" detail="visits · prius" />
           </div>
 
-          <div className="mt-3 border border-dashed border-faint px-3 py-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+          <div className="mt-3 border border-dashed border-faint px-3 py-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
             atomic inside DynamoDB · no read–modify–write race
           </div>
         </div>
@@ -77,13 +77,13 @@ export function CounterDeployFigure() {
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg">
                 GitHub
               </p>
-              <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+              <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
                 exact repo
               </span>
             </div>
             <div className="flex flex-col gap-2">
               <DiagramNode label="push to main" detail="starts the workflow" />
-              <div className="text-center font-mono text-[10px] text-faint">↓</div>
+              <div className="text-center font-mono text-[10px] text-muted">↓</div>
               <DiagramNode
                 label="Actions job"
                 detail="test · terraform plan / apply"
@@ -92,7 +92,7 @@ export function CounterDeployFigure() {
             </div>
           </div>
 
-          <div className="flex min-h-20 flex-col items-center justify-center gap-1 px-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+          <div className="flex min-h-20 flex-col items-center justify-center gap-1 px-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
             <span className="hidden sm:block">OIDC token →</span>
             <span className="sm:hidden">OIDC token ↓</span>
             <span className="h-px w-full bg-line sm:block" />
@@ -105,25 +105,25 @@ export function CounterDeployFigure() {
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg">
                 AWS
               </p>
-              <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+              <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
                 trust boundary
               </span>
             </div>
             <div className="flex flex-col gap-2">
               <DiagramNode label="IAM trust rule" detail="validates repo identity" />
-              <div className="text-center font-mono text-[10px] text-faint">↓</div>
+              <div className="text-center font-mono text-[10px] text-muted">↓</div>
               <DiagramNode label="STS session" detail="short-lived credentials" strong />
-              <div className="text-center font-mono text-[10px] text-faint">↓</div>
+              <div className="text-center font-mono text-[10px] text-muted">↓</div>
               <DiagramNode label="AWS resources" detail="updated by Terraform" />
             </div>
           </div>
         </div>
 
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          <div className="border border-dashed border-faint px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+          <div className="border border-dashed border-faint px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
             stored AWS access key&nbsp; — &nbsp;none
           </div>
-          <div className="border border-line bg-surface px-3 py-2 text-right font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
+          <div className="border border-line bg-surface px-3 py-2 text-right font-mono text-[9px] uppercase tracking-[0.12em] text-fg">
             session authorizes this run only
           </div>
         </div>

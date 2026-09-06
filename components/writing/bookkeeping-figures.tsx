@@ -1,35 +1,40 @@
 import { DiagramNode } from "@/components/writing/diagram";
 import { EssayFigure } from "@/components/writing/essay";
 
-const responsibilities = [
+const stages = [
   {
-    owner: "model-assisted",
-    title: "categorize the unfamiliar",
-    detail: "vendor meaning · proposed account · confidence · explanation",
+    owner: "categorize agent",
+    focus: "history first; model when unfamiliar",
+    detail: "category · confidence · reasoning",
   },
   {
-    owner: "deterministic code",
-    title: "prove the numbers",
-    detail: "history lookup · matching · arithmetic · balance checks",
+    owner: "reconcile agent",
+    focus: "deterministic matching and math",
+    detail: "missing · duplicated · out of balance",
   },
   {
-    owner: "human judgment",
-    title: "decide what posts",
-    detail: "approve · edit · reject · resolve exceptions",
+    owner: "QA agent",
+    focus: "review the closed period",
+    detail: "exceptions ranked by severity",
+  },
+  {
+    owner: "human review",
+    focus: "approve · edit · reject",
+    detail: "the only path to integration",
   },
 ];
 
 export function BookkeepingSystemFigure() {
   return (
-    <EssayFigure caption="fig. 01 — assistance, verification, and authority belong to different layers">
+    <EssayFigure caption="fig. 01 — three agents prepare the work; a person controls what reaches the ledger">
       <div
         role="img"
-        aria-label="Bank and card data enters three responsibility layers. The model proposes categories and explanations, deterministic code performs matching, arithmetic and balance checks, and a human approves, edits or rejects. Only approved structured entries pass through the integration layer into the ledger."
+        aria-label="Bank and card data passes through a categorization agent, a deterministic reconciliation agent, and a quality assurance agent. A human then approves, edits, or rejects the proposed entries. Only approved structured entries pass through the integration layer into the ledger."
         className="border-y border-line py-5"
       >
         <div className="grid gap-3 sm:grid-cols-[0.7fr_2.1rem_1.7fr] sm:items-center">
           <DiagramNode label="source data" detail="bank feed · card feed · CSV" />
-          <div className="text-center font-mono text-[10px] text-faint">
+          <div className="text-center font-mono text-[10px] text-muted">
             <span className="sm:hidden">↓</span>
             <span className="hidden sm:inline">→</span>
           </div>
@@ -38,26 +43,26 @@ export function BookkeepingSystemFigure() {
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg">
                 monthly close
               </p>
-              <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
-                separated responsibility
+              <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
+                three agents + one gate
               </span>
             </div>
             <div className="divide-y divide-line">
-              {responsibilities.map((item, index) => (
+              {stages.map((stage, index) => (
                 <div
-                  key={item.owner}
+                  key={stage.owner}
                   className="grid gap-1 px-4 py-3 sm:grid-cols-[1.1fr_1.5fr] sm:gap-4"
                 >
                   <div>
-                    <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
-                      0{index + 1} · {item.owner}
+                    <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
+                      0{index + 1} · {stage.owner}
                     </p>
                     <p className="mt-1 text-[12px] font-medium text-fg">
-                      {item.title}
+                      {stage.focus}
                     </p>
                   </div>
-                  <p className="text-[12px] leading-[1.45] text-faint">
-                    {item.detail}
+                  <p className="text-[12px] leading-[1.45] text-muted">
+                    {stage.detail}
                   </p>
                 </div>
               ))}
@@ -71,7 +76,7 @@ export function BookkeepingSystemFigure() {
             label="integration layer"
             detail="translates approved structured entries"
           />
-          <div className="flex items-center justify-center font-mono text-[10px] text-faint">
+          <div className="flex items-center justify-center font-mono text-[10px] text-muted">
             <span className="sm:hidden">↓</span>
             <span className="hidden sm:inline">→</span>
           </div>
@@ -95,7 +100,7 @@ export function BookkeepingBoundaryFigure() {
             <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
               proposal space
             </p>
-            <p className="mt-1 text-[11px] text-faint">model-assisted judgment</p>
+            <p className="mt-1 text-[11px] text-muted">model-assisted judgment</p>
             <div className="mt-4 grid gap-2">
               <DiagramNode label="may read" detail="description · history · chart" />
               <DiagramNode
@@ -106,18 +111,18 @@ export function BookkeepingBoundaryFigure() {
             </div>
           </div>
 
-          <div className="flex min-h-20 flex-col items-center justify-center gap-2 px-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+          <div className="flex min-h-20 flex-col items-center justify-center gap-2 px-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
             <span className="sm:hidden">structured proposal ↓</span>
             <span className="hidden sm:block">proposal →</span>
             <span className="h-px w-full border-t border-dashed border-faint sm:block" />
             <span>hard gate</span>
           </div>
 
-          <div className="border border-faint bg-surface p-4">
+          <div className="border border-faint p-4">
             <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg">
               commit space
             </p>
-            <p className="mt-1 text-[11px] text-faint">deterministic + human authority</p>
+            <p className="mt-1 text-[11px] text-muted">deterministic + human authority</p>
             <div className="mt-4 grid gap-2">
               <DiagramNode label="code verifies" detail="math · match · balance" />
               <DiagramNode label="person decides" detail="approve · edit · reject" strong />
@@ -127,10 +132,10 @@ export function BookkeepingBoundaryFigure() {
         </div>
 
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          <div className="border border-line px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+          <div className="border border-line px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
             model → ledger arithmetic&nbsp; <span className="text-fg">blocked</span>
           </div>
-          <div className="border border-line px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] text-faint sm:text-right">
+          <div className="border border-line px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] text-muted sm:text-right">
             model → direct write&nbsp; <span className="text-fg">blocked</span>
           </div>
         </div>

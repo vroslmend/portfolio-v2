@@ -12,7 +12,7 @@ export function NowPlayingRequestFigure() {
         <div className="grid items-center gap-3 sm:grid-cols-[0.68fr_3.5rem_1.55fr_3.5rem_0.68fr] sm:gap-0">
           <DiagramNode label="browser" detail="footer polls one route" />
 
-          <div className="flex flex-col items-center justify-center gap-1 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+          <div className="flex flex-col items-center justify-center gap-1 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
             <span className="sm:hidden">poll ↓</span>
             <span className="hidden sm:block">poll →</span>
             <span className="hidden h-px w-full bg-line sm:block" />
@@ -24,7 +24,7 @@ export function NowPlayingRequestFigure() {
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg">
                 Vercel server boundary
               </p>
-              <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+              <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
                 one route
               </span>
             </div>
@@ -39,12 +39,12 @@ export function NowPlayingRequestFigure() {
               />
             </div>
 
-            <div className="mt-3 border-t border-line pt-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+            <div className="mt-3 border-t border-line pt-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
               temporary access token returns here
             </div>
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-1 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+          <div className="flex flex-col items-center justify-center gap-1 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
             <span className="sm:hidden">refresh / query ↓</span>
             <span className="hidden sm:block">refresh →</span>
             <span className="hidden h-px w-full bg-line sm:block" />
@@ -54,7 +54,7 @@ export function NowPlayingRequestFigure() {
           <DiagramNode label="Spotify" detail="token + currently playing APIs" />
         </div>
 
-        <div className="mt-3 border border-dashed border-faint px-3 py-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+        <div className="mt-3 border border-dashed border-faint px-3 py-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
           browser can receive track fields · browser cannot receive the refresh token
         </div>
       </div>
