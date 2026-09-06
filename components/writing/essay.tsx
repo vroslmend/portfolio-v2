@@ -74,7 +74,7 @@ export function EssayFigure({
   return (
     <figure className="select-none py-3">
       {children}
-      <figcaption className="pt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
+      <figcaption className="pt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
         {caption}
       </figcaption>
     </figure>

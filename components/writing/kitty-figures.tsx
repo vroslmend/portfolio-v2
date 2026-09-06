@@ -1,32 +1,6 @@
 import Image from "next/image";
+import { DiagramNode } from "@/components/writing/diagram";
 import { EssayFigure } from "@/components/writing/essay";
-
-function DiagramNode({
-  label,
-  detail,
-  strong = false,
-  className = "",
-}: {
-  label: string;
-  detail?: string;
-  strong?: boolean;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`border px-3 py-3 ${
-        strong ? "border-faint bg-surface text-fg" : "border-line text-muted"
-      } ${className}`}
-    >
-      <p className="font-mono text-[10px] uppercase tracking-[0.14em]">
-        {label}
-      </p>
-      {detail ? (
-        <p className="mt-1 text-[12px] leading-[1.45] text-faint">{detail}</p>
-      ) : null}
-    </div>
-  );
-}
 
 export function KittySystemFigure() {
   return (
@@ -41,13 +15,13 @@ export function KittySystemFigure() {
             <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg">
               portfolio-v2
             </p>
-            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
               Next.js
             </span>
           </div>
           <div className="flex flex-col gap-2">
             <DiagramNode label="visitor" detail="asks from the page they are reading" />
-            <div className="flex justify-center font-mono text-[10px] text-faint">↓</div>
+            <div className="flex justify-center font-mono text-[10px] text-muted">↓</div>
             <DiagramNode
               label="kitty widget"
               detail="message · thread · page path"
@@ -56,7 +30,7 @@ export function KittySystemFigure() {
           </div>
         </div>
 
-        <div className="flex min-h-16 flex-col items-center justify-center gap-1 px-2 font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+        <div className="flex min-h-16 flex-col items-center justify-center gap-1 px-2 font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
           <span className="hidden sm:block">request →</span>
           <span className="sm:hidden">request ↓</span>
           <span className="h-px w-full bg-line sm:block" />
@@ -69,13 +43,13 @@ export function KittySystemFigure() {
             <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg">
               kitty-agent
             </p>
-            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-faint">
+            <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
               Python
             </span>
           </div>
           <div className="flex flex-col gap-2">
             <DiagramNode label="FastAPI /chat" detail="admission · SSE framing" />
-            <div className="flex justify-center font-mono text-[10px] text-faint">↓</div>
+            <div className="flex justify-center font-mono text-[10px] text-muted">↓</div>
             <DiagramNode
               label="LangGraph loop"
               detail="decide · call · observe · answer"
@@ -112,7 +86,7 @@ export function KittyLoopFigure() {
       >
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:grid-cols-[1fr_2.1rem_1.2fr_2.1rem_1fr]">
           <DiagramNode label="message" detail="visitor turn" />
-          <span className="text-center font-mono text-[11px] text-faint">→</span>
+          <span className="text-center font-mono text-[11px] text-muted">→</span>
           <div className="flex min-h-32 flex-col items-center justify-center border border-faint bg-surface px-3 py-2 text-center">
             <Image
               src="/kitty/cat-8273689.svg"
@@ -126,7 +100,7 @@ export function KittyLoopFigure() {
               agent
             </p>
           </div>
-          <span className="hidden text-center font-mono text-[11px] text-faint sm:block">→</span>
+          <span className="hidden text-center font-mono text-[11px] text-muted sm:block">→</span>
           <DiagramNode
             label="answer"
             detail="when no tool call remains"
@@ -134,7 +108,7 @@ export function KittyLoopFigure() {
           />
         </div>
 
-        <div className="mx-auto grid w-[68%] grid-cols-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-faint sm:w-[48%]">
+        <div className="mx-auto grid w-[68%] grid-cols-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted sm:w-[48%]">
           <div className="border-r border-line py-3 pr-3">tool call ↓</div>
           <div className="py-3 pl-3">↑ result</div>
         </div>
@@ -144,7 +118,7 @@ export function KittyLoopFigure() {
             <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg">
               ToolNode
             </p>
-            <span className="font-mono text-[9px] text-faint">bounded surface</span>
+            <span className="font-mono text-[9px] text-muted">bounded surface</span>
           </div>
           <div className="grid grid-cols-2 border-l border-t border-line sm:grid-cols-3">
             {toolNames.map((tool) => (
@@ -163,12 +137,12 @@ export function KittyLoopFigure() {
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
             ambiguous request
           </p>
-          <p className="mt-1 text-[12px] text-faint">
+          <p className="mt-1 text-[12px] text-muted">
             interrupt → visitor chooses → resume the same run
           </p>
         </div>
 
-        <div className="mt-5 border-t border-line pt-3 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-faint sm:hidden">
+        <div className="mt-5 border-t border-line pt-3 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted sm:hidden">
           answer when the loop ends
         </div>
       </div>
@@ -210,7 +184,7 @@ export function KittyStreamFigure() {
       >
         <div
           role="row"
-          className="hidden grid-cols-[5.5rem_1fr_1.25fr] border-b border-line py-2 font-mono text-[9px] uppercase tracking-[0.14em] text-faint sm:grid"
+          className="hidden grid-cols-[5.5rem_1fr_1.25fr] border-b border-line py-2 font-mono text-[9px] uppercase tracking-[0.14em] text-muted sm:grid"
         >
           <span role="columnheader">event</span>
           <span role="columnheader">payload</span>
@@ -232,7 +206,7 @@ export function KittyStreamFigure() {
             >
               {event.type}
             </span>
-            <code role="cell" className="text-[12px] text-faint">
+            <code role="cell" className="text-[12px] text-muted">
               {event.payload}
             </code>
             <span role="cell" className="text-[12px] leading-[1.5] text-muted">
@@ -278,7 +252,7 @@ export function KittyFailureFigure() {
       >
         <div
           role="row"
-          className="hidden grid-cols-[1fr_1fr_1.15fr] gap-5 border-b border-line py-2 font-mono text-[9px] uppercase tracking-[0.14em] text-faint sm:grid"
+          className="hidden grid-cols-[1fr_1fr_1.15fr] gap-5 border-b border-line py-2 font-mono text-[9px] uppercase tracking-[0.14em] text-muted sm:grid"
         >
           <span role="columnheader">what I saw</span>
           <span role="columnheader">what was underneath</span>
@@ -291,14 +265,14 @@ export function KittyFailureFigure() {
             className="grid gap-3 border-b border-line py-5 sm:grid-cols-[1fr_1fr_1.15fr] sm:gap-5"
           >
             <div role="cell" className="flex gap-3">
-              <span className="font-mono text-[9px] text-faint">
+              <span className="font-mono text-[9px] text-muted">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <span className="text-[12px] leading-[1.55] text-muted">
                 {failure.symptom}
               </span>
             </div>
-            <span role="cell" className="text-[12px] leading-[1.55] text-faint">
+            <span role="cell" className="text-[12px] leading-[1.55] text-muted">
               {failure.cause}
             </span>
             <span role="cell" className="text-[12px] font-medium leading-[1.55] text-fg">

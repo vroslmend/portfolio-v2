@@ -4,31 +4,18 @@ import {
   EssayFooter,
   EssayHeader,
   EssaySection,
-  LinearFlow,
-  type EssayFlowStep,
 } from "@/components/writing/essay";
 import { EssayShell } from "@/components/writing/essay-shell";
+import {
+  CounterDeployFigure,
+  CounterTopologyFigure,
+} from "@/components/writing/visitor-counter-figures";
 
 export const metadata: Metadata = {
   title: "a visitor counter, taken too seriously · ammar hassan",
   description:
     "Why I wrapped a trivial visitor counter in Terraform, a keyless CI/CD pipeline, and atomic writes. A deliberately small take on the Cloud Resume Challenge.",
 };
-
-const requestPath: EssayFlowStep[] = [
-  { label: "browser", note: "the page on ammarhassan.dev" },
-  { label: "api gateway", note: "http api, cors locked to the site" },
-  { label: "lambda", note: "python, reads or increments atomically", emphasis: true },
-  { label: "dynamodb", note: "two rows: visits, prius" },
-];
-
-const deployPath: EssayFlowStep[] = [
-  { label: "git push", note: "to main" },
-  { label: "github actions", note: "runs the tests first" },
-  { label: "oidc handshake", note: "short-lived token ⇄ temporary aws credentials", emphasis: true },
-  { label: "terraform apply", note: "from shared state in s3" },
-  { label: "aws", note: "infrastructure updated" },
-];
 
 export default function VisitorCounterEssay() {
   return (
@@ -71,11 +58,7 @@ export default function VisitorCounterEssay() {
 
       <EssaySection n="02" title="The shape of the system">
         <p className="text-pretty">A request goes through four steps.</p>
-        <LinearFlow
-          steps={requestPath}
-          label="Request path: the browser calls API Gateway, which triggers a Lambda function, which reads or increments a counter in DynamoDB"
-          caption="fig. 01 — one request, four steps. the increment is atomic"
-        />
+        <CounterTopologyFigure />
         <p className="text-pretty">
           The browser calls an API Gateway endpoint. That runs a small Python
           function on Lambda. The function reads or updates a number in
@@ -124,11 +107,7 @@ export default function VisitorCounterEssay() {
           anywhere. This is called OIDC. It was more work to set up, and
           it&apos;s the part I&apos;m happiest I didn&apos;t cut.
         </p>
-        <LinearFlow
-          steps={deployPath}
-          label="Deploy path: a push to main triggers GitHub Actions, which exchanges an OIDC token for temporary AWS credentials, then runs terraform apply"
-          caption="fig. 02 — every deploy logs in with no stored keys"
-        />
+        <CounterDeployFigure />
         <p className="text-pretty">
           <b className="font-medium text-fg">The pipeline is the real project.</b>{" "}
           All of the infrastructure is written in Terraform: the table, the
