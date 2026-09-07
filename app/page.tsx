@@ -32,9 +32,11 @@ export default function Home() {
           </Reveal>
           <Reveal delay={0.28}>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-              Right now I&apos;m in my final year, spending my free time on side
-              projects and slowly working my way into AI engineering. Have a
-              look at{" "}
+              Right now I&apos;m building for the web,{" "}
+              <Link href="/work-with-me" className="p-link">
+                taking on client work
+              </Link>{" "}
+              and spending more time on AI systems. Have a look at{" "}
               <Link href="/work" className="p-link">
                 my work
               </Link>
@@ -52,7 +54,7 @@ export default function Home() {
           <Reveal delay={0.36} className="mt-4">
             <p className="font-mono text-[12px] leading-relaxed tracking-[0.04em] text-muted text-pretty">
               <span className="text-fg">now</span> — {site.now}
-              <span className="text-faint"> · jun 2026</span>
+              <span className="text-faint"> · sep 2026</span>
             </p>
           </Reveal>
         </section>

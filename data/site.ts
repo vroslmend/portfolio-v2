@@ -24,7 +24,7 @@ export const site = {
     linkedin: "https://www.linkedin.com/in/ammar-hassan-8aa48a233/",
     resume: "/resume.pdf",
   },
-  now: "final year, going deep on python and ai engineering, open to work",
+  now: "final year, shipping web, ai and client work, open to roles and projects",
 } as const;
 
 export const projects: Project[] = [
@@ -216,6 +216,13 @@ export const projects: Project[] = [
 ];
 
 export const experience = [
+  {
+    company: "Corporate Events Company (Client)",
+    role: "Freelance Web Developer",
+    period: "jul 2026 – present",
+    description:
+      "Building a multi-page Astro site for a corporate events company and working directly with the client through the design and review process.",
+  },
   {
     company: "Punjab Safe Cities Authority",
     role: "Web Development Intern",
