@@ -12,6 +12,12 @@ export type Project = {
   featured: boolean;
 };
 
+export const current = {
+  focus: "working across web and ai",
+  availability: "available for",
+  clientWork: "client work",
+} as const;
+
 export const site = {
   name: "Ammar Hassan",
   wordmark: "ammar hassan",
@@ -24,7 +30,7 @@ export const site = {
     linkedin: "https://www.linkedin.com/in/ammar-hassan-8aa48a233/",
     resume: "/resume.pdf",
   },
-  now: "final year, shipping web, ai and client work, open to roles and projects",
+  now: `${current.focus} · ${current.availability} ${current.clientWork}`,
 } as const;
 
 export const projects: Project[] = [

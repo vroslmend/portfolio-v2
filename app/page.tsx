@@ -3,7 +3,7 @@ import { Drift } from "@/components/drift";
 import { NameReveal } from "@/components/name-reveal";
 import { Reveal } from "@/components/reveal";
 import { WorkList } from "@/components/work/work-list";
-import { projects, site } from "@/data/site";
+import { current, projects, site } from "@/data/site";
 
 export default function Home() {
   const featured = projects.filter((p) => p.featured);
@@ -32,11 +32,7 @@ export default function Home() {
           </Reveal>
           <Reveal delay={0.28}>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-              Right now I&apos;m building for the web,{" "}
-              <Link href="/work-with-me" className="p-link">
-                taking on client work
-              </Link>{" "}
-              and spending more time on AI systems. Have a look at{" "}
+              Have a look at{" "}
               <Link href="/work" className="p-link">
                 my work
               </Link>
@@ -53,7 +49,12 @@ export default function Home() {
           </Reveal>
           <Reveal delay={0.36} className="mt-4">
             <p className="font-mono text-[12px] leading-relaxed tracking-[0.04em] text-muted text-pretty">
-              <span className="text-fg">now</span> — {site.now}
+              <span className="text-fg">now</span> — {current.focus}
+              <span className="text-faint"> · </span>
+              {current.availability}{" "}
+              <Link href="/work-with-me" className="p-link">
+                {current.clientWork}
+              </Link>
               <span className="text-faint"> · sep 2026</span>
             </p>
           </Reveal>
