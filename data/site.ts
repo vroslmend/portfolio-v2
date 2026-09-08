@@ -37,7 +37,7 @@ export type ClientService = {
   name: string;
   description: string;
   proof: {
-    label: string;
+    label?: string;
     work?: string;
     note?: string;
   };
@@ -48,19 +48,19 @@ export const clientServices: ClientService[] = [
     name: "websites and rebuilds",
     description:
       "New business and marketing sites, along with careful rebuilds of existing ones. I can handle the structure, visual direction, responsive build and launch.",
-    proof: { label: "selected proof", work: "corporate-events-website" },
+    proof: { work: "corporate-events-website" },
   },
   {
     name: "web applications and internal tools",
     description:
       "Custom web applications for products, teams and day-to-day work, including dashboards, accounts, permissions, realtime features, payments and the data behind them.",
-    proof: { label: "selected proof", work: "cui-central" },
+    proof: { work: "cui-central" },
   },
   {
     name: "AI assistants and knowledge search",
     description:
       "AI features built around a business's own information and a clear job, including knowledge search, grounded chat, tool-using agents and the tests that keep them useful.",
-    proof: { label: "selected proof", work: "kitty" },
+    proof: { work: "kitty" },
   },
   {
     name: "automation and integrations",
@@ -68,7 +68,7 @@ export const clientServices: ClientService[] = [
       "Workflows that connect websites, WhatsApp, Instagram, email, calendars, stores and CRMs to capture leads, look up information, route work and handle routine follow-up.",
     proof: {
       label: "in progress",
-      note: "a WhatsApp assistant and a workflow integration demo.",
+      note: "A WhatsApp assistant and a workflow integration demo.",
     },
   },
   {
@@ -94,7 +94,7 @@ export type ClientWork = {
 export const clientWork: ClientWork[] = [
   {
     key: "corporate-events-website",
-    name: "corporate events website",
+    name: "Corporate events website",
     meta: "client work · 2026 · in review",
     description:
       "A multi-page Astro rebuild shaped through research, design exploration and staged client reviews. It remains private while the final work is reviewed.",
@@ -107,12 +107,12 @@ export const clientWork: ClientWork[] = [
     description:
       "The agent running on this site, with a separate service for knowledge search, bounded tools, streaming and durable conversations. Evaluations cover routing and answer quality.",
     links: [
-      { label: "case study", href: "/writing/kitty", external: false },
       {
         label: "github",
         href: "https://github.com/vroslmend/kitty-agent",
         external: true,
       },
+      { label: "case study", href: "/writing/kitty", external: false },
     ],
   },
   {

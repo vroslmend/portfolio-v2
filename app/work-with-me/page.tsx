@@ -67,16 +67,18 @@ export default function WorkWithMePage() {
                       {area.description}
                     </p>
                     <div className="mt-5 border-t border-line pt-4">
-                      <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-faint">
-                        {area.proof.label}
-                      </p>
+                      {area.proof.label && (
+                        <p className="font-mono text-[11px] tracking-[0.08em] text-faint">
+                          {area.proof.label}
+                        </p>
+                      )}
                       {work && (
-                        <div className="mt-3 flex flex-col gap-3">
+                        <div className="flex flex-col gap-3">
                           <div>
                             <h4 className="text-[14px] font-medium tracking-tight text-fg">
                               {work.name}
                             </h4>
-                            <p className="pt-1 font-mono text-[10px] uppercase leading-[1.7] tracking-[0.1em] text-faint">
+                            <p className="pt-1 font-mono text-[11px] tracking-[0.08em] text-faint">
                               {work.meta}
                             </p>
                           </div>
@@ -93,10 +95,13 @@ export default function WorkWithMePage() {
                                   rel={
                                     link.external ? "noreferrer" : undefined
                                   }
-                                  className="u-link group/link font-mono text-[11px] tracking-[0.12em] text-fg"
+                                  className="u-link group/link whitespace-nowrap font-mono text-[11px] tracking-[0.12em] text-fg"
                                 >
                                   {link.label}{" "}
-                                  <span className="inline-block transition-transform duration-500 ease-out-expo group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5">
+                                  <span
+                                    aria-hidden="true"
+                                    className={`inline-block transition-transform duration-500 ease-out-expo group-hover/link:translate-x-0.5 ${link.external ? "group-hover/link:-translate-y-0.5" : ""}`}
+                                  >
                                     {link.external ? "↗" : "→"}
                                   </span>
                                 </a>
