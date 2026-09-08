@@ -36,6 +36,11 @@ export const site = {
 export type ClientService = {
   name: string;
   description: string;
+  proof: {
+    label: string;
+    work?: string;
+    note?: string;
+  };
 };
 
 export const clientServices: ClientService[] = [
@@ -43,30 +48,39 @@ export const clientServices: ClientService[] = [
     name: "websites and rebuilds",
     description:
       "New business and marketing sites, along with careful rebuilds of existing ones. I can work through the page structure, visual direction, responsive development and launch.",
+    proof: { label: "selected proof", work: "corporate-events-website" },
   },
   {
     name: "web applications and internal tools",
     description:
       "Custom applications for products, teams and day-to-day work. That can include dashboards, accounts and permissions, realtime features, payments and the data behind them.",
+    proof: { label: "selected proof", work: "cui-central" },
   },
   {
     name: "AI assistants and knowledge search",
     description:
       "AI features that work with a business's own information and have a clear job to do. That includes knowledge search, grounded chat, tool-using agents and the testing needed to keep them useful.",
+    proof: { label: "selected proof", work: "kitty" },
   },
   {
     name: "automation and integrations",
     description:
       "Workflows that connect the places where a business already works, including websites, WhatsApp, Instagram, email, calendars, stores and CRMs. They can capture leads, look up information, route work and handle routine follow-up.",
+    proof: {
+      label: "in progress",
+      note: "a WhatsApp assistant and a workflow integration demo.",
+    },
   },
   {
     name: "improvements and ongoing work",
     description:
       "Smaller pieces of work are welcome too, from a new feature or API connection to bugs, performance and ongoing maintenance.",
+    proof: { label: "available as focused project work" },
   },
 ];
 
 export type ClientWork = {
+  key: string;
   name: string;
   meta: string;
   description: string;
@@ -79,6 +93,7 @@ export type ClientWork = {
 
 export const clientWork: ClientWork[] = [
   {
+    key: "corporate-events-website",
     name: "corporate events website",
     meta: "client work · 2026 · in review",
     description:
@@ -86,6 +101,7 @@ export const clientWork: ClientWork[] = [
     links: [],
   },
   {
+    key: "kitty",
     name: "Kitty",
     meta: "AI system · 2026 · live",
     description:
@@ -100,6 +116,7 @@ export const clientWork: ClientWork[] = [
     ],
   },
   {
+    key: "cui-central",
     name: "CUI Central",
     meta: "web application · 2025 · live",
     description:
