@@ -75,6 +75,15 @@ export function CommandMenu() {
     };
   }, []);
 
+  // Let other global interactions stand down while the command menu owns the
+  // viewport. This is synchronous with the open commit so footer gestures
+  // cannot race the Lenis lock below.
+  useLayoutEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("cmdk-open-change", { detail: { open } }),
+    );
+  }, [open]);
+
   // Lock the page behind the panel. Lenis owns the scroll, so a plain overlay
   // doesn't stop it drifting; pause Lenis while the menu is open (same pattern
   // as the photo lightbox) and resume on close.

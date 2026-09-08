@@ -132,8 +132,9 @@ export function BeyondTheEnd() {
   // DOM with display:none until the gesture actually starts lifting it.
   useMotionValueEvent(lift, "change", (v) => setPanelShown(v > 0.0005));
   // lets the click-off scrim and Escape reuse the gesture's own close logic
-  const closeRef = useRef<() => void>(() => {});
+  const closeRef = useRef<(resumeScroll?: boolean) => void>(() => {});
   const kittyOpen = useRef(false);
+  const commandMenuOpen = useRef(false);
   const pastEndPriority = useRef(false);
   const panelRef = useRef<HTMLElement>(null);
   const contentX = useSpring(0, { stiffness: 110, damping: 24, mass: 0.45 });
@@ -177,6 +178,23 @@ export function BeyondTheEnd() {
     }
     window.addEventListener("kitty-open-change", onKittyChange);
     return () => window.removeEventListener("kitty-open-change", onKittyChange);
+  }, [hintOpacity, reportPastEndPriority]);
+
+  useEffect(() => {
+    function onCommandMenuChange(event: Event) {
+      const open = Boolean(
+        (event as CustomEvent<{ open?: boolean }>).detail?.open,
+      );
+      commandMenuOpen.current = open;
+      if (open) {
+        hintOpacity.set(0);
+        closeRef.current(false);
+        reportPastEndPriority(false);
+      }
+    }
+    window.addEventListener("cmdk-open-change", onCommandMenuChange);
+    return () =>
+      window.removeEventListener("cmdk-open-change", onCommandMenuChange);
   }, [hintOpacity, reportPastEndPriority]);
 
   // ----- counter data (runs for everyone, independent of the reveal) -----
@@ -260,13 +278,14 @@ export function BeyondTheEnd() {
         reportPastEndPriority(true);
       }
     }
-    function release() {
+    function release(resumeScroll = true) {
+      clearTimeout(idle);
       engaged = false;
       open = false;
       pull = 0;
       lift.set(0);
       setRevealed(false);
-      lenis?.start();
+      if (resumeScroll) lenis?.start();
       reportPastEndPriority(false);
     }
     // expose close so a click off the panel / Escape can dismiss it too
@@ -307,7 +326,7 @@ export function BeyondTheEnd() {
     }
 
     function onWheel(e: WheelEvent) {
-      if (kittyOpen.current) return;
+      if (kittyOpen.current || commandMenuOpen.current) return;
       if (!engaged && !(atBottom() && e.deltaY > 0)) return;
       engage();
       e.preventDefault();
@@ -320,7 +339,7 @@ export function BeyondTheEnd() {
     }
 
     function onScroll() {
-      if (kittyOpen.current) {
+      if (kittyOpen.current || commandMenuOpen.current) {
         hintOpacity.set(0);
         reportPastEndPriority(false);
         return;
@@ -333,7 +352,7 @@ export function BeyondTheEnd() {
       touchY = e.touches[0].clientY;
     }
     function onTouchMove(e: TouchEvent) {
-      if (kittyOpen.current) return;
+      if (kittyOpen.current || commandMenuOpen.current) return;
       const dy = touchY - e.touches[0].clientY; // dragging up is positive
       if (!engaged && !(atBottom() && dy > 0)) return;
       engage();
