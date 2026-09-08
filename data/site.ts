@@ -33,6 +33,115 @@ export const site = {
   now: `${current.focus} · ${current.availability} ${current.clientWork}`,
 } as const;
 
+export type ClientService = {
+  name: string;
+  description: string;
+};
+
+export const clientServices: ClientService[] = [
+  {
+    name: "websites and rebuilds",
+    description:
+      "New business and marketing sites, along with careful rebuilds of existing ones. I can work through the page structure, visual direction, responsive development and launch.",
+  },
+  {
+    name: "web applications and internal tools",
+    description:
+      "Custom applications for products, teams and day-to-day work. That can include dashboards, accounts and permissions, realtime features, payments and the data behind them.",
+  },
+  {
+    name: "AI assistants and knowledge search",
+    description:
+      "AI features that work with a business's own information and have a clear job to do. That includes knowledge search, grounded chat, tool-using agents and the testing needed to keep them useful.",
+  },
+  {
+    name: "automation and integrations",
+    description:
+      "Workflows that connect the places where a business already works, including websites, WhatsApp, Instagram, email, calendars, stores and CRMs. They can capture leads, look up information, route work and handle routine follow-up.",
+  },
+  {
+    name: "improvements and ongoing work",
+    description:
+      "Smaller pieces of work are welcome too, from a new feature or API connection to bugs, performance and ongoing maintenance.",
+  },
+];
+
+export type ClientWork = {
+  name: string;
+  meta: string;
+  description: string;
+  links: {
+    label: string;
+    href: string;
+    external: boolean;
+  }[];
+};
+
+export const clientWork: ClientWork[] = [
+  {
+    name: "corporate events website",
+    meta: "client work · 2026 · in review",
+    description:
+      "A multi-page website rebuild for a corporate events company, shaped through research, design exploration and staged client reviews. The project remains private while the final work is being reviewed.",
+    links: [],
+  },
+  {
+    name: "Kitty",
+    meta: "AI system · 2026 · live",
+    description:
+      "The agent inside this portfolio. I built the interface and a separate service that searches the site, uses bounded tools, streams its work and keeps conversations durable. Tests and evaluations cover both routing and answer quality.",
+    links: [
+      { label: "case study", href: "/writing/kitty", external: false },
+      {
+        label: "github",
+        href: "https://github.com/vroslmend/kitty-agent",
+        external: true,
+      },
+    ],
+  },
+  {
+    name: "CUI Central",
+    meta: "web application · 2025 · live",
+    description:
+      "A university platform with separate workflows for students, faculty, companies and administrators. It combines realtime updates, ordering and bookings with an assistant that answers from a custom knowledge base.",
+    links: [
+      {
+        label: "live project",
+        href: "https://cui-central.vercel.app",
+        external: true,
+      },
+    ],
+  },
+];
+
+export type ClientProcessStep = {
+  name: string;
+  description: string;
+};
+
+export const clientProcess: ClientProcessStep[] = [
+  {
+    name: "understand",
+    description:
+      "We start with what you need, what already exists and what the first useful version should include.",
+  },
+  {
+    name: "scope",
+    description:
+      "I turn that into a clear piece of work, including what will be built, what can wait and how feedback will happen.",
+  },
+  {
+    name: "build and review",
+    description:
+      "I share the work as it develops, so questions and revisions are handled before the end.",
+  },
+  {
+    name: "launch and handover",
+    description:
+      "I test the agreed work, prepare it for launch and leave you with the access and notes needed to keep it moving.",
+  },
+];
+
 export const projects: Project[] = [
   {
     slug: "cui-central",
