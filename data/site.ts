@@ -12,6 +12,12 @@ export type Project = {
   featured: boolean;
 };
 
+export const current = {
+  focus: "working across web and ai",
+  availability: "available for",
+  clientWork: "client work",
+} as const;
+
 export const site = {
   name: "Ammar Hassan",
   wordmark: "ammar hassan",
@@ -24,7 +30,111 @@ export const site = {
     linkedin: "https://www.linkedin.com/in/ammar-hassan-8aa48a233/",
     resume: "/resume.pdf",
   },
-  now: "final year, going deep on python and ai engineering, open to work",
+  now: `${current.focus} · ${current.availability} ${current.clientWork}`,
+} as const;
+
+export type ClientService = {
+  name: string;
+  description: string;
+  proof: {
+    label?: string;
+    work?: string;
+    note?: string;
+  };
+};
+
+export const clientServices: ClientService[] = [
+  {
+    name: "websites and rebuilds",
+    description:
+      "New business and marketing sites, along with careful rebuilds of existing ones. I can handle the structure, visual direction, responsive build and launch.",
+    proof: { work: "corporate-events-website" },
+  },
+  {
+    name: "web applications and internal tools",
+    description:
+      "Custom web applications for products, teams and day-to-day work, including dashboards, accounts, permissions, realtime features, payments and the data behind them.",
+    proof: { work: "cui-central" },
+  },
+  {
+    name: "AI assistants and knowledge search",
+    description:
+      "AI features built around a business's own information and a clear job, including knowledge search, grounded chat, tool-using agents and the tests that keep them useful.",
+    proof: { work: "kitty" },
+  },
+  {
+    name: "automation and integrations",
+    description:
+      "Workflows that connect websites, WhatsApp, Instagram, email, calendars, stores and CRMs to capture leads, look up information, route work and handle routine follow-up.",
+    proof: {
+      label: "in progress",
+      note: "A WhatsApp assistant and a workflow integration demo.",
+    },
+  },
+  {
+    name: "improvements and ongoing work",
+    description:
+      "Focused work is welcome too, including new features, API connections, bug fixes, performance work and ongoing maintenance.",
+    proof: { label: "available as focused project work" },
+  },
+];
+
+export type ClientWork = {
+  key: string;
+  name: string;
+  meta: string;
+  description: string;
+  links: {
+    label: string;
+    href: string;
+    external: boolean;
+  }[];
+};
+
+export const clientWork: ClientWork[] = [
+  {
+    key: "corporate-events-website",
+    name: "Corporate events website",
+    meta: "client work · 2026 · in review",
+    description:
+      "A multi-page Astro rebuild shaped through research, design exploration and staged client reviews. It remains private while the final work is reviewed.",
+    links: [],
+  },
+  {
+    key: "kitty",
+    name: "Kitty",
+    meta: "AI system · 2026 · live",
+    description:
+      "The agent running on this site, with a separate service for knowledge search, bounded tools, streaming and durable conversations. Evaluations cover routing and answer quality.",
+    links: [
+      {
+        label: "github",
+        href: "https://github.com/vroslmend/kitty-agent",
+        external: true,
+      },
+      { label: "case study", href: "/writing/kitty", external: false },
+    ],
+  },
+  {
+    key: "cui-central",
+    name: "CUI Central",
+    meta: "web application · 2025 · live",
+    description:
+      "A live university platform with separate workflows for students, faculty, companies and administrators, along with realtime ordering, bookings and a knowledge-based assistant.",
+    links: [
+      {
+        label: "live",
+        href: "https://cui-central.vercel.app",
+        external: true,
+      },
+    ],
+  },
+];
+
+export const clientProcess = {
+  steps: ["understand", "scope", "build and review", "launch and handover"],
+  description:
+    "We agree on the first useful version, review the work as it develops, then prepare it for launch and handover.",
 } as const;
 
 export const projects: Project[] = [
@@ -46,7 +156,7 @@ export const projects: Project[] = [
   },
   {
     slug: "kitty-agent",
-    name: "kitty",
+    name: "Kitty",
     year: "2026",
     tagline: "on-site portfolio agent",
     description:
@@ -216,6 +326,13 @@ export const projects: Project[] = [
 ];
 
 export const experience = [
+  {
+    company: "Corporate Events Company",
+    role: "Freelance Web Developer",
+    period: "jul 2026 – present",
+    description:
+      "Building a multi-page Astro site for a corporate events company and working directly with the client through the design and review process.",
+  },
   {
     company: "Punjab Safe Cities Authority",
     role: "Web Development Intern",

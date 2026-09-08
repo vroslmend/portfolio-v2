@@ -287,6 +287,7 @@ body::after {
   font-weight: 500;
   line-height: 1.15;
   letter-spacing: -0.035em;
+  text-wrap: balance;
 }
 
 /* Nastaliq brings its own italic-like slant and needs no tracking of ours. It
