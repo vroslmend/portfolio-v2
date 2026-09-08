@@ -123,25 +123,35 @@ export default function WorkWithMePage() {
         <Reveal>
           <SectionLabel>how I work</SectionLabel>
         </Reveal>
-        <div className="rows-hover flex flex-col">
-          {clientProcess.map((step, index) => (
-            <Reveal key={step.name} delay={index * 0.06}>
-              <div className="group grid gap-x-10 gap-y-2 border-t border-line py-5 transition-colors duration-500 hover:border-faint sm:grid-cols-[1fr_2fr]">
-                <div className="flex items-baseline gap-3">
-                  <span className="font-mono text-[10px] text-faint">
-                    {String(index + 1).padStart(2, "0")}
+        <Reveal delay={0.08}>
+          <div className="flex flex-col gap-5">
+            <ol className="flex flex-wrap items-center gap-x-4 gap-y-3 border-y border-line py-5">
+              {clientProcess.steps.map((step, index) => (
+                <li key={step} className="inline-flex items-baseline gap-4">
+                  <span className="inline-flex items-baseline gap-2">
+                    <span className="font-mono text-[9px] text-faint">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="text-[13px] font-medium tracking-tight text-fg">
+                      {step}
+                    </span>
                   </span>
-                  <h3 className="text-[15px] font-medium tracking-tight">
-                    {step.name}
-                  </h3>
-                </div>
-                <p className="max-w-[60ch] text-[14.5px] leading-[1.8] text-muted text-pretty">
-                  {step.description}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+                  {index < clientProcess.steps.length - 1 && (
+                    <span
+                      aria-hidden="true"
+                      className="font-mono text-[10px] text-faint"
+                    >
+                      →
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+            <p className="max-w-[58ch] text-[14.5px] leading-[1.8] text-muted text-pretty">
+              {clientProcess.description}
+            </p>
+          </div>
+        </Reveal>
       </section>
 
       <section className="flex flex-col gap-4">
@@ -150,12 +160,20 @@ export default function WorkWithMePage() {
         </Reveal>
         <Reveal delay={0.08}>
           <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted">
-            If you have something in mind, you can reach me at{" "}
-            <a href={`mailto:${site.email}`} className="p-link">
-              {site.email}
-            </a>
-            .
+            If you have something in mind, send me a short note about what you
+            are building and where the work currently stands.
           </p>
+        </Reveal>
+        <Reveal delay={0.12}>
+          <a
+            href={`mailto:${site.email}`}
+            className="u-link group self-start font-mono text-[11px] tracking-[0.12em] text-fg"
+          >
+            {site.email}{" "}
+            <span className="inline-block transition-transform duration-500 ease-out-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+              ↗
+            </span>
+          </a>
         </Reveal>
       </section>
     </div>
