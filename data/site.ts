@@ -95,9 +95,9 @@ export const clientWork: ClientWork[] = [
   {
     key: "corporate-events-website",
     name: "Corporate events website",
-    meta: "client work · 2026 · in review",
+    meta: "client work · 2026 · private",
     description:
-      "A multi-page Astro rebuild shaped through research, design exploration and staged client reviews. It remains private while the final work is reviewed.",
+      "A full marketing site in Astro, from research and design exploration through staged client reviews.",
     links: [],
   },
   {
@@ -329,9 +329,9 @@ export const experience = [
   {
     company: "Corporate Events Company",
     role: "Freelance Web Developer",
-    period: "jul 2026 – present",
+    period: "jul – sep 2026",
     description:
-      "Building a multi-page Astro site for a corporate events company and working directly with the client through the design and review process.",
+      "Designed and built the full marketing site for a corporate events company in Astro, working with the client through research, design exploration and staged reviews.",
   },
   {
     company: "Punjab Safe Cities Authority",
