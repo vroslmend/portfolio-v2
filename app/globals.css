@@ -287,6 +287,7 @@ body::after {
   font-weight: 500;
   line-height: 1.15;
   letter-spacing: -0.035em;
+  text-wrap: balance;
 }
 
 /* Nastaliq brings its own italic-like slant and needs no tracking of ours. It
@@ -940,12 +941,17 @@ body::after {
   border-top-color: var(--faint);
 }
 
-/* ---- work list dimming ---- */
-.work-list:hover .work-row {
-  opacity: 0.35;
-}
-.work-list:hover .work-row:hover {
-  opacity: 1;
+/* ---- work list dimming ----
+   Mouse only: a tap leaves :hover stuck on touch screens, which would keep
+   the rest of the list dimmed after coming back from the opened link. And
+   paused while the page scrolls under a resting cursor (lib/hover-intent). */
+@media (hover: hover) and (pointer: fine) {
+  html:not(.hover-paused) .work-list:hover .work-row {
+    opacity: 0.35;
+  }
+  html:not(.hover-paused) .work-list:hover .work-row:hover {
+    opacity: 1;
+  }
 }
 .work-row {
   transition: opacity 0.4s var(--ease-out-expo);

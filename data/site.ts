@@ -12,6 +12,12 @@ export type Project = {
   featured: boolean;
 };
 
+export const current = {
+  focus: "working across web and ai",
+  availability: "open to roles and",
+  clientWork: "client work",
+} as const;
+
 export const site = {
   name: "Ammar Hassan",
   wordmark: "ammar hassan",
@@ -24,8 +30,60 @@ export const site = {
     linkedin: "https://www.linkedin.com/in/ammar-hassan-8aa48a233/",
     resume: "/resume.pdf",
   },
-  now: "final year, going deep on python and ai engineering, open to work",
+  now: `${current.focus} · ${current.availability} ${current.clientWork}`,
 } as const;
+
+export type ClientService = {
+  name: string;
+  description: string;
+  /** Slugs of the projects that show this kind of work. On the work with me
+   *  page, hovering the area keeps these lit in the recent work list. */
+  work: string[];
+};
+
+export const clientServices: ClientService[] = [
+  {
+    name: "websites",
+    description:
+      "I build new sites and rebuild old ones that have stopped pulling their weight, and I care about how they look as much as how they're put together.",
+    work: ["this-site"],
+  },
+  {
+    name: "web applications",
+    description:
+      "The kind of app people log into every day, from a small team's internal tool to a full product with accounts, roles and live updates. I build it front to back, database included.",
+    work: ["cui-central", "check"],
+  },
+  {
+    name: "AI assistants",
+    description:
+      "I add AI where it can be trusted: assistants that answer from your own information, agents that stick to a small set of tools, and tests that show when a change makes them worse.",
+    work: ["kitty-agent", "replywork", "cui-central"],
+  },
+  {
+    name: "backends and cloud",
+    description:
+      "I set up backends the way I'd want to inherit one: infrastructure written as code, deploys that run on their own, and no secrets sitting in the repo.",
+    work: ["cloud-visitor-counter", "replywork", "kitty-agent"],
+  },
+  {
+    name: "automation",
+    description:
+      "I connect the tools a business already runs on, so routine work stops getting copied between them by hand, and a person can still step in whenever it matters.",
+    work: ["replywork"],
+  },
+];
+
+/** The projects listed as recent work on the work with me page, in order.
+ *  Every slug an area points to must appear here. */
+export const clientRecentWork: string[] = [
+  "replywork",
+  "kitty-agent",
+  "cui-central",
+  "cloud-visitor-counter",
+  "check",
+  "this-site",
+];
 
 export const projects: Project[] = [
   {
@@ -46,7 +104,7 @@ export const projects: Project[] = [
   },
   {
     slug: "kitty-agent",
-    name: "kitty",
+    name: "Kitty",
     year: "2026",
     tagline: "on-site portfolio agent",
     description:
@@ -59,6 +117,22 @@ export const projects: Project[] = [
     stack: ["Python", "LangGraph", "FastAPI", "Postgres / pgvector", "SSE"],
     links: { github: "https://github.com/vroslmend/kitty-agent" },
     image: "/images/projects/kitty.webp",
+    featured: true,
+  },
+  {
+    slug: "replywork",
+    name: "Replywork",
+    year: "2026",
+    tagline: "the work behind the reply",
+    description:
+      "A backend for support inboxes like Crisp and Chatwoot that answers product questions from approved records instead of from whatever the model remembers. Incoming messages are verified and queued so nothing gets lost or answered twice, and a person can take over a conversation and hand it back. It's a reference build that runs locally rather than a hosted product.",
+    evidence: [
+      "The model only extracts a bounded request. Local code writes the reply from stored facts in PostgreSQL, so it can't invent a price, change stock or place an order.",
+      "Each webhook is checked against its signature and admitted once, in the same transaction that queues it. A worker with visibility timeouts and audit records works through the queue.",
+      "A human takeover pauses automation durably, and only a trusted resume control hands the conversation back.",
+    ],
+    stack: ["TypeScript", "Fastify", "PostgreSQL", "Drizzle", "Gemini"],
+    links: { github: "https://github.com/vroslmend/replywork" },
     featured: true,
   },
   {
@@ -111,7 +185,7 @@ export const projects: Project[] = [
       github: "https://github.com/vroslmend/next-ai-saas-app",
     },
     image: "/images/projects/imaginify.webp",
-    featured: true,
+    featured: false,
   },
   {
     slug: "karting-analysis",
@@ -217,6 +291,13 @@ export const projects: Project[] = [
 
 export const experience = [
   {
+    company: "Corporate Events Company",
+    role: "Freelance Web Developer",
+    period: "jul – sep 2026",
+    description:
+      "Designed and built the full marketing site for a corporate events company in Astro, working with the client through research, design exploration and staged reviews.",
+  },
+  {
     company: "Punjab Safe Cities Authority",
     role: "Web Development Intern",
     period: "jun – aug 2024",
@@ -229,7 +310,7 @@ export const education = [
   {
     school: "COMSATS University, Lahore",
     degree: "BS Software Engineering",
-    period: "2021 – present",
+    period: "2021 – 2026",
   },
   {
     school: "International School Lahore",
@@ -241,8 +322,9 @@ export const education = [
 export const toolbox = [
   "TypeScript",
   "React / Next.js",
+  "Astro",
   "Node.js",
-  "Express",
+  "Express / Fastify",
   "Socket.IO",
   "XState",
   "Tailwind CSS",
@@ -255,6 +337,7 @@ export const toolbox = [
   "Pandas / NumPy / Matplotlib",
   "MongoDB + Vector Search",
   "Postgres / pgvector",
+  "Drizzle",
   "Gemini API",
   "LLM evals",
   "Spotify API",
@@ -265,5 +348,6 @@ export const toolbox = [
   "Terraform",
   "GitHub Actions",
   "Vercel",
+  "Cloudflare",
   "Git / Linux",
 ];

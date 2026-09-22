@@ -94,7 +94,7 @@ export function KittyLoopFigure() {
               width={82}
               height={82}
               unoptimized
-              className="h-20 w-20 opacity-90"
+              className="kitty-art h-20 w-20 opacity-90"
             />
             <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg">
               agent

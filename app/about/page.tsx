@@ -55,9 +55,10 @@ export default function AboutPage() {
               currently
             </span>
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
-              I&apos;m working my way into AI engineering. Right now that mostly
-              means getting properly good at Python, then building small, real
-              agent projects on top of it instead of only reading about them.
+              I&apos;ve been moving deeper into AI engineering by building
+              something real and following the problems wherever they lead.
+              One of the results is sitting at the bottom of this page, if you
+              want to ask it something.
             </p>
           </div>
         </Reveal>

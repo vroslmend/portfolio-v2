@@ -248,6 +248,13 @@ export function CommandMenu() {
                       work
                     </Item>
                     <Item
+                      value="work with me"
+                      keywords={["hire", "client work", "services", "freelance"]}
+                      onSelect={() => run(() => router.push("/work-with-me"))}
+                    >
+                      work with me
+                    </Item>
+                    <Item
                       value="writing"
                       onSelect={() => run(() => router.push("/writing"))}
                     >
