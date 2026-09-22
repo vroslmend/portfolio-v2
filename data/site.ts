@@ -36,46 +36,40 @@ export const site = {
 export type ClientService = {
   name: string;
   description: string;
-  proof: {
-    label?: string;
-    work?: string;
-    note?: string;
-  };
+  /** Key of the clientWork entry shown under this area as an example. */
+  example: string;
 };
 
 export const clientServices: ClientService[] = [
   {
     name: "websites and rebuilds",
     description:
-      "New business and marketing sites, along with careful rebuilds of existing ones. I can handle the structure, visual direction, responsive build and launch.",
-    proof: { work: "corporate-events-website" },
+      "Websites of any kind, for a business, a product, a person or a project. New from scratch, or a rebuild of one that no longer does its job. I care about how it's structured and how it looks as much as how it's built.",
+    example: "corporate-events-website",
   },
   {
     name: "web applications and internal tools",
     description:
-      "Custom web applications for products, teams and day-to-day work, including dashboards, accounts, permissions, realtime features, payments and the data behind them.",
-    proof: { work: "cui-central" },
+      "Web applications of any size, from an internal tool a small team uses every day to a full product with accounts, roles and live data. Frontend, backend and the database behind them.",
+    example: "cui-central",
   },
   {
-    name: "AI assistants and knowledge search",
+    name: "AI assistants and agents",
     description:
-      "AI features built around a business's own information and a clear job, including knowledge search, grounded chat, tool-using agents and the tests that keep them useful.",
-    proof: { work: "kitty" },
+      "Adding AI to a product or a workflow in a way you can rely on. Assistants that answer from your own information, agents that take actions through tools, and the testing that tells you whether they actually work.",
+    example: "kitty",
+  },
+  {
+    name: "cloud systems and delivery",
+    description:
+      "Backends, APIs and the infrastructure they run on, set up so they're easy to deploy and safe to change later. Infrastructure as code, automated deployments, and no keys sitting in a repository.",
+    example: "cloud-visitor-counter",
   },
   {
     name: "automation and integrations",
     description:
-      "Workflows that connect websites, WhatsApp, Instagram, email, calendars, stores and CRMs to capture leads, look up information, route work and handle routine follow-up.",
-    proof: {
-      label: "in progress",
-      note: "A WhatsApp assistant and a workflow integration demo.",
-    },
-  },
-  {
-    name: "improvements and ongoing work",
-    description:
-      "Focused work is welcome too, including new features, API connections, bug fixes, performance work and ongoing maintenance.",
-    proof: { label: "available as focused project work" },
+      "Connecting the tools a business already uses so work moves between them without someone doing it by hand. Messages, records and the routine follow-up in between, with a person able to step in where it matters.",
+    example: "replywork",
   },
 ];
 
@@ -97,23 +91,8 @@ export const clientWork: ClientWork[] = [
     name: "Corporate events website",
     meta: "client work · 2026 · private",
     description:
-      "A full marketing site in Astro, from research and design exploration through staged client reviews.",
+      "Designed and built a marketing site in Astro for a corporate events company, through research, design exploration and staged reviews with the client.",
     links: [],
-  },
-  {
-    key: "kitty",
-    name: "Kitty",
-    meta: "AI system · 2026 · live",
-    description:
-      "The agent running on this site, with a separate service for knowledge search, bounded tools, streaming and durable conversations. Evaluations cover routing and answer quality.",
-    links: [
-      {
-        label: "github",
-        href: "https://github.com/vroslmend/kitty-agent",
-        external: true,
-      },
-      { label: "case study", href: "/writing/kitty", external: false },
-    ],
   },
   {
     key: "cui-central",
@@ -129,13 +108,55 @@ export const clientWork: ClientWork[] = [
       },
     ],
   },
+  {
+    key: "kitty",
+    name: "Kitty",
+    meta: "AI system · 2026 · live",
+    description:
+      "The assistant running on this site. It runs as its own service, answers from my projects and writing, sticks to a bounded set of tools and keeps conversations in Postgres. Its evaluations check where a question gets routed and how good the answer is.",
+    links: [
+      {
+        label: "github",
+        href: "https://github.com/vroslmend/kitty-agent",
+        external: true,
+      },
+      { label: "case study", href: "/writing/kitty", external: false },
+    ],
+  },
+  {
+    key: "cloud-visitor-counter",
+    name: "Cloud Visitor Counter",
+    meta: "cloud service · 2026 · live",
+    description:
+      "The visitor and Prius counts at the bottom of this site, running as their own small AWS service. Lambda and DynamoDB behind API Gateway, defined in Terraform and deployed by GitHub Actions with short-lived credentials.",
+    links: [
+      {
+        label: "github",
+        href: "https://github.com/vroslmend/cloud-visitor-counter",
+        external: true,
+      },
+      {
+        label: "case study",
+        href: "/writing/visitor-counter",
+        external: false,
+      },
+    ],
+  },
+  {
+    key: "replywork",
+    name: "Replywork",
+    meta: "reference build · 2026 · public",
+    description:
+      "A support inbox backend for tools like Crisp and Chatwoot. Messages are verified, accepted once and queued, product answers come from approved records in Postgres, and a person can take a conversation over and hand it back. The model can't invent a price or place an order.",
+    links: [
+      {
+        label: "github",
+        href: "https://github.com/vroslmend/replywork",
+        external: true,
+      },
+    ],
+  },
 ];
-
-export const clientProcess = {
-  steps: ["understand", "scope", "build and review", "launch and handover"],
-  description:
-    "We agree on the first useful version, review the work as it develops, then prepare it for launch and handover.",
-} as const;
 
 export const projects: Project[] = [
   {
