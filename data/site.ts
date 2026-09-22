@@ -36,126 +36,53 @@ export const site = {
 export type ClientService = {
   name: string;
   description: string;
-  /** Key of the clientWork entry shown under this area as an example. */
-  example: string;
+  /** Slugs of the projects that show this kind of work. On the work with me
+   *  page, hovering the area keeps these lit in the recent work list. */
+  work: string[];
 };
 
 export const clientServices: ClientService[] = [
   {
-    name: "websites and rebuilds",
+    name: "websites",
     description:
-      "Websites of any kind, for a business, a product, a person or a project. New from scratch, or a rebuild of one that no longer does its job. I care about how it's structured and how it looks as much as how it's built.",
-    example: "corporate-events-website",
+      "I build new sites and rebuild old ones that have stopped pulling their weight, and I care about how they look as much as how they're put together.",
+    work: ["this-site"],
   },
   {
-    name: "web applications and internal tools",
+    name: "web applications",
     description:
-      "Web applications of any size, from an internal tool a small team uses every day to a full product with accounts, roles and live data. Frontend, backend and the database behind them.",
-    example: "cui-central",
+      "The kind of app people log into every day, from a small team's internal tool to a full product with accounts, roles and live updates. I build it front to back, database included.",
+    work: ["cui-central", "check"],
   },
   {
-    name: "AI assistants and agents",
+    name: "AI assistants",
     description:
-      "Adding AI to a product or a workflow in a way you can rely on. Assistants that answer from your own information, agents that take actions through tools, and the testing that tells you whether they actually work.",
-    example: "kitty",
+      "I add AI where it can be trusted: assistants that answer from your own information, agents that stick to a small set of tools, and tests that show when a change makes them worse.",
+    work: ["kitty-agent", "replywork", "cui-central"],
   },
   {
-    name: "cloud systems and delivery",
+    name: "backends and cloud",
     description:
-      "Backends, APIs and the infrastructure they run on, set up so they're easy to deploy and safe to change later. Infrastructure as code, automated deployments, and no keys sitting in a repository.",
-    example: "cloud-visitor-counter",
+      "I set up backends the way I'd want to inherit one: infrastructure written as code, deploys that run on their own, and no secrets sitting in the repo.",
+    work: ["cloud-visitor-counter", "replywork", "kitty-agent"],
   },
   {
-    name: "automation and integrations",
+    name: "automation",
     description:
-      "Connecting the tools a business already uses so work moves between them without someone doing it by hand. Messages, records and the routine follow-up in between, with a person able to step in where it matters.",
-    example: "replywork",
+      "I connect the tools a business already runs on, so routine work stops getting copied between them by hand, and a person can still step in whenever it matters.",
+    work: ["replywork"],
   },
 ];
 
-export type ClientWork = {
-  key: string;
-  name: string;
-  meta: string;
-  description: string;
-  links: {
-    label: string;
-    href: string;
-    external: boolean;
-  }[];
-};
-
-export const clientWork: ClientWork[] = [
-  {
-    key: "corporate-events-website",
-    name: "Corporate events website",
-    meta: "client work · 2026 · private",
-    description:
-      "Designed and built a marketing site in Astro for a corporate events company, through research, design exploration and staged reviews with the client.",
-    links: [],
-  },
-  {
-    key: "cui-central",
-    name: "CUI Central",
-    meta: "web application · 2025 · live",
-    description:
-      "A live university platform with separate workflows for students, faculty, companies and administrators, along with realtime ordering, bookings and a knowledge-based assistant.",
-    links: [
-      {
-        label: "live",
-        href: "https://cui-central.vercel.app",
-        external: true,
-      },
-    ],
-  },
-  {
-    key: "kitty",
-    name: "Kitty",
-    meta: "AI system · 2026 · live",
-    description:
-      "The assistant running on this site. It runs as its own service, answers from my projects and writing, sticks to a bounded set of tools and keeps conversations in Postgres. Its evaluations check where a question gets routed and how good the answer is.",
-    links: [
-      {
-        label: "github",
-        href: "https://github.com/vroslmend/kitty-agent",
-        external: true,
-      },
-      { label: "case study", href: "/writing/kitty", external: false },
-    ],
-  },
-  {
-    key: "cloud-visitor-counter",
-    name: "Cloud Visitor Counter",
-    meta: "cloud service · 2026 · live",
-    description:
-      "The visitor and Prius counts at the bottom of this site, running as their own small AWS service. Lambda and DynamoDB behind API Gateway, defined in Terraform and deployed by GitHub Actions with short-lived credentials.",
-    links: [
-      {
-        label: "github",
-        href: "https://github.com/vroslmend/cloud-visitor-counter",
-        external: true,
-      },
-      {
-        label: "case study",
-        href: "/writing/visitor-counter",
-        external: false,
-      },
-    ],
-  },
-  {
-    key: "replywork",
-    name: "Replywork",
-    meta: "reference build · 2026 · public",
-    description:
-      "A support inbox backend for tools like Crisp and Chatwoot. Messages are verified, accepted once and queued, product answers come from approved records in Postgres, and a person can take a conversation over and hand it back. The model can't invent a price or place an order.",
-    links: [
-      {
-        label: "github",
-        href: "https://github.com/vroslmend/replywork",
-        external: true,
-      },
-    ],
-  },
+/** The projects listed as recent work on the work with me page, in order.
+ *  Every slug an area points to must appear here. */
+export const clientRecentWork: string[] = [
+  "replywork",
+  "kitty-agent",
+  "cui-central",
+  "cloud-visitor-counter",
+  "check",
+  "this-site",
 ];
 
 export const projects: Project[] = [
