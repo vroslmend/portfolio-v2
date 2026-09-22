@@ -45,3 +45,4 @@ next-env.d.ts
 
 # playwright plugin artifacts
 .playwright-mcp/
+.playwright-cli/
