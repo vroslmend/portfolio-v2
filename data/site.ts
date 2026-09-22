@@ -14,7 +14,7 @@ export type Project = {
 
 export const current = {
   focus: "working across web and ai",
-  availability: "available for",
+  availability: "open to roles and",
   clientWork: "client work",
 } as const;
 
@@ -193,6 +193,22 @@ export const projects: Project[] = [
     featured: true,
   },
   {
+    slug: "replywork",
+    name: "Replywork",
+    year: "2026",
+    tagline: "the work behind the reply",
+    description:
+      "A backend for support inboxes like Crisp and Chatwoot that answers product questions from approved records instead of from whatever the model remembers. Incoming messages are verified and queued so nothing gets lost or answered twice, and a person can take over a conversation and hand it back. It's a reference build that runs locally rather than a hosted product.",
+    evidence: [
+      "The model only extracts a bounded request. Local code writes the reply from stored facts in PostgreSQL, so it can't invent a price, change stock or place an order.",
+      "Each webhook is checked against its signature and admitted once, in the same transaction that queues it. A worker with visibility timeouts and audit records works through the queue.",
+      "A human takeover pauses automation durably, and only a trusted resume control hands the conversation back.",
+    ],
+    stack: ["TypeScript", "Fastify", "PostgreSQL", "Drizzle", "Gemini"],
+    links: { github: "https://github.com/vroslmend/replywork" },
+    featured: true,
+  },
+  {
     slug: "check",
     name: "Check!",
     year: "2025",
@@ -242,7 +258,7 @@ export const projects: Project[] = [
       github: "https://github.com/vroslmend/next-ai-saas-app",
     },
     image: "/images/projects/imaginify.webp",
-    featured: true,
+    featured: false,
   },
   {
     slug: "karting-analysis",
@@ -367,7 +383,7 @@ export const education = [
   {
     school: "COMSATS University, Lahore",
     degree: "BS Software Engineering",
-    period: "2021 – present",
+    period: "2021 – 2026",
   },
   {
     school: "International School Lahore",
@@ -379,8 +395,9 @@ export const education = [
 export const toolbox = [
   "TypeScript",
   "React / Next.js",
+  "Astro",
   "Node.js",
-  "Express",
+  "Express / Fastify",
   "Socket.IO",
   "XState",
   "Tailwind CSS",
@@ -393,6 +410,7 @@ export const toolbox = [
   "Pandas / NumPy / Matplotlib",
   "MongoDB + Vector Search",
   "Postgres / pgvector",
+  "Drizzle",
   "Gemini API",
   "LLM evals",
   "Spotify API",
@@ -403,5 +421,6 @@ export const toolbox = [
   "Terraform",
   "GitHub Actions",
   "Vercel",
+  "Cloudflare",
   "Git / Linux",
 ];

@@ -57,7 +57,8 @@ export default function AboutPage() {
             <p className="max-w-[58ch] text-[15px] leading-[1.8] text-muted text-pretty">
               I&apos;ve been moving deeper into AI engineering by building
               something real and following the problems wherever they lead.
-              Kitty is the latest result, now running on this site.
+              One of the results is sitting at the bottom of this page, if you
+              want to ask it something.
             </p>
           </div>
         </Reveal>
