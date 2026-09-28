@@ -291,11 +291,11 @@ export const projects: Project[] = [
 
 export const experience = [
   {
-    company: "Corporate Events Company",
-    role: "Freelance Web Developer",
-    period: "jul – sep 2026",
+    company: "Self-Employed",
+    role: "Freelance Full-Stack Developer",
+    period: "2025 – present",
     description:
-      "Designed and built the full marketing site for a corporate events company in Astro, working with the client through research, design exploration and staged reviews.",
+      "Built responsive websites and applications with React, Next.js, Astro, Node.js and Python, including APIs, authentication and database-backed features. Handled deployment with Cloudflare, AWS and GitHub Actions, working directly with clients from requirements through review and delivery.",
   },
   {
     company: "Punjab Safe Cities Authority",
