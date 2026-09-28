@@ -1,11 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import {
-  Geist,
-  Geist_Mono,
-  Newsreader,
-  Noto_Nastaliq_Urdu,
-} from "next/font/google";
+import { Geist, Geist_Mono, Noto_Nastaliq_Urdu } from "next/font/google";
+import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
@@ -28,11 +24,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const newsreader = Newsreader({
+const newsreader = localFont({
+  src: "./fonts/newsreader-italic.woff2",
   variable: "--font-newsreader",
-  subsets: ["latin"],
-  style: ["italic"],
-  weight: ["400", "500"],
+  style: "italic",
+  weight: "400 500",
+  display: "swap",
+  adjustFontFallback: "Times New Roman",
 });
 
 const nastaliq = Noto_Nastaliq_Urdu({
