@@ -310,7 +310,7 @@ export const education = [
   {
     school: "COMSATS University, Lahore",
     degree: "BS Software Engineering",
-    period: "2021 – 2026",
+    period: "2021 – 2025",
   },
   {
     school: "International School Lahore",
